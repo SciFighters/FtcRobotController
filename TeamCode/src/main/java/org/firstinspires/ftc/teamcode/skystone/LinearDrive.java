@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.skystone;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -13,7 +14,7 @@ import com.qualcomm.robotcore.util.RobotLog;
  */
 
 @TeleOp(name = "Linear Drive", group = "SciFighters")
-//@Disabled
+@Disabled
 public class LinearDrive extends LinearOpMode {
 
     // Declare OpMode members.

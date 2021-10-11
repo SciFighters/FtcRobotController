@@ -56,7 +56,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="Red Foundation PARK", group="SciFighters")// moving the blue foundation. you are in the blue team.
-//@Disabled
+@Disabled
 public class Auto_red_foundation_park extends LinearOpMode {
 
     /* Declare OpMode members. */
