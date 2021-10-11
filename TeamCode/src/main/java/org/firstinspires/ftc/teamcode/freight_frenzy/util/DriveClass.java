@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 public class DriveClass {
-	//region DON'T TOUH
+	//region DON'T TOUCH
 	final double tile = 0.6;
 	private boolean useEncoders = false;
 	private boolean useBrake = false;
