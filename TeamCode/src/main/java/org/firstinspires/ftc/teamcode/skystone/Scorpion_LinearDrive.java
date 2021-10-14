@@ -13,9 +13,9 @@ import com.qualcomm.robotcore.util.RobotLog;
  * Drive with left right bumpers stops and Hooks.
  */
 
-@TeleOp(name = "Linear Drive", group = "SciFighters")
-@Disabled
-public class LinearDrive extends LinearOpMode {
+@TeleOp(name = "Scorpion", group = "SciFighters")
+//@Disabled
+public class Scorpion_LinearDrive extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
