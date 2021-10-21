@@ -346,7 +346,7 @@ public class DriveClass {
 		opMode.telemetry.addData("goto hypocampus total dist", totalDist);
 		opMode.telemetry.update();
 
-		while (currentDist < totalDist - tolerance) { // TODO: theres a NaN here somewhere (the attack of the NaNs)
+		while (currentDist > totalDist - tolerance) { // TODO: there a NaN here somewhere (the attack of the NaNs)
 			double power = targetPower;
 
 			currentX = getPosX();
@@ -370,16 +370,16 @@ public class DriveClass {
 				power = acclPower;
 			}
 
-			double breakgain = 0.9;
+			double breakgain = 0.7;
 			double breakPower = remainDist * breakgain + minPower;
 
-			if (breakPower < power && tolerance > 0.05) {
+			if (breakPower < power) { //&& tolerance > 0.05
 				power = breakPower;
 			}
 
-			double err = getDeltaHeading(targetHeading)/180;
-			double gain = 0.2;
-			double correction = gain * err;
+			double headingErr = getDeltaHeading(targetHeading)/180;
+			double headingGain = 0.9;
+			double correction = headingGain * headingErr;
 			double Vy = RVy * power;
 			double Vx = RVx * power;
 
@@ -395,7 +395,7 @@ public class DriveClass {
 			opMode.telemetry.addData("goto delta"," x,y: %2.3f, %2.3f", deltaX, deltaY);
 			opMode.telemetry.addData("goto velos","f,s: %2.3f, %2.3f", Vy, Vx);
 			opMode.telemetry.addData("heading ", getHeading());
-			opMode.telemetry.addData("heading error", err);
+			opMode.telemetry.addData("heading error", headingErr);
 			opMode.telemetry.addData("power", power);
 			opMode.telemetry.update();
 		}
