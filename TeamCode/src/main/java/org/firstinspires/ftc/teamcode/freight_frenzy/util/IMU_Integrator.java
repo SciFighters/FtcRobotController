@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.ultimate_goal.util;
+package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;

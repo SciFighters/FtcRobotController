@@ -13,8 +13,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.opencv.core.Scalar;
 
 public class DriveClass {
 	//region DON'T TOUH
@@ -57,7 +55,7 @@ public class DriveClass {
 	public enum ROBOT {
 		SCORPION,
 		COBALT
-	}
+	};
 
 	private ROBOT robot;
 
@@ -134,7 +132,6 @@ public class DriveClass {
 
 		parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
 		parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-		parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter);
 
 		imu.initialize(parameters);
 
@@ -152,7 +149,7 @@ public class DriveClass {
 			opMode.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
 		}
 
-		imu.startAccelerationIntegration(new Position(), new Velocity(), 1);
+//		imu.startAccelerationIntegration(new Position(), new Velocity(), 10);
 
 		opMode.telemetry.update();
 
@@ -175,9 +172,9 @@ public class DriveClass {
 		br.setPower(forward - turn + strafe);
 	}
 
-	public void  setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
+	public void setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
 		if (fieldOriented != true) {
-			setPower(y, turn, x);  // No field oriented
+			setPower(y , turn, x);  // No field oriented
 		} else {
 			double phiRad = (-getHeading() + angleOffset) / 180 * Math.PI;
 			double forward = y * Math.cos(phiRad) - x * Math.sin(phiRad);
@@ -185,8 +182,11 @@ public class DriveClass {
 			setPower(forward, turn, strafe);
 		}
 
-//		opMode.telemetry.addData("Front","left/right: %d, %d", fl.getCurrentPosition(), fr.getCurrentPosition());
-//		opMode.telemetry.addData("Back","left/right: %d, %d", bl.getCurrentPosition(), br.getCurrentPosition());
+		opMode.telemetry.addData("front left:", fl.getCurrentPosition());
+		opMode.telemetry.addData("front right:", fr.getCurrentPosition());
+		opMode.telemetry.addData("back left:", bl.getCurrentPosition());
+		opMode.telemetry.addData("back right:", br.getCurrentPosition());
+
 	}
 
 	public void stopPower() {
@@ -230,7 +230,7 @@ public class DriveClass {
 	}
 
 	public double getPosY() {
-		return imu.getPosition().y;
+		return getAbsolutesPosY() + startingPosition.y;
 	}
 
 	public double getAbsolutesPosY() {
@@ -259,7 +259,7 @@ public class DriveClass {
 	}
 
 	public double getPosX() {
-		return imu.getPosition().x;
+		return getAbsolutesPosX() + startingPosition.x;
 	}
 
 	public double getAbsolutesPosX() {
@@ -307,7 +307,7 @@ public class DriveClass {
 		while ((delta * s > 0) && opMode.opModeIsActive()) {
 
 			delta = getDeltaHeading(targetAngle);
-			double gain = 0.02;
+			double gain = 0.04;
 			double power = gain * delta * targetPower;
 			if (Math.abs(power) < 0.1)
 				power = 0.1 * Math.signum(power);
@@ -324,82 +324,21 @@ public class DriveClass {
 	}
 
 	public void  goToLocation(Location location, double power, double targetHeading, double tolerance){
+
+
 		goTo(location.x, location.y, power, targetHeading, tolerance);
 	}
 
-	public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance) {
+	public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance){
 		double currentX = getPosX();
 		double currentY = getPosY();
 		double deltaX = x - currentX;
 		double deltaY = y - currentY;
-		double startX = currentX;
-		double startY = currentY;
-
-		//double totalDist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
-		double totalDist = Math.hypot(deltaX, deltaY);
-		double currentDist = 0;
-
 		opMode.telemetry.addData("goto x", x);
 		opMode.telemetry.addData("goto y", y);
-		opMode.telemetry.addData("goto delta x", deltaX);
-		opMode.telemetry.addData("goto delta y", deltaY);
-		opMode.telemetry.addData("goto hypocampus total dist", totalDist);
 		opMode.telemetry.update();
 
-		while (currentDist > totalDist - tolerance) { // TODO: there a NaN here somewhere (the attack of the NaNs)
-			double power = targetPower;
-
-			currentX = getPosX();
-			currentY = getPosY();
-			deltaX = currentX - startX;
-			deltaY = currentY - startY;
-			currentDist = Math.hypot(deltaY,deltaX); // distance moved from start position.
-			deltaX = x - currentX;
-			deltaY = y - currentY;
-			double remainDist = Math.hypot(deltaY,deltaX);  // distance left to target.
-
-			//double leftDist = totalDist - currentDist;
-			double minPower = 0.2;
-			double acclGain = 2;
-			double acclPower = currentDist * acclGain + minPower;
-
-			double RVy = deltaY / remainDist;  // y velocity ratio
-			double RVx = deltaX / remainDist;  // x velocity ratio
-
-			if (acclPower + 0.2 < power) {
-				power = acclPower;
-			}
-
-			double breakgain = 0.7;
-			double breakPower = remainDist * breakgain + minPower;
-
-			if (breakPower < power) { //&& tolerance > 0.05
-				power = breakPower;
-			}
-
-			double headingErr = getDeltaHeading(targetHeading)/180;
-			double headingGain = 0.9;
-			double correction = headingGain * headingErr;
-			double Vy = RVy * power;
-			double Vx = RVx * power;
-
-			//setPowerOriented(Vy, Vx, correction, true);
-			double phiRad = -getHeading() / 180 * Math.PI;
-			double forward = Vy * Math.cos(phiRad) - Vx * Math.sin(phiRad);
-			double strafe  = Vy * Math.sin(phiRad) + Vx * Math.cos(phiRad);
-			setPower(forward, correction, strafe);
-
-			opMode.telemetry.addData("distance","%2.3f, %2.3f", currentDist, remainDist);
-			opMode.telemetry.addData("Abs Pos","X,Y %2.3f, %2.3f", getAbsolutesPosX(), getAbsolutesPosY());
-			opMode.telemetry.addData("> currnt","X,Y: %2.3f, %2.3f", currentX, currentY);
-			opMode.telemetry.addData("goto delta"," x,y: %2.3f, %2.3f", deltaX, deltaY);
-			opMode.telemetry.addData("goto velos","f,s: %2.3f, %2.3f", Vy, Vx);
-			opMode.telemetry.addData("heading ", getHeading());
-			opMode.telemetry.addData("heading error", headingErr);
-			opMode.telemetry.addData("power", power);
-			opMode.telemetry.update();
-		}
-		setPower(0,0,0);
+		drive(deltaY, deltaX, targetPower, targetHeading, true, tolerance);
 	}
 
 	public void drive(double forward, double sideward, double targetPower, double targetAngle) {
@@ -421,7 +360,7 @@ public class DriveClass {
 		resetPosition();
 		timer.reset();
 
-		while (opMode.opModeIsActive() && (RVf != 0) || (RVs != 0)) {
+		while (opMode.opModeIsActive() && (RVf != 0) ||  (RVs != 0)) {
 
 			if (getForwardDistance() * sf > forward * sf - tolerance) {
 				RVf = 0;
@@ -429,29 +368,27 @@ public class DriveClass {
 			if (getStrafeDistance() * ss > sideward * ss - tolerance) {
 				RVs = 0;
 			}
-			double power = targetPower;
+			double power = targetPower ;
 
 			double deltaForward = forward - getForwardDistance();
-			double deltaStrafe = sideward - getStrafeDistance();
+			double deltaStrafe  = sideward - getStrafeDistance();
 
 			double deltaC = Math.sqrt(deltaStrafe * deltaStrafe + deltaForward * deltaForward);
-			double lengthC = c - deltaC;
+			double lengthC = c - deltaC ;
 
 			double acclGain = 2;
-			double acclPower = lengthC * acclGain + minPower;
+			double acclPower = lengthC * acclGain +  minPower;
 
-			if (acclPower + minPower < power ) {
+			if (acclPower + 0.2 < power ) {
 				power = acclPower;
 			}
 
 			double breakgain = 0.9;
 			double breakPower = deltaC * breakgain + minPower;
 
-			if (breakPower < power) {
+			if (breakPower < power)  {
 				power = breakPower;
 			}
-
-			power = Math.max(power, minPower);
 
 			double err = getDeltaHeading(targetAngle);
 			double gain = 0.040;
@@ -478,4 +415,5 @@ public class DriveClass {
 		}
 		stopPower();
 	}
+
 }
