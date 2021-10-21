@@ -31,13 +31,14 @@ package org.firstinspires.ftc.teamcode.ultimate_goal;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.BananaPipeline;
 
 @Autonomous(group = "blue fullflow")
-//@Disabled
+@Disabled
 public class BlueAutoOutter extends LinearOpMode {
 	AutoFlows auto = new AutoFlows(this, AutoFlows.Alliance.BLUE, AutoFlows.StartLine.OUTTER, true);
 	BananaPipeline pipeline;

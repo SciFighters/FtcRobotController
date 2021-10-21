@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.skystone;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,9 +13,9 @@ import com.qualcomm.robotcore.util.RobotLog;
  * Drive with left right bumpers stops and Hooks.
  */
 
-@TeleOp(name = "Linear Drive", group = "SciFighters")
+@TeleOp(name = "Scorpion", group = "SciFighters")
 //@Disabled
-public class LinearDrive extends LinearOpMode {
+public class Scorpion_LinearDrive extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
