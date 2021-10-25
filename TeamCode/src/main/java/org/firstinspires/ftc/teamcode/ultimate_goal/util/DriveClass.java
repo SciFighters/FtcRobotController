@@ -54,7 +54,9 @@ public class DriveClass {
 
 	public enum ROBOT {
 		SCORPION,
-		COBALT
+		COBALT,
+		JACKUJ
+
 	};
 
 	private ROBOT robot;

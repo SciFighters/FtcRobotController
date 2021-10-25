@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+
 // Handrail class
 public class HandRailClass {
     //motors, servos and touch switch
@@ -14,7 +14,7 @@ public class HandRailClass {
     private DcMotorEx hand = null;
     private CRServo grabber_right = null;
     private CRServo grabber_left = null;
-    private DigitalChannel grabber_switch = null; //???
+    private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit = null;
     private DigitalChannel rail_limit = null;
 
@@ -28,14 +28,16 @@ public class HandRailClass {
     }
 
     public void init(HardwareMap hw) {
-        rail = hw.get(DcMotorEx.class, "rail");
-        hand = hw.get(DcMotorEx.class, "hand");
+//        rail = hw.get(DcMotorEx.class, "rail");
+//        hand = hw.get(DcMotorEx.class, "hand");
 
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 
+        grabber_left.setDirection(CRServo.Direction.REVERSE);
+
         grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
-        hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
+//        hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit = hw.get(DigitalChannel.class, "hand_limit_back");
     }
 
@@ -50,16 +52,16 @@ public class HandRailClass {
         return value;
     }
 
-    public void grab() {
-        setServosPower(0.95);
+    public void grabberGrab() {
+        setServosPower(1);
     }
 
-    public void stop() {
+    public void grabberStop() {
         setServosPower(0.0);
     }
 
-    public void release() {
-        setServosPower(-0.2);
+    public void grabberRelease() {
+        setServosPower(-0.6);
     }
 
     public void rail_move(double pow) {
@@ -68,17 +70,27 @@ public class HandRailClass {
     }
 
 
-    public void resetPos(int pos) {
+    public void resetPos(int pos) { // reset rail's position to it's optimized or initial position1
         rail.setPower(0.0);
+        rail.setTargetPosition(pos);
 
     }
 
-    public void touch_switch_update() {
+    public void railLimit_ts() { //rail limit (limit of the rail) touch switch
         if(rail_limit.getState()) {
-            //if touch switch is pressed
+            //if touch switch is pressed...
             rail.setPower(0.0);
-            stop();
+            grabberStop();
         }
+    }
+
+    public boolean grabber_ts() { // grabber touch switch update (limit of the grabber), and returns grabber state (pressed / unpressed)
+        /*if(grabber_switch.getState()) {
+            // updates
+            stop(); // if touch switch is pressed then stop
+
+        }*/
+        return grabber_switch.getState();
     }
 
 }
