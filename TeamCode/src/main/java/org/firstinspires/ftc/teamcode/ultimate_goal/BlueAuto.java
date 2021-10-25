@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode.ultimate_goal;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -44,7 +45,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Autonomous(group = "blue fullflow")
-//@Disabled
+@Disabled
 public class BlueAuto extends LinearOpMode {
 	AutoFlows auto = new AutoFlows(this, AutoFlows.Alliance.BLUE, AutoFlows.StartLine.INNER, false);
 	BananaPipeline pipeline;
