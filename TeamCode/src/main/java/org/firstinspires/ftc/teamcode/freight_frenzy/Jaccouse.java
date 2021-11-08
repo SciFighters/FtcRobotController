@@ -10,14 +10,13 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp(group = "Jacouj")
-public class Jacouj extends LinearOpMode {
+public class Jaccouse extends LinearOpMode {
 	final double tile = 0.6;
 
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
 	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition).useEncoders().useBrake();
-	private GameClass game = new GameClass(this);
 	private Toggle turningToggle = new Toggle();
 	private int direction = 1;
 	private double targetHeading = 0;
@@ -28,9 +27,7 @@ public class Jacouj extends LinearOpMode {
 		telemetry.update();
 
 		drive.init(hardwareMap);
-		game.init(hardwareMap);
 
-		game.initLifterPosition();
 
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
@@ -59,7 +56,7 @@ public class Jacouj extends LinearOpMode {
 			}
 
 			boolean stopAll = gamepad1.a || gamepad2.a;
-			boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; // down armShooter
+			boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; // ?
 
 			boolean fieldOriented = !gamepad1.y;
 			double boost = gamepad1.right_trigger * 0.6 + 0.4;
@@ -89,18 +86,11 @@ public class Jacouj extends LinearOpMode {
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
 
-			if (stopAll) {
-				game.stopAll();
-			}
-
-			game.lifterMoveManually(-gamepad1.right_stick_y-gamepad2.right_stick_y);
 			telemetry.addData("X Pos", drive.getPosX());
 			telemetry.addData("Y Pos", drive.getPosY());
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-
-			game.update();
 			telemetry.update();
 		}
 	}

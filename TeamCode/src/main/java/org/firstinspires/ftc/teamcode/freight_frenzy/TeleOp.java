@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
-
 public class TeleOp extends LinearOpMode {
 
     final double tile = 0.6;
@@ -45,7 +44,7 @@ public class TeleOp extends LinearOpMode {
                 arm.grabberRelease();
             } else {
                 arm.grabberStop();
-            }
+            }//אפשר הסבר למה איתי אומר ששינתם הרבה, כיוון שהדבר היחיד ששיניתם בקוד שלי זה ההוספה של RELEASE, והורדתם את ה! לפני arm.grabber_ts
         }
 
     }
