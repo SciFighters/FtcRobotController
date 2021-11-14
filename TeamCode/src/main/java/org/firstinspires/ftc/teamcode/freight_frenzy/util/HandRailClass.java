@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -19,6 +21,12 @@ public class HandRailClass {
     private DigitalChannel rail_limit_B = null;
     private DigitalChannel rail_limit_F = null;
 
+    public enum State {
+        Drive,
+        Goto
+    }
+
+    public State state = State.Drive;
     private int RAIL_MAX = 1000;
 
     private LinearOpMode opMode;
@@ -31,7 +39,7 @@ public class HandRailClass {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
 
-        rail.setDirection(DcMotorEx.Direction.FORWARD);// Setting directions
+        rail.setDirection(DcMotorEx.Direction.REVERSE);// Setting directions
         hand.setDirection(DcMotorEx.Direction.FORWARD);
 
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
@@ -47,7 +55,8 @@ public class HandRailClass {
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
 
-        searchHome();
+        hand_limit_B = hw.get(DigitalChannel.class, "hand_limit_back");
+        hand_limit_F = hw.get(DigitalChannel.class, "hand_limit_front");
     }
 
     public void setServosPower(double power) {
@@ -79,44 +88,43 @@ public class HandRailClass {
     }
 
     public void rail_drive(double power) {
-        if(power > 0){
-            if(rail_limit_F.getState()){
-                rail.setPower(power);
-            }
-            else {
-                rail.setPower(0);
-            }
-        }
-        else if (power != 0){
-            if (rail_limit_B.getState()){
-                rail.setPower(power);
-            }
-            else {
-                rail.setPower(0);
-            }
-        }
+        setState(State.Drive);
+        if(power > 0 && rail_limit_F.getState())
+            rail.setPower(power);
+        else if (power < 0 && rail_limit_B.getState())
+            rail.setPower(power);
+        else
+            rail.setPower(0);
+
+//        if(power > 0){
+//            if(rail_limit_F.getState()){
+//                rail.setPower(power);
+//            }
+//            else {
+//                rail.setPower(0);
+//            }
+//        }
+//        else if (power != 0){
+//            if (rail_limit_B.getState()){
+//                rail.setPower(power);
+//            }
+//            else {
+//                rail.setPower(0);
+//            }
+//        }
         //double currentPos = this.rail.getCurrentPosition();
         //double delta = pos - currentPos;
 
     }
 
-    public void hand_Move(double power) {
-        if(power > 0){
-            if(hand_limit_F.getState()){
-                hand.setPower(power);
-            }
-            else {
-                hand.setPower(0);
-            }
-        }
-        else if (power != 0){
-            if (hand_limit_B.getState()){
-                hand.setPower(power);
-            }
-            else {
-                hand.setPower(0);
-            }
-        }
+    public void hand_drive(double power) {
+        setState(State.Drive);
+        if(power > 0 && hand_limit_F.getState())
+            hand.setPower(power);
+        else if (power < 0 && hand_limit_B.getState())
+            hand.setPower(power);
+        else
+            hand.setPower(0);
     }
 
 
@@ -133,6 +141,8 @@ public class HandRailClass {
         }*/
         return !grabber_switch.getState();
     }
+
+
     public void searchHome(){
         //hand limit
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER); // Reset encoders
@@ -180,6 +190,46 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
     }
+
+    public void gotoHandRail(int railPos, int handPos, float pow) {
+        // GOTO
+        railPos = (int)this.clamp((double)railPos,100, 0);// Clamping values to percentage values
+        handPos = (int)this.clamp((double)handPos, 100, 0);
+        if(this.rail.getCurrentPosition() != railPos) {
+            rail.setTargetPosition(railPos);
+            rail.setPower(pow);
+        }
+        if(this.hand.getCurrentPosition() != handPos) {
+            hand.setTargetPosition(handPos);
+            hand.setPower(pow);
+        }
+        this.setState(State.Goto);
+    }
+
+
+    //updates
+    public void update_handRail() {
+
+        opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
+        opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
+        opMode.telemetry.update();
+    }
+
+    public void setState(State state) {
+        if(this.state != state) {
+            this.state = state;
+            if(state == State.Drive)
+                this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            if(state == State.Goto)
+                this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+    }
+
+
+
 }
 
 

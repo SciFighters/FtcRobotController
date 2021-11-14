@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.freight_frenzy;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
@@ -21,6 +20,7 @@ public class HandRailTester extends LinearOpMode {
 
     private Toggle collector = new Toggle(); //  Collection toggle (A button)
     boolean release; // releasing object (B button)
+    private Toggle homing = new Toggle();
 
     @Override
     public void runOpMode() {
@@ -35,9 +35,10 @@ public class HandRailTester extends LinearOpMode {
             double armPower = -gamepad1.right_stick_y;
 
             handRail.rail_drive(railPower);
-            handRail.hand_Move(armPower);
+            handRail.hand_drive(armPower);
 
             collector.update(gamepad1.a || gamepad2.a); // update toggle (A button)
+            homing.update(gamepad1.x || gamepad2.x);
             release = gamepad1.b || gamepad2.b;
 
             if (!release) {
@@ -52,6 +53,10 @@ public class HandRailTester extends LinearOpMode {
                 collector.set(false);
             }
 
+            if(homing.isClicked())
+                handRail.searchHome();
+
+            this.handRail.update_handRail(); //telemetry
            // if (collector.getState() && !handRail.grabber_ts()) { //collection toggle
             //    handRail.grabberGrab();
            // } else if (release) {
