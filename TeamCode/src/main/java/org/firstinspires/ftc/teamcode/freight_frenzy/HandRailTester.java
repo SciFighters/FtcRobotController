@@ -64,9 +64,6 @@ public class HandRailTester extends LinearOpMode {
             //} else {
              //   handRail.grabberStop();
             //}//אפשר הסבר למה איתי אומר ששינתם הרבה, כיוון שהדבר היחיד ששיניתם בקוד שלי זה ההוספה של RELEASE, והורדתם את ה! לפני arm.grabber_ts
-
-
-
         }
     }
 }
