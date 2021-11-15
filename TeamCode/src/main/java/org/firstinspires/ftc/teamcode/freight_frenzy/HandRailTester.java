@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp
+@TeleOp
 public class HandRailTester extends LinearOpMode {
 
     final double tile = 0.6;
@@ -42,28 +43,21 @@ public class HandRailTester extends LinearOpMode {
             release = gamepad1.b || gamepad2.b;
 
             if (!release) {
-                if (collector.getState()) {
+                if (collector.getState() && !handRail.grabber_ts()) { //collection toggle
                     handRail.grabberGrab();
                 } else {
                     handRail.grabberStop();
                 }
             }
             else {
-                handRail.grabberRelease();
                 collector.set(false);
+                handRail.grabberRelease();
             }
-
             if(homing.isClicked())
                 handRail.searchHome();
 
             this.handRail.update_handRail(); //telemetry
-           // if (collector.getState() && !handRail.grabber_ts()) { //collection toggle
-            //    handRail.grabberGrab();
-           // } else if (release) {
-             //   handRail.grabberRelease();
-            //} else {
-             //   handRail.grabberStop();
-            //}//אפשר הסבר למה איתי אומר ששינתם הרבה, כיוון שהדבר היחיד ששיניתם בקוד שלי זה ההוספה של RELEASE, והורדתם את ה! לפני arm.grabber_ts
+
         }
     }
 }

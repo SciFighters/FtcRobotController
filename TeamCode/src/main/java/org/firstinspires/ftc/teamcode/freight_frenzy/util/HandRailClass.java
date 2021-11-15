@@ -51,7 +51,8 @@ public class HandRailClass {
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 
-        grabber_left.setDirection(CRServo.Direction.REVERSE);
+        grabber_left.setDirection(CRServo.Direction.FORWARD);
+        grabber_right.setDirection(CRServo.Direction.REVERSE);
 
         grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //        hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
@@ -76,7 +77,7 @@ public class HandRailClass {
     }
 
     public void grabberGrab() {
-        if (!grabber_switch.getState()) {
+        if (grabber_switch.getState()) {
             setServosPower(1);
         }
         else {
@@ -163,14 +164,14 @@ public class HandRailClass {
         while (!rail_limit_F.getState() && !rail_limit_B.getState()){
             rail.setPower(-0.5);
             opMode.sleep(250);
-//            int currentPos = rail.getCurrentPosition();
-//            if (currentPos >= 1000){
-//                break;
-//            }
-//            if (lastPos >= currentPos){
-//                break;
-//            }
-//            lastPos = currentPos;
+            int currentPos = rail.getCurrentPosition();
+            if (currentPos >= 1000){
+                break;
+            }
+            if (lastPos >= currentPos){
+                break;
+            }
+            lastPos = currentPos;
         }
         opMode.telemetry.addData("Ticks (distance delta): ", Math.abs(tempPos - lastPos));
         opMode.telemetry.update();
