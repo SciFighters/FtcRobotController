@@ -74,9 +74,9 @@ public class DriveClass {
 		this.startingPosition = startingPosition;
 
 
-		if (robot == ROBOT.SCORPION) {
-			this.forwardTicksPerMeter = 2455;
-			this.strafeTicksPerMeter = 2587;
+		if (robot == ROBOT.JACKUJ) {
+			this.forwardTicksPerMeter = 1562.5;
+			this.strafeTicksPerMeter = 1645.83;
 		} else if (robot == ROBOT.COBALT) {
 			this.forwardTicksPerMeter = 1753;
 			this.strafeTicksPerMeter = 2006;

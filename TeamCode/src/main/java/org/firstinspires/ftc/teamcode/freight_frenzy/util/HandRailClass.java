@@ -234,12 +234,12 @@ public class HandRailClass {
 
     }
 
-    public void carousel_start(double power) {
+    public void carouselRun(double power) {
 
         carousel.setPower(power);
     }
 
-    public void carousel_stop() {
+    public void carouselStop() {
 
         carousel.setPower(0);
     }
