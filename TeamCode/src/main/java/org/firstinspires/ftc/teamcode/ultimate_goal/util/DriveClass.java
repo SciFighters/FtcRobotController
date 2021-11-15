@@ -55,7 +55,7 @@ public class DriveClass {
 	public enum ROBOT {
 		SCORPION,
 		COBALT,
-		JACKUJ
+		JACCUSE
 
 	};
 
@@ -74,7 +74,7 @@ public class DriveClass {
 		this.startingPosition = startingPosition;
 
 
-		if (robot == ROBOT.JACKUJ) {
+		if (robot == ROBOT.JACCUSE) {
 			this.forwardTicksPerMeter = 1562.5;
 			this.strafeTicksPerMeter = 1645.83;
 		} else if (robot == ROBOT.COBALT) {
