@@ -39,6 +39,7 @@ public class Jaccouse extends LinearOpMode {
 		telemetry.update();
 
 		drive.init(hardwareMap);
+		handRail.init(hardwareMap);
 
 
 		// Wait for the game to start (driver presses PLAY)
@@ -53,13 +54,11 @@ public class Jaccouse extends LinearOpMode {
 		// run until the end of the match (driver presses STOP)
 		while (opModeIsActive()) {
 
-			boolean resetOrientation = gamepad1.start;
-
-			if (resetOrientation) {
-				if (gamepad2.x) {
+			if (gamepad1.start) {
+				if (gamepad1.x) {
 					drive.resetOrientation(90);
 				}
-				if (gamepad2.y) {
+				if (gamepad1.y) {
 					drive.resetOrientation(-90);
 				}
 				drive.resetPosition();
@@ -68,27 +67,27 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			boolean stopAll = gamepad1.y;
-			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; // ?
+			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
+			boolean fieldOriented = !gamepad1.y;
+			double boost = gamepad1.right_trigger * 0.6 + 0.4;
 
-			boolean fieldOriented = !gamepad2.y;
-			double boost = gamepad2.right_trigger * 0.6 + 0.4;
+			double y = -gamepad1.left_stick_y * boost;
+			double x = gamepad1.left_stick_x * boost;
+			double turn = gamepad1.right_stick_x * boost;
 
-			double railPower = -gamepad2.right_trigger;
+			// Hand rail
+			double railPower = -gamepad2.left_stick_y;
 			double armPower = -gamepad2.right_stick_y;
 
-			double y = -gamepad2.left_stick_y * boost;
-			double x = gamepad2.left_stick_x * boost;
-			double turn = gamepad2.right_stick_x * boost;
-
-			handRail.rail_drive(railPower);
-			handRail.hand_drive(armPower);
+			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
+			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
 
 			turningToggle.update(Math.abs(turn) > 0.02);
-			spincarousel.update(gamepad1.left_bumper );
+			spincarousel.update(gamepad2.left_bumper);
 
-			collector.update(gamepad1.a ); // update toggle (A button)
-			//homing.update(gamepad1.x);
-			release = gamepad1.b;
+			collector.update(gamepad2.a ); // update toggle (A button)
+			homing.update(gamepad2.x);
+			release = gamepad2.b;
 
 			if (turningToggle.isReleased()) {
 				turningCount = 8;
@@ -120,10 +119,11 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if(homing.isClicked()) {
+				telemetry.addData("[searchHome]", "starting");
 				handRail.searchHome();
 			}
 
-			if(spincarousel.isChanged())
+			if(spincarousel.getState())
 				handRail.carouselRun(0.9);
 			else {
 				handRail.carouselStop();

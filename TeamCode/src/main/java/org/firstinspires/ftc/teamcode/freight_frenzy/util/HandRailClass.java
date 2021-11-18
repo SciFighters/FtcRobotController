@@ -16,12 +16,12 @@ public class HandRailClass {
     private CRServo grabber_right = null;
     private CRServo grabber_left = null;
     private DigitalChannel grabber_switch = null;
-    private DigitalChannel hand_limit_B= null;
-    private DigitalChannel hand_limit_F= null;
+    private DigitalChannel hand_limit_B = null;
+    private DigitalChannel hand_limit_F = null;
     private DigitalChannel rail_limit_B = null;
     private DigitalChannel rail_limit_F = null;
 
-    private DcMotor carousel = null;
+    private DcMotorEx carousel = null;
 
 
     public enum State {
@@ -71,16 +71,15 @@ public class HandRailClass {
     }
 
     public double clamp(double value, double maximum, double minimum) {
-        if(maximum < value) value = maximum;
-        if(minimum > value) value = minimum;
+        if (maximum < value) value = maximum;
+        if (minimum > value) value = minimum;
         return value;
     }
 
     public void grabberGrab() {
         if (grabber_switch.getState()) {
             setServosPower(1);
-        }
-        else {
+        } else {
             setServosPower(0);
         }
     }
@@ -95,7 +94,7 @@ public class HandRailClass {
 
     public void rail_drive(double power) {
         setState(State.Drive);
-        if(power > 0 && rail_limit_F.getState())
+        if (power > 0 && rail_limit_F.getState())
             rail.setPower(power);
         else if (power < 0 && rail_limit_B.getState())
             rail.setPower(power);
@@ -125,7 +124,7 @@ public class HandRailClass {
 
     public void hand_drive(double power) {
         setState(State.Drive);
-        if(power > 0 && hand_limit_F.getState())
+        if (power > 0 && hand_limit_F.getState())
             hand.setPower(power);
         else if (power < 0 && hand_limit_B.getState())
             hand.setPower(power);
@@ -149,10 +148,10 @@ public class HandRailClass {
     }
 
 
-    public void searchHome(){
+    public void searchHome() {
         //hand limit
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER); // Reset encoders
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+//        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER); // Reset encoders
+//        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         int lastPos = hand.getCurrentPosition();
         int tempPos = lastPos;
         int counter = 0;
@@ -160,76 +159,79 @@ public class HandRailClass {
         //rail limit
         rail.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
         lastPos = rail.getCurrentPosition();
-        while (!rail_limit_F.getState() && !rail_limit_B.getState()){
+
+        while (rail_limit_F.getState() && rail_limit_B.getState()) {
             rail.setPower(-0.5);
-            opMode.sleep(250);
+//            opMode.sleep(250);
             int currentPos = rail.getCurrentPosition();
+//            if (currentPos >= 1000){
+//                break;
+//            }
+//            if (lastPos >= currentPos){
+//                break;
+//            }
+            opMode.telemetry.addData("[Homming] delta Ticks: ", Math.abs(tempPos - lastPos));
+            opMode.telemetry.update();
+            lastPos = currentPos;
+        }
+        rail.setPower(0);
+        rail.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        while (!hand_limit_F.getState() && !hand_limit_B.getState()){
+            hand.setPower(-0.5);
+            opMode.sleep(250);
+            int currentPos = hand.getCurrentPosition();
             if (currentPos >= 1000){
                 break;
             }
-            if (lastPos >= currentPos){
+            if (lastPos >= currentPos){  //?
+                lastPos = currentPos;
                 break;
             }
             lastPos = currentPos;
         }
         opMode.telemetry.addData("Ticks (distance delta): ", Math.abs(tempPos - lastPos));
         opMode.telemetry.update();
-        rail.setPower(0);
-        rail.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-//        while (!hand_limit_F.getState() && !hand_limit_B.getState()){
-//            hand.setPower(-0.5);
-//            opMode.sleep(250);
-//            int currentPos = hand.getCurrentPosition();
-//            if (currentPos >= 1000){
-//                break;
-//            }
-//            if (lastPos >= currentPos){  //?
-//                lastPos = currentPos;
-//                break;
-//            }
-//            lastPos = currentPos;
-//        }
-//        opMode.telemetry.addData("Ticks (distance delta): ", Math.abs(tempPos - lastPos));
-//        opMode.telemetry.update();
-//        hand.setPower(0);
-//        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-//        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hand.setPower(0);
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
     }
 
     public void gotoHandRail(int railPos, int handPos, float pow) {
         // GOTO
-        railPos = (int)this.clamp((double)railPos,100, 0);// Clamping values to percentage values
-        handPos = (int)this.clamp((double)handPos, 100, 0);
-        if(this.rail.getCurrentPosition() != railPos) {
+        railPos = (int) this.clamp((double) railPos, 100, 0);// Clamping values to percentage values
+        handPos = (int) this.clamp((double) handPos, 100, 0);
+        if (this.rail.getCurrentPosition() != railPos) {
             rail.setTargetPosition(railPos);
             rail.setPower(pow);
         }
-        if(this.hand.getCurrentPosition() != handPos) {
+        if (this.hand.getCurrentPosition() != handPos) {
             hand.setTargetPosition(handPos);
             hand.setPower(pow);
         }
         this.setState(State.Goto);
     }
+
     //updates
     public void update_handRail() {
 
         opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
-        opMode.telemetry.update();
     }
 
     public void setState(State state) {
-        if(this.state != state) {
+        if (this.state != state) {
             this.state = state;
-            if(state == State.Drive)
+            if (state == State.Drive)
                 this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            if(state == State.Goto)
+            this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            if (state == State.Goto)
                 this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
 
     }
@@ -243,7 +245,6 @@ public class HandRailClass {
 
         carousel.setPower(0);
     }
-
 
 
 }
