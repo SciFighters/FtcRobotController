@@ -54,7 +54,7 @@ public class HandRailTester extends LinearOpMode {
                 handRail.grabberRelease();
             }
             if(homing.isClicked()) {
-                handRail.searchHome();
+                handRail.searchHomeRail();
             }
 
             this.handRail.update_handRail(); //telemetry

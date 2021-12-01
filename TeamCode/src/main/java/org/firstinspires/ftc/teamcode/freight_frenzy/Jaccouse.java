@@ -2,14 +2,19 @@ package org.firstinspires.ftc.teamcode.freight_frenzy;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.GameClass;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
+
+// TODO: clean code
+// TODO: hand rail boost
+// TODO: hand rail coupling
+// TODO: hand rail preset positions
+// TODO: hand rail RED BLUE Flipping.
+// TODO: drive heading correction - reduce game
 
 @TeleOp(group = "Jacouj")
 public class Jaccouse extends LinearOpMode {
@@ -28,10 +33,12 @@ public class Jaccouse extends LinearOpMode {
 	private int direction = 1;
 	private double targetHeading = 0;
 
+	// HandRail variables
 	private Toggle collector = new Toggle(); //  Collection toggle (A button)
 	boolean release; // releasing object (B button)
 	private Toggle homing = new Toggle();
 	private Toggle spincarousel = new Toggle();
+	private Toggle homingHand = new Toggle();
 
 	@Override
 	public void runOpMode() {
@@ -66,6 +73,20 @@ public class Jaccouse extends LinearOpMode {
 				continue;
 			}
 
+			homing.update(gamepad2.x);
+			homingHand.update(gamepad2.y);
+
+
+			if (gamepad2.start) {
+				if (homing.isClicked()) {
+					telemetry.addData("[searchHome]", "starting");
+					handRail.searchHomeRail();
+				}
+
+				if (homingHand.isClicked())
+					handRail.searchHomeHand();
+			}
+
 			boolean stopAll = gamepad1.y;
 			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
 			boolean fieldOriented = !gamepad1.y;
@@ -76,17 +97,17 @@ public class Jaccouse extends LinearOpMode {
 			double turn = gamepad1.right_stick_x * boost;
 
 			// Hand rail
-			double railPower = -gamepad2.left_stick_y;
+			double railPower = -gamepad2.left_stick_x;
 			double armPower = -gamepad2.right_stick_y;
+
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
 			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
 
 			turningToggle.update(Math.abs(turn) > 0.02);
-			spincarousel.update(gamepad2.left_bumper);
+			spincarousel.update(gamepad1.left_bumper);
 
 			collector.update(gamepad2.a ); // update toggle (A button)
-			homing.update(gamepad2.x);
 			release = gamepad2.b;
 
 			if (turningToggle.isReleased()) {
@@ -116,11 +137,6 @@ public class Jaccouse extends LinearOpMode {
 			else {
 				handRail.grabberRelease();
 				collector.set(false);
-			}
-
-			if(homing.isClicked()) {
-				telemetry.addData("[searchHome]", "starting");
-				handRail.searchHome();
 			}
 
 			if(spincarousel.getState())
