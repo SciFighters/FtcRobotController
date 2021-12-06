@@ -15,8 +15,6 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 @TeleOp
 public class DuckLineTester extends LinearOpMode {
-
-	enum ABC {A, B, C}
 	public int screenWidth = 640;
 	public int screenHeight = 360;
 
@@ -46,19 +44,10 @@ public class DuckLineTester extends LinearOpMode {
 
 		waitForStart();
 
-		ABC abc = null;
+		DuckLine.ABC abc = null;
 
 		while (opModeIsActive()) {
-			Point duck = duckline.getTargetPos();
-			if (duck.x <= screenWidth / 3) { // First 3rd of the screen
-				abc = ABC.A;
-			} else if (duck.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
-				abc = ABC.B;
-			} else if (duck.x <= screenWidth){ // Detects on the whole screen
-				abc = ABC.C;
-			} else {
-
-			}
+			abc = duckline.getDuck(screenWidth);
 
 			if(abc != null) telemetry.addData("Duck at:", abc); //if duck is on screen, adding telemetry about it's location...
 			else telemetry.addData("The Duck is: ", "not found"); // if the duck isn't on screen or not found

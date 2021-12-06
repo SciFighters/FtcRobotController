@@ -32,6 +32,20 @@ public class DuckLine extends OpenCvPipeline {
 		return targetRect;
 	}
 
+	public enum ABC {A, B, C}
+
+	public ABC getDuck(int screenWidth) {
+		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen
+			return ABC.A;
+		} else if (targetPos.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
+			return ABC.B;
+		} else if (targetPos.x <= screenWidth) { // Detects on the whole screen
+			return ABC.C;
+		} else {
+			return null;
+		}
+	}
+
 	@Override
 	public void init(Mat firstFrame) {
 		super.init(firstFrame);
@@ -43,7 +57,7 @@ public class DuckLine extends OpenCvPipeline {
 
 		width = hsv.width();
 		height = hsv.height();
-		subRect = new Rect(new Point(width*2/5,height*5/12), new Point(width*3/5, height*6/12));
+		subRect = new Rect(new Point(width * 2 / 5, height * 5 / 12), new Point(width * 3 / 5, height * 6 / 12));
 		subMat = hsv.submat(subRect);
 	}
 
@@ -55,11 +69,11 @@ public class DuckLine extends OpenCvPipeline {
 		Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
 		Scalar min_yellow = new Scalar(8, 130, 160);
 		Scalar max_yellow = new Scalar(60, 255, 255);
-		Core.inRange(hsv, min_yellow, max_yellow, mask );   // Mask all orange
+		Core.inRange(hsv, min_yellow, max_yellow, mask);   // Mask all orange
 
 
-		Mat kernel = Mat.ones(5,5, CvType.CV_8UC1);
-		Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_CLOSE, kernel, new Point(2,2)  );
+		Mat kernel = Mat.ones(5, 5, CvType.CV_8UC1);
+		Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_CLOSE, kernel, new Point(2, 2));
 
 		smallFrame.setTo(new Scalar(0, 0, 0), mask);
 
@@ -119,7 +133,7 @@ public class DuckLine extends OpenCvPipeline {
 		Scalar c = Core.mean(subMat);  // Calcs the average color in the sub Rect area
 		Imgproc.rectangle(smallFrame, subRect, new Scalar(0, 255, 0), 2); // Draw a green rect around the subRect area
 		Point textPoint = new Point(10, subRect.y - 20);
-		Imgproc.putText(smallFrame, String.format("H: %03.1f, S: %03.1f, V: %03.1f", c.val[0], c.val[1], c.val[2]), textPoint, Imgproc.FONT_HERSHEY_PLAIN, 2, new Scalar(0,255,00), 2);
+		Imgproc.putText(smallFrame, String.format("H: %03.1f, S: %03.1f, V: %03.1f", c.val[0], c.val[1], c.val[2]), textPoint, Imgproc.FONT_HERSHEY_PLAIN, 2, new Scalar(0, 255, 00), 2);
 
 		return smallFrame;
 	}
