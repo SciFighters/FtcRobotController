@@ -93,43 +93,27 @@ public class HandRailClass {
     }
 
     public void rail_drive(double power) {
-        setState(State.Drive);
-        if(power > 0 && rail_limit_F.getState())
-            rail.setPower(power);
-        else if (power < 0 && rail_limit_B.getState())
-            rail.setPower(power);
-        else
-            rail.setPower(0);
-
-//        if(power > 0){
-//            if(rail_limit_F.getState()){
-//                rail.setPower(power);
-//            }
-//            else {
-//                rail.setPower(0);
-//            }
-//        }
-//        else if (power != 0){
-//            if (rail_limit_B.getState()){
-//                rail.setPower(power);
-//            }
-//            else {
-//                rail.setPower(0);
-//            }
-//        }
-        //double currentPos = this.rail.getCurrentPosition();
-        //double delta = pos - currentPos;
-
+        if(Math.abs(power) > 0.1) {
+            setState(State.Drive);
+            if (power > 0 && rail_limit_F.getState())
+                rail.setPower(power);
+            else if (power < 0 && rail_limit_B.getState())
+                rail.setPower(power);
+            else
+                rail.setPower(0);
+        }
     }
 
     public void hand_drive(double power) {
-        setState(State.Drive);
-        if(power > 0 && hand_limit_F.getState())
-            hand.setPower(power);
-        else if (power < 0 && hand_limit_B.getState())
-            hand.setPower(power);
-        else
-            hand.setPower(0);
+        if(Math.abs(power) > 0.1) {
+            setState(State.Drive);
+            if(power > 0 && hand_limit_F.getState())
+                hand.setPower(power);
+            else if (power < 0 && hand_limit_B.getState())
+                hand.setPower(power);
+            else
+                hand.setPower(0);
+        }
     }
 
 
@@ -221,6 +205,23 @@ public class HandRailClass {
         }
         this.setState(State.Goto);
     }
+
+    public void gotoA(){
+        gotoHand(0,20,1);
+    }
+
+    public void gotoB(){
+        gotoHand(0,40,1);
+    }
+
+    public void gotoC(){
+        gotoHand(0,60,1);
+    }
+
+    public void gotoX(){
+        gotoHand(0,10,1);
+    }
+
 
     public void gotoHand(int railPos, int handPos, float pow) {
         // GOTO

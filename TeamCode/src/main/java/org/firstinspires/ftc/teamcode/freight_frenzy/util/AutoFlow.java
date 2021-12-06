@@ -17,7 +17,7 @@ public class AutoFlow {
 
 	public enum ALLIANCE {
 		BLUE,
-		RED,
+		RED
 	}
 	public enum StartPosY {
 		CAR,

@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 // TODO: hand rail RED BLUE Flipping.
 // TODO: drive heading correction - reduce game
 
-@TeleOp(group = "Jacouj")
+@TeleOp(group = "Jaccouse")
 public class Jaccouse extends LinearOpMode {
 	final double tile = 0.6;
 
@@ -39,6 +39,10 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle homing = new Toggle();
 	private Toggle spincarousel = new Toggle();
 	private Toggle homingHand = new Toggle();
+	private Toggle A = new Toggle();
+	private Toggle B = new Toggle();
+	private Toggle C = new Toggle();
+	private Toggle X = new Toggle();
 
 	@Override
 	public void runOpMode() {
@@ -73,11 +77,11 @@ public class Jaccouse extends LinearOpMode {
 				continue;
 			}
 
-			homing.update(gamepad2.x);
-			homingHand.update(gamepad2.y);
-
 
 			if (gamepad2.start) {
+				homing.update(gamepad2.x);
+				homingHand.update(gamepad2.y);
+
 				if (homing.isClicked()) {
 					telemetry.addData("[searchHome]", "starting");
 					handRail.searchHomeRail();
@@ -86,6 +90,7 @@ public class Jaccouse extends LinearOpMode {
 				if (homingHand.isClicked())
 					handRail.searchHomeHand();
 			}
+
 
 			boolean stopAll = gamepad1.y;
 			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
@@ -98,8 +103,7 @@ public class Jaccouse extends LinearOpMode {
 
 			// Hand rail
 			double railPower = -gamepad2.left_stick_x;
-			double armPower = -gamepad2.right_stick_y;
-
+			double armPower =   gamepad2.right_stick_x;
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
 			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
@@ -107,10 +111,15 @@ public class Jaccouse extends LinearOpMode {
 			turningToggle.update(Math.abs(turn) > 0.02);
 			spincarousel.update(gamepad1.left_bumper);
 
-			collector.update(gamepad2.a ); // update toggle (A button)
-			release = gamepad2.b;
+			A.update(gamepad2.a);
+			B.update(gamepad2.b);
+			C.update(gamepad2.y);
+			X.update(gamepad2.x);
+			collector.update(gamepad2.dpad_down); // update toggle (A button)
+			release = gamepad2.dpad_up;
 
 			if (turningToggle.isReleased()) {
+
 				turningCount = 8;
 			}
 			if (!turningToggle.isPressed()) {
@@ -125,6 +134,16 @@ public class Jaccouse extends LinearOpMode {
 				double delta = drive.getDeltaHeading(targetHeading);
 				double gain = 0.05;
 				turn = delta * gain;
+			}
+
+			if(A.isClicked()) {
+				handRail.gotoA();
+			} else if (B.isClicked()){
+				handRail.gotoB();
+			} else if (C.isClicked()) {
+				handRail.gotoC();
+			} else if (X.isClicked()){
+				handRail.gotoX();
 			}
 
 			if (!release) {
