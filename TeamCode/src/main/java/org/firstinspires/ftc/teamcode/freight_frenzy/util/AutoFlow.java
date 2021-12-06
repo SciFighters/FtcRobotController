@@ -16,7 +16,7 @@ public class AutoFlow {
 
 	public enum ALLIANCE {
 		BLUE,
-		RED,
+		RED
 	}
 
 	private HandRailClass handrail = null;
