@@ -3,20 +3,25 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
-import org.firstinspires.ftc.teamcode.ultimate_goal.AutoFlows;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
-	private LinearOpMode opMode; // First I declared it as OpMode now its LinearOpMode
+	private LinearOpMode opMode = null; // First I declared it as OpMode now its LinearOpMode
+	private Location statLine = new Location(0,0);
+	DriveClass drive = null;
 	final double tile = 0.6;
 
 
 	public enum ALLIANCE {
 		BLUE,
 		RED,
+	}
+	public enum StartPosY {
+		CAR,
+		BuMP
 	}
 
 	private HandRailClass handrail = null;
@@ -27,11 +32,25 @@ public class AutoFlow {
 	final int screenWidth = 640;
 	final int screenHeight = 360;
 
+	Location a_pos;
+	Location b_pos;
+	Location c_pos;
+	Location shippingHub;
+	Location carousel;
+	Location bump;
+	Location  freight;
+
+
 	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance) {
 		this.opMode = opMode;
 		alliance = alliance;
+		StartPosY startPos = StartPosY.CAR ;
 
+
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
 		this.handrail = new HandRailClass(opMode);
+
+		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
 
 
@@ -65,6 +84,23 @@ public class AutoFlow {
 
 		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 
+		double heading = drive.getHeading();
+		int mulPos;
+		if (startPos == StartPosY.CAR){
+			mulPos = 1;
+		}else {
+			mulPos =-1;
+		}
+
+		drive.goToLocation(carousel,1, heading, 0.5);
+
+		handrail.carouselRun(1);
+
+		drive.goToLocation(shippingHub, 1, heading, 0.5);
+
+		//put bloke
+
+		drive.goToLocation(freight, 1, heading, 0.5);
 
 	}
 
