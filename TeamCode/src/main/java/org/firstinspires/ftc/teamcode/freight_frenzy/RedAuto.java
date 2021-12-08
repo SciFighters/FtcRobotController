@@ -42,7 +42,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.BananaPipeline;
 @Autonomous(group = "red fullflow")
 //@Disabled
 public class RedAuto extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED);
+	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPosY.CAR, false);
 	DuckLine pipeline;
 
 	private ElapsedTime runtime = new ElapsedTime();

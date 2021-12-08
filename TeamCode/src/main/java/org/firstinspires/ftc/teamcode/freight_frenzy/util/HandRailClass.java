@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
+
 // Handrail class
 public class HandRailClass {
     //motors, servos and touch switch
@@ -204,6 +206,16 @@ public class HandRailClass {
             rail.setPower(power);
         }
         this.setState(State.Goto);
+    }
+
+    public  void goToABC(DuckLine.ABC abc){
+        if (abc == abc.A){
+            gotoHand(0,20,1);
+        }else if (abc == abc.A){
+            gotoHand(0,40,1);
+        }else if (abc == abc.C){
+            gotoHand(0,60,1);
+        }
     }
 
     public void gotoA(){

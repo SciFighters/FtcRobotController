@@ -24,6 +24,8 @@ public class AutoFlow {
 		BuMP
 	}
 
+	boolean shortened = false;
+
 	private HandRailClass handrail = null;
 	private DuckLine duckLine = null;
 
@@ -39,13 +41,14 @@ public class AutoFlow {
 	Location carousel;
 	Location bump;
 	Location  freight;
+	Location parkPos;
 
 
-	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance) {
+	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, boolean shortened) {
 		this.opMode = opMode;
 		alliance = alliance;
-		StartPosY startPos = StartPosY.CAR ;
-
+		StartPosY startPos = startPosY ;
+		this.shortened = shortened;
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
 		this.handrail = new HandRailClass(opMode);
@@ -95,13 +98,21 @@ public class AutoFlow {
 		drive.goToLocation(carousel,1, heading, 0.5);
 
 		handrail.carouselRun(1);
+		this.opMode.sleep(2000);
+		handrail.carouselStop();
 
 		drive.goToLocation(shippingHub, 1, heading, 0.5);
 
-		//put bloke
+		handrail.goToABC(abc);
 
-		drive.goToLocation(freight, 1, heading, 0.5);
-
+		if (shortened == false){
+			drive.goToLocation(freight, 1, heading, 0.5);
+			drive.goToLocation(shippingHub, 1, heading, 0.5);
+			handrail.goToABC(abc);
+			drive.goToLocation(parkPos,1, heading, 0.5);
+		}else {
+			drive.goToLocation(parkPos, 1, heading, 0.05);
+		}
 	}
 
 }
