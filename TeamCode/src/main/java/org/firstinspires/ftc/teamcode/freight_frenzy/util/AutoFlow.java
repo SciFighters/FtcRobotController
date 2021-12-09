@@ -35,9 +35,10 @@ public class AutoFlow {
 
 	int mul;
 
+
 	final int screenWidth = 640;
 	final int screenHeight = 360;
-
+	Auto auto;
 	Location a_pos;
 	Location b_pos;
 	Location c_pos;
@@ -46,13 +47,16 @@ public class AutoFlow {
 	Location bump;
 	Location  freight;
 	Location parkPos;
+	ALLIANCE alliance;
+
+	StartPosY startPos;
 
 
 	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, Auto auto) {
 		this.opMode = opMode;
-		alliance = alliance;
-		StartPosY startPos = startPosY ;
-		Auto auto = auto;
+		this.alliance = alliance;
+		this.startPos = startPosY ;
+		 this.auto = auto;
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
 		this.handrail = new HandRailClass(opMode);
@@ -98,7 +102,7 @@ public class AutoFlow {
 		}else {
 			mulPos =-1;
 		}
-
+		//Autonomous starts
 		if (auto != Auto.PARK){
 			drive.goToLocation(carousel,1, heading, 0.5);
 
