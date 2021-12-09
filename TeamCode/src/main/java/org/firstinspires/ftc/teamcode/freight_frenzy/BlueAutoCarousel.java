@@ -40,7 +40,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.AutoFlow;
 @Autonomous(group = "blue carousel")
 //@Disabled
 public class BlueAutoCarousel extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, false);
+	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, AutoFlow.Auto.LONG);
 	DuckLine pipeline;
 
 	private ElapsedTime runtime = new ElapsedTime();

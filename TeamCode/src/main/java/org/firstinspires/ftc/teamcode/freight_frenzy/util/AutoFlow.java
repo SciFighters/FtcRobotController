@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
+import org.firstinspires.ftc.teamcode.ultimate_goal.study.Auto;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -24,8 +25,11 @@ public class AutoFlow {
 		BuMP
 	}
 
-	boolean shortened = false;
-
+    public enum Auto{
+		SHORT,
+		LONG,
+		PARK,
+	}
 	private HandRailClass handrail = null;
 	private DuckLine duckLine = null;
 
@@ -44,11 +48,11 @@ public class AutoFlow {
 	Location parkPos;
 
 
-	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, boolean shortened) {
+	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, Auto auto) {
 		this.opMode = opMode;
 		alliance = alliance;
 		StartPosY startPos = startPosY ;
-		this.shortened = shortened;
+		Auto auto = auto;
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
 		this.handrail = new HandRailClass(opMode);
@@ -95,17 +99,19 @@ public class AutoFlow {
 			mulPos =-1;
 		}
 
-		drive.goToLocation(carousel,1, heading, 0.5);
+		if (auto != Auto.PARK){
+			drive.goToLocation(carousel,1, heading, 0.5);
 
-		handrail.carouselRun(1);
-		this.opMode.sleep(2000);
-		handrail.carouselStop();
+			handrail.carouselRun(1);
+			this.opMode.sleep(2000);
+			handrail.carouselStop();
 
-		drive.goToLocation(shippingHub, 1, heading, 0.5);
+			drive.goToLocation(shippingHub, 1, heading, 0.5);
 
-		handrail.goToABC(abc);
+			handrail.goToABC(abc);
+		}
 
-		if (shortened == false){
+		if (auto == Auto.LONG){
 			drive.goToLocation(freight, 1, heading, 0.5);
 			drive.goToLocation(shippingHub, 1, heading, 0.5);
 			handrail.goToABC(abc);
