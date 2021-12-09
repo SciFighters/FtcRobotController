@@ -218,23 +218,6 @@ public class HandRailClass {
         }
     }
 
-    public void gotoA(){
-        gotoHand(0,20,1);
-    }
-
-    public void gotoB(){
-        gotoHand(0,40,1);
-    }
-
-    public void gotoC(){
-        gotoHand(0,60,1);
-    }
-
-    public void gotoX(){
-        gotoHand(0,10,1);
-    }
-
-
     public void gotoHand(int railPos, int handPos, float pow) {
         // GOTO
         handPos = (int)this.clamp((double)handPos, 100, 0);
