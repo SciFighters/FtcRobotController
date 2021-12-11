@@ -24,6 +24,28 @@ public class HandRailClass {
 
     private DcMotorEx carousel = null;
 
+    public enum gotoPoints {
+        pointA(0,0),
+        pointB(0,0),
+        pointC(0,0),
+        pointX(0,0);
+
+        public double railPower = 0.8;
+        public float handPower = (float)0.8;
+        public double railPercentage;
+        public int handPercentage;
+        gotoPoints(double railPercentage, int handPercentage) {
+            this.railPercentage = railPercentage;
+            this.handPercentage = handPercentage;
+        }
+    }
+
+
+    public void gotoPoint(gotoPoints point) {
+        this.gotoRail(point.railPercentage, point.railPower);
+        this.gotoHand(0, point.handPercentage, point.handPower);
+    }
+
 
     public enum State {
         Drive,
@@ -249,12 +271,10 @@ public class HandRailClass {
     }
 
     public void carouselRun(double power) {
-
         carousel.setPower(power);
     }
 
     public void carouselStop() {
-
         carousel.setPower(0);
     }
 

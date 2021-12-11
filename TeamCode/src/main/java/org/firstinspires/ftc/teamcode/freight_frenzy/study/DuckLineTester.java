@@ -32,7 +32,7 @@ public class DuckLineTester extends LinearOpMode {
 		webcam.openCameraDeviceAsync(new AsyncCameraOpenListener() {
 			@Override
 			public void onOpened() {
-				webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
+				webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT); //
 			}
 
 			@Override
@@ -46,7 +46,7 @@ public class DuckLineTester extends LinearOpMode {
 
 		DuckLine.ABC abc = null;
 
-		while (opModeIsActive()) {
+		while(opModeIsActive()) {
 			abc = duckline.getDuck(screenWidth);
 
 			if(abc != null) telemetry.addData("Duck at:", abc); //if duck is on screen, adding telemetry about it's location...

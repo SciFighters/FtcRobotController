@@ -137,13 +137,13 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if(A.isClicked()) {
-				handRail.gotoA();
+				handRail.gotoPoint(HandRailClass.gotoPoints.pointA);
 			} else if (B.isClicked()){
-				handRail.gotoB();
+				handRail.gotoPoint(HandRailClass.gotoPoints.pointB);
 			} else if (C.isClicked()) {
-				handRail.gotoC();
+				handRail.gotoPoint(HandRailClass.gotoPoints.pointC);
 			} else if (X.isClicked()){
-				handRail.gotoX();
+				handRail.gotoPoint(HandRailClass.gotoPoints.pointX);
 			}
 
 			if (!release) {
@@ -159,7 +159,7 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if(spincarousel.getState())
-				handRail.carouselRun(0.9);
+				handRail.carouselRun(0.6);
 			else {
 				handRail.carouselStop();
 			}
