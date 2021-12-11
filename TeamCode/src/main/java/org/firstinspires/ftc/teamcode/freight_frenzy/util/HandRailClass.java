@@ -25,6 +25,28 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
+    public enum gotoPoints {
+        pointA(0,0),
+        pointB(0,0),
+        pointC(0,0),
+        pointX(0,0);
+
+        public double railPower = 0.8;
+        public float handPower = (float)0.8;
+        public double railPercentage;
+        public int handPercentage;
+        gotoPoints(double railPercentage, int handPercentage) {
+            this.railPercentage = railPercentage;
+            this.handPercentage = handPercentage;
+        }
+    }
+
+
+    public void gotoPoint(gotoPoints point) {
+        this.gotoRail(point.railPercentage, point.railPower);
+        this.gotoHand(0, point.handPercentage, point.handPower);
+    }
+
 
     public enum State {
         Drive,
@@ -176,6 +198,7 @@ public class HandRailClass {
         //rail got middle
         opMode.telemetry.addData("[Homing] Start: ", hand.getCurrentPosition());
         opMode.telemetry.update();
+        opMode.sleep(1000);
 
         gotoRail(75, 0.7);
         while (rail.isBusy());
@@ -188,6 +211,7 @@ public class HandRailClass {
         opMode.telemetry.addData("[Homing] Begin search: ", hand.getCurrentPosition());
         opMode.telemetry.update();
 
+        opMode.sleep(5000);
         // Hand go to limiter
         while(hand_limit_F.getState() && hand_limit_B.getState()) {
             hand.setPower(0.6);

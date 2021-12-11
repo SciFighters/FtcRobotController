@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 // TODO: hand rail RED BLUE Flipping.
 // TODO: drive heading correction - reduce game
 
-@TeleOp(group = "Jacouj")
+@TeleOp(group = "Jaccouse")
 public class Jaccouse extends LinearOpMode {
 	final double tile = 0.6;
 
@@ -159,7 +159,7 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if(spincarousel.getState())
-				handRail.carouselRun(0.9);
+				handRail.carouselRun(0.6);
 			else {
 				handRail.carouselStop();
 			}

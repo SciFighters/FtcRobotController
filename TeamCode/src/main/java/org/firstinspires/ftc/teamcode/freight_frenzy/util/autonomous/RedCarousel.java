@@ -27,27 +27,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.freight_frenzy;
+package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.AutoFlow;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.BananaPipeline;
-
-@Autonomous(group = "red fullflow")
+@Autonomous(group = "blue carousel")
 //@Disabled
-public class RedAuto extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPosY.CAR, AutoFlow.Auto.LONG);
-	DuckLine pipeline;
-
-	private ElapsedTime runtime = new ElapsedTime();
-	// main functions ==============================================================================
+public class RedCarousel extends LinearOpMode {
+	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPosY.CAR, AutoFlow.Auto.FULL);
 	@Override
-	public void runOpMode() {
+	public void runOpMode() throws InterruptedException {
+
 	}
 }
