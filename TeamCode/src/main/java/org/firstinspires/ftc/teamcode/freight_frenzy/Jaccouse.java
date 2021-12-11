@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
+import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 // TODO: clean code
 // TODO: hand rail boost
 // TODO: hand rail coupling
@@ -16,7 +17,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 // TODO: hand rail RED BLUE Flipping.
 // TODO: drive heading correction - reduce game
 
-@TeleOp(group = "Jaccouse")
+@TeleOp(group = "Jacouj")
 public class Jaccouse extends LinearOpMode {
 	final double tile = 0.6;
 
@@ -119,7 +120,6 @@ public class Jaccouse extends LinearOpMode {
 			release = gamepad2.dpad_up;
 
 			if (turningToggle.isReleased()) {
-
 				turningCount = 8;
 			}
 			if (!turningToggle.isPressed()) {
@@ -137,13 +137,13 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if(A.isClicked()) {
-				handRail.gotoA();
+				handRail.goToABC(DuckLine.ABC.A);
 			} else if (B.isClicked()){
-				handRail.gotoB();
+				handRail.goToABC(DuckLine.ABC.B);
 			} else if (C.isClicked()) {
-				handRail.gotoC();
+				handRail.goToABC(DuckLine.ABC.C);
 			} else if (X.isClicked()){
-				handRail.gotoX();
+				handRail.goToABC(DuckLine.ABC.X);
 			}
 
 			if (!release) {

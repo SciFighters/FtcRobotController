@@ -32,7 +32,7 @@ public class DuckLine extends OpenCvPipeline {
 		return targetRect;
 	}
 
-	public enum ABC {A, B, C}
+	public enum ABC {A, B, C, X}
 
 	public ABC getDuck(int screenWidth) {
 		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen

@@ -24,6 +24,7 @@ public class HandRailClass {
 
     private DcMotorEx carousel = null;
 
+    private int railRange = 1470;
 
     public enum State {
         Drive,
@@ -66,10 +67,17 @@ public class HandRailClass {
         carousel = hw.get(DcMotorEx.class, "carousel");
     }
 
+
+    public int getRailPos(){
+        int pos = rail.getCurrentPosition();
+        int railTicks = (int)(pos/100 * railRange + 0.5);
+        return railTicks;
+    }
     public void setServosPower(double power) {
         grabber_left.setPower(power);
         grabber_right.setPower(power);
     }
+
 
     public double clamp(double value, double maximum, double minimum) {
         if(maximum < value) value = maximum;
@@ -95,7 +103,7 @@ public class HandRailClass {
     }
 
     public void rail_drive(double power) {
-        if(Math.abs(power) > 0.1) {
+        if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setState(State.Drive);
             if (power > 0 && rail_limit_F.getState())
                 rail.setPower(power);
@@ -107,7 +115,7 @@ public class HandRailClass {
     }
 
     public void hand_drive(double power) {
-        if(Math.abs(power) > 0.1) {
+        if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
             setState(State.Drive);
             if(power > 0 && hand_limit_F.getState())
                 hand.setPower(power);
@@ -146,7 +154,7 @@ public class HandRailClass {
         lastPos = rail.getCurrentPosition();
 
         while (rail_limit_F.getState() && rail_limit_B.getState()){
-            rail.setPower(-0.5);
+            rail.setPower(-0.8);
 //            opMode.sleep(250);
             int currentPos = rail.getCurrentPosition();
 //            if (currentPos >= 1000){
@@ -168,19 +176,18 @@ public class HandRailClass {
         //rail got middle
         opMode.telemetry.addData("[Homing] Start: ", hand.getCurrentPosition());
         opMode.telemetry.update();
-        opMode.sleep(1000);
 
         gotoRail(75, 0.7);
         while (rail.isBusy());
         rail.setPower(0);
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        setState(State.Drive);
+        hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //setState(State.Drive);
 
         opMode.telemetry.addData("[Homing] Begin search: ", hand.getCurrentPosition());
         opMode.telemetry.update();
 
-        opMode.sleep(5000);
         // Hand go to limiter
         while(hand_limit_F.getState() && hand_limit_B.getState()) {
             hand.setPower(0.6);
@@ -198,8 +205,7 @@ public class HandRailClass {
 
     public void gotoRail(double railPercents, double power) {
         // GOTO
-        int RAIL_RANGE = 1470;
-        int railTicks = (int)(railPercents/100 * RAIL_RANGE + 0.5);
+        int railTicks = (int)(railPercents/100 * railRange + 0.5);
         if(this.rail.getCurrentPosition() != railTicks) {
             hand.setTargetPosition(hand.getCurrentPosition());
             rail.setTargetPosition(railTicks);
@@ -210,15 +216,17 @@ public class HandRailClass {
 
     public  void goToABC(DuckLine.ABC abc){
         if (abc == abc.A){
-            gotoHand(0,20,1);
+            gotoPercent(90,90,1);
         }else if (abc == abc.A){
-            gotoHand(0,40,1);
+            gotoPercent(90,80,1);
         }else if (abc == abc.C){
-            gotoHand(0,60,1);
+            gotoPercent(90,70,1);
+        } else if (abc == abc.X){
+            gotoPercent(5,5,1);
         }
     }
 
-    public void gotoHand(int railPos, int handPos, float pow) {
+    public void gotoPercent(int railPos, int handPos, float pow) {
         // GOTO
         handPos = (int)this.clamp((double)handPos, 100, 0);
         if(this.hand.getCurrentPosition() != handPos) {
@@ -256,6 +264,18 @@ public class HandRailClass {
     public void carouselStop() {
 
         carousel.setPower(0);
+    }
+
+    public void switchSides(){
+        setState(State.Goto);
+        int pos = getRailPos();
+        if (pos < 50){
+            gotoRail(100, 1);
+        }
+        else{
+            gotoRail(0, 1);
+        }
+
     }
 
 
