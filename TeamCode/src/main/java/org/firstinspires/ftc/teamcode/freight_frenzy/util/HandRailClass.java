@@ -48,6 +48,8 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        rail.setTargetPositionTolerance(100);
+
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 
@@ -71,6 +73,7 @@ public class HandRailClass {
         int railTicks = (int)(pos/100 * railRange + 0.5);
         return railTicks;
     }
+
     public void setServosPower(double power) {
         grabber_left.setPower(power);
         grabber_right.setPower(power);
@@ -177,7 +180,13 @@ public class HandRailClass {
         opMode.sleep(1000);
 
         gotoRail(75, 0.7);
-        while (rail.isBusy());
+        while (rail.isBusy()) {
+            opMode.telemetry.addData("[Homing]", "tmp in loop");
+            opMode.telemetry.addData("target:", rail.getTargetPosition());
+            opMode.telemetry.addData("cur:", rail.getCurrentPosition());
+            opMode.telemetry.addData("cur mode:", rail.getMode());
+            opMode.telemetry.update();
+        }
         rail.setPower(0);
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -187,7 +196,7 @@ public class HandRailClass {
         opMode.telemetry.addData("[Homing] Begin search: ", hand.getCurrentPosition());
         opMode.telemetry.update();
 
-        opMode.sleep(5000);
+        opMode.sleep(200);
         // Hand go to limiter
         while(hand_limit_F.getState() && hand_limit_B.getState()) {
             hand.setPower(0.6);
@@ -237,7 +246,6 @@ public class HandRailClass {
     }
     //updates
     public void update_handRail() {
-
         opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
     }
@@ -245,14 +253,15 @@ public class HandRailClass {
     public void setState(State state) {
         if(this.state != state) {
             this.state = state;
-            if(state == State.Drive)
+            if (state == State.Drive) {
                 this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                opMode.telemetry.addData("handRail","DRIVE");
-            if(state == State.Goto)
+                opMode.telemetry.addData("handRail", "DRIVE");
+            } else if (state == State.Goto) {
                 this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                opMode.telemetry.addData("handRail","GOTO");
+                opMode.telemetry.addData("handRail", "GOTO");
+            }
         }
     }
 

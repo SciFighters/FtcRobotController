@@ -68,11 +68,11 @@ public class Jaccouse extends LinearOpMode {
 
 			if (gamepad1.start) {
 				if (gamepad1.x) {
-					drive.resetOrientation(90);
+					drive.resetOrientation(0);
 				}
-				if (gamepad1.y) {
-					drive.resetOrientation(-90);
-				}
+//				if (gamepad1.y) {
+//					drive.resetOrientation(-90);
+//				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
 				continue;
