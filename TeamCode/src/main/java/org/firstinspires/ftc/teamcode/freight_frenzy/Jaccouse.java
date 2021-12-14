@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.freight_frenzy;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
@@ -136,15 +137,16 @@ public class Jaccouse extends LinearOpMode {
 				turn = delta * gain;
 			}
 
-			if(A.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.A);
-			} else if (B.isClicked()){
+			if(B.isClicked()) {
 				handRail.goToABC(DuckLine.ABC.B);
-			} else if (C.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.C);
-			} else if (X.isClicked()){
-				handRail.goToABC(DuckLine.ABC.X);
 			}
+//			} else if (B.isClicked()){
+//				handRail.goToABC(DuckLine.ABC.B);
+//			} else if (C.isClicked()) {
+//				handRail.goToABC(DuckLine.ABC.C);
+//			} else if (X.isClicked()){
+//				handRail.goToABC(DuckLine.ABC.X);
+//			}
 
 			if (!release) {
 				if (collector.getState()) {
@@ -173,6 +175,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
+			telemetry.addData("potentiometer", handRail.getPotentiometerValue());
 			telemetry.update();
 		}
 	}
