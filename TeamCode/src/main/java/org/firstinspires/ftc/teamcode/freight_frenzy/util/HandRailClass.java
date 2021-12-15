@@ -246,6 +246,14 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
+    private void pot_to_ticks() {
+        // map
+        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+
+        // TODO: get 2nd range values, call this at start and offset reset accordingly
+        // return (((getPotentiometerValue() - 0.6) * (new_max - new_min)) / (1.6 - 0.6)) + new_min
+    }
+
     public void gotoRail(double railPercents, double power) {
         // GOTO
         int railTicks = (int)(railPercents/100 * railRange + 0.5);
