@@ -177,7 +177,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-			telemetry.addData("potentiometer", handRail.getPotentiometerValue());
+			telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
 			telemetry.update();
 		}
 	}

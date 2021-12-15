@@ -29,7 +29,6 @@ public class HandRailClass {
 
     private int railRange = 1470;
 
-
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
@@ -104,9 +103,16 @@ public class HandRailClass {
     }
 
 
-    public double getPotentiometerValue(){
-        return potentiometer.getVoltage();
+    public double getPotentiometerValue(boolean applyScale) {
+        double degreesScale = 0.0;
+        return applyScale ? potentiometer.getVoltage() * degreesScale : potentiometer.getVoltage() ;
     }
+
+
+
+
+
+
     public void setServosPower(double power) {
         grabber_left.setPower(power);
         grabber_right.setPower(power);
@@ -331,6 +337,7 @@ public class HandRailClass {
             gotoRail(0, 1);
         }
     }
+
 }
 
 

@@ -38,7 +38,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class BlueBumpShort extends LinearOpMode {
 	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.BuMP, AutoFlow.Auto.SHORT);
 	@Override
-	public void runOpMode() throws InterruptedException {
+	public void runOpMode() {
 
 	}
 }

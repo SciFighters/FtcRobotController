@@ -40,9 +40,11 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
 @Autonomous(group = "blue carousel")
 //@Disabled
 public class BlueAutoCarousel extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, AutoFlow.Auto.FULL);
+	AutoFlow auto;
 	@Override
-	public void runOpMode() throws InterruptedException {
+	public void runOpMode() {
+		waitForStart();
 
+		auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, AutoFlow.Auto.FULL);
 	}
 }

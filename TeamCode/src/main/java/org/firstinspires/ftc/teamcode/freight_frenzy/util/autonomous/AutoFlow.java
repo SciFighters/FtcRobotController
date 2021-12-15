@@ -20,12 +20,22 @@ public class AutoFlow {
 
 
 	public enum ALLIANCE {
-		BLUE,
-		RED
+		BLUE(1),
+		RED(-1);
+
+		int multiplier;
+		ALLIANCE(int multiplier) {
+			this.multiplier = multiplier;
+		}
 	}
 	public enum StartPosY {
-		CAR,
-		BuMP
+		CAR(1),
+		BuMP(-1);
+
+		int multiplier;
+		StartPosY(int multiplier) {
+			this.multiplier = multiplier;
+		}
 	}
 
     public enum Auto{
@@ -46,13 +56,13 @@ public class AutoFlow {
 	Location a_pos;
 	Location b_pos;
 	Location c_pos;
-	Location shippingHub;
-	Location carousel;
-	Location bump;
-	Location  freight;
-	Location parkPos;
+	Location shippingHub = new Location(0.6, 0.75);
+	Location carousel = new Location(1.1, 0.0);
+	Location Barrier;
+	Location freight = new Location(1.5,2.5);
+	Location parkPos = new Location(0,0);
 	ALLIANCE alliance;
-
+	Location tempStartPos = new Location(0.6,1.5);
 	StartPosY startPos;
 
 	/***
@@ -76,9 +86,10 @@ public class AutoFlow {
 
 
 		// TODO: separate to util class
-		int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+		//Webcam
+		// int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
 
-		WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "webcam");
+		/*WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "webcam");
 		OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
 		this.duckLine = new DuckLine();
@@ -96,16 +107,14 @@ public class AutoFlow {
 				opMode.telemetry.update();
 			}
 		});
-
-		if (alliance == ALLIANCE.BLUE) {
-			mul = 1;// blue
-		} else {
-			mul = -1;// red
-		}
+		*/
+		mul = alliance.multiplier;
 
 //		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		DuckLine.SH_Levels shLevel = duckLine.getDuck(screenWidth);
 
+		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
+		//DuckLine.ABC abc = DuckLine.ABC.C;
 		double heading = drive.getHeading();
 		int mulPos;
 		if (startPos == StartPosY.CAR){
@@ -113,6 +122,8 @@ public class AutoFlow {
 		}else {
 			mulPos =-1;
 		}
+
+
 		//Autonomous starts
 		if (auto != Auto.PARK && startPosY != StartPosY.BuMP){
 			drive.goToLocation(carousel,1, heading, 0.5);
