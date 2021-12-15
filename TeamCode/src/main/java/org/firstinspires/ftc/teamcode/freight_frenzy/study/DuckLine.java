@@ -32,24 +32,43 @@ public class DuckLine extends OpenCvPipeline {
 		return targetRect;
 	}
 
-	public enum ABC {A, B, C, X}
+//	public enum ABC {A, B, C, X}
 
-	public ABC getDuck(int screenWidth) {
-		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen
-			return ABC.A;
-		} else if (targetPos.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
-			return ABC.B;
-		} else if (targetPos.x <= screenWidth) { // Detects on the whole screen
-			return ABC.C;
-		} else {
-			return null;
+	// SH - Shipping Hub
+	public enum SH_Levels {
+		Top,
+		Middle,
+		Bottom,
+	}
+
+//	public ABC getDuck(int screenWidth) {
+//		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen
+//			return ABC.A;
+//		} else if (targetPos.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
+//			return ABC.B;
+//		} else if (targetPos.x <= screenWidth) { // Detects on the whole screen
+//			return ABC.C;
+//		} else {
+//			return null;
+//		}
+//	}
+
+	public SH_Levels getDuck(int screenWidth) {
+		if (targetPos == null) return null;
+		else {
+			if (targetPos.x <= screenWidth / 3) {
+				return SH_Levels.Bottom;
+			} else if (targetPos.x >= screenWidth / 3 * 2) {
+				return SH_Levels.Top;
+			} else {
+				return SH_Levels.Middle;
+			}
 		}
 	}
 
 	@Override
 	public void init(Mat firstFrame) {
 		super.init(firstFrame);
-
 
 		mask = new Mat();
 		hsv = new Mat();
@@ -67,8 +86,10 @@ public class DuckLine extends OpenCvPipeline {
 //        Mat smallFrame = new Mat(frame, new Range(frame.height() / 2, frame.height()));
 		Mat smallFrame = frame;
 		Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
-		Scalar min_yellow = new Scalar(8, 130, 160);
-		Scalar max_yellow = new Scalar(60, 255, 255);
+//		Scalar min_yellow = new Scalar(8, 130, 160);
+//		Scalar max_yellow = new Scalar(60, 255, 255);
+		Scalar min_yellow = new Scalar(16, 130, 160);
+		Scalar max_yellow = new Scalar(70, 255, 255);
 		Core.inRange(hsv, min_yellow, max_yellow, mask);   // Mask all orange
 
 
@@ -137,5 +158,4 @@ public class DuckLine extends OpenCvPipeline {
 
 		return smallFrame;
 	}
-
 }

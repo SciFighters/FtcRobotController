@@ -103,7 +103,8 @@ public class AutoFlow {
 			mul = -1;// red
 		}
 
-		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
+//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
+		DuckLine.SH_Levels shLevel = duckLine.getDuck(screenWidth);
 
 		double heading = drive.getHeading();
 		int mulPos;
@@ -125,14 +126,16 @@ public class AutoFlow {
 		if (auto != Auto.PARK){
 			drive.goToLocation(shippingHub, 1, heading, 0.5);
 
-			handrail.goToABC(abc);
+//			handrail.goToABC(abc);
+			handrail.goToSH_Level(shLevel);
 		}
 
 		if (auto == Auto.FULL || startPosY == StartPosY.BuMP){
 			drive.goToLocation(freight, 1, heading, 0.5);
 			handrail.grabberGrab(); //takes block
 			drive.goToLocation(shippingHub, 1, heading, 0.5);
-			handrail.goToABC(abc);
+//			handrail.goToABC(abc);
+			handrail.goToSH_Level(shLevel);
 			drive.goToLocation(parkPos,1, heading, 0.5);
 		}else {
 			drive.goToLocation(parkPos, 1, heading, 0.05);

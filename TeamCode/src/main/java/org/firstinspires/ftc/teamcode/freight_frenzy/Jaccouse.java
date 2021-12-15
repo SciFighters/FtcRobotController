@@ -136,15 +136,19 @@ public class Jaccouse extends LinearOpMode {
 				turn = delta * gain;
 			}
 
-			if(A.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.A);
-			} else if (B.isClicked()){
-				handRail.goToABC(DuckLine.ABC.B);
+			if (A.isClicked()) {
+//				handRail.goToABC(DuckLine.ABC.A);
+				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
+			} else if (B.isClicked()) {
+//				handRail.goToABC(DuckLine.ABC.B);
+				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.C);
-			} else if (X.isClicked()){
-				handRail.goToABC(DuckLine.ABC.X);
+//				handRail.goToABC(DuckLine.ABC.C);
+				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
 			}
+//			else if (X.isClicked()) {
+//				handRail.goToABC(DuckLine.ABC.X);
+//			}
 
 			if (!release) {
 				if (collector.getState()) {

@@ -173,7 +173,7 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    public void searchHomeHand(){
+    public void searchHomeHand() {
         //rail got middle
         opMode.telemetry.addData("[Homing] Start: ", hand.getCurrentPosition());
         opMode.telemetry.update();
@@ -223,16 +223,17 @@ public class HandRailClass {
         this.setState(State.Goto);
     }
 
-    public  void goToABC(DuckLine.ABC abc){
-        if (abc == abc.A){
+    public void goToSH_Level(DuckLine.SH_Levels shLevel){
+        if (shLevel == DuckLine.SH_Levels.Top) {
             gotoPercent(90,90,1);
-        }else if (abc == abc.A){
+        } else if (shLevel == DuckLine.SH_Levels.Middle) {
             gotoPercent(90,80,1);
-        }else if (abc == abc.C){
+        } else if (shLevel == DuckLine.SH_Levels.Bottom) {
             gotoPercent(90,70,1);
-        } else if (abc == abc.X){
-            gotoPercent(5,5,1);
         }
+//        else if (abc == abc.X){
+//            gotoPercent(5,5,1);
+//        }
     }
 
     public void gotoPercent(int railPos, int handPos, float pow) {
