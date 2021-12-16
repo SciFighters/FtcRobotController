@@ -168,6 +168,13 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselStop();
 			}
 
+			if (gamepad1.x){
+				//drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
+				//sleep(2000);
+				//drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
+				drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
+			}
+
 			this.handRail.update_handRail();
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);

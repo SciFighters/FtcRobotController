@@ -28,23 +28,26 @@
  */
 
 package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
-
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
 
 @Autonomous(group = "blue carousel")
 //@Disabled
 public class BlueAutoCarousel extends LinearOpMode {
 	AutoFlow auto;
+	DriveClass drive = null;
+	HandRailClass handrail = null;
 	@Override
-	public void runOpMode() {
-		waitForStart();
-
+	public void runOpMode() throws InterruptedException {
 		auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, AutoFlow.Auto.FULL);
+		auto.Init();
+		waitForStart();
+		auto.run();
 	}
 }

@@ -47,7 +47,7 @@ public class AutoFlow {
 	private HandRailClass handrail = null;
 	private DuckLine duckLine = null;
 
-	int mul;
+	private int mul;
 
 
 	final int screenWidth = 640;
@@ -75,12 +75,14 @@ public class AutoFlow {
 	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, Auto auto) {
 		this.opMode = opMode;
 		this.alliance = alliance;
-		this.startPos = startPosY ;
-		 this.auto = auto;
+		this.startPos = startPosY;
+		this.auto = auto;
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
 		this.handrail = new HandRailClass(opMode);
+	}
 
+	public void Init() {
 		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
 
@@ -110,28 +112,31 @@ public class AutoFlow {
 		*/
 		mul = alliance.multiplier;
 
-//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
+		DuckLine.SH_Levels shLevel = duckLine.getDuck(screenWidth);
+		opMode.telemetry.addData("ABC", shLevel);
+	}
+
+	public void run() { //Autonomous starts
+		//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		DuckLine.SH_Levels shLevel = duckLine.getDuck(screenWidth);
 
 		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		//DuckLine.ABC abc = DuckLine.ABC.C;
-		double heading = drive.getHeading();
 		int mulPos;
-		if (startPos == StartPosY.CAR){
+		if (startPos == StartPosY.CAR) {
 			mulPos = 1;
-		}else {
-			mulPos =-1;
+		} else {
+			mulPos = -1;
 		}
 
+		double heading = drive.getHeading();
 
-		//Autonomous starts
-		if (auto != Auto.PARK && startPosY != StartPosY.BuMP){
+		if (auto != Auto.PARK && this.startPos != StartPosY.BuMP){
 			drive.goToLocation(carousel,1, heading, 0.5);
 
 			handrail.carouselRun(1);
 			this.opMode.sleep(2000);
 			handrail.carouselStop();
-
 		}
 
 		if (auto != Auto.PARK){
@@ -141,7 +146,7 @@ public class AutoFlow {
 			handrail.goToSH_Level(shLevel);
 		}
 
-		if (auto == Auto.FULL || startPosY == StartPosY.BuMP){
+		if (auto == Auto.FULL || this.startPos == StartPosY.BuMP){
 			drive.goToLocation(freight, 1, heading, 0.5);
 			handrail.grabberGrab(); //takes block
 			drive.goToLocation(shippingHub, 1, heading, 0.5);
@@ -151,8 +156,5 @@ public class AutoFlow {
 		}else {
 			drive.goToLocation(parkPos, 1, heading, 0.05);
 		}
-
-
 	}
-
 }
