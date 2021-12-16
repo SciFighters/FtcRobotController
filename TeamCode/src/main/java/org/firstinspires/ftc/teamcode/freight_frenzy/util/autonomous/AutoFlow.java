@@ -111,8 +111,17 @@ public class AutoFlow {
 		opMode.telemetry.update();
 	}
 
+	public void run() {
+		opMode.telemetry.addData("temp run: ", "active");
+		opMode.telemetry.update();
+		drive.goToLocation(carousel, 1, -45.0, 0.05);
 
-	public void run() { //Autonomous starts
+		handrail.carouselRun(1);
+		this.opMode.sleep(2000);
+		handrail.carouselStop();
+	}
+
+	public void not_run() { //Autonomous starts
 		//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Middle; //duckLine.getDuck(screenWidth);
 		opMode.telemetry.addData("Start - ABC", shLevel);
