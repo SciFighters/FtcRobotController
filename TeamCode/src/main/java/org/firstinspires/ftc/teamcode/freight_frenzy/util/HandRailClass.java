@@ -80,7 +80,7 @@ public class HandRailClass {
 
     public void gotoPoint(gotoPoints point) {
         this.gotoRail(point.railPercentage, point.railPower);
-        this.gotoPercent(0, point.handPercentage, point.handPower);
+        this.gotoHandRail(0, point.handPercentage, point.handPower);
     }
 
 
@@ -109,7 +109,13 @@ public class HandRailClass {
     }
 
 
+    public double convRail_ticks2percent(int ticks) {
+        return (ticks / railRange) * 100;
+    }
 
+    public int convRail_percent2ticks(double percent) {
+        return (int)(percent * railRange);
+    }
 
 
 
@@ -273,20 +279,21 @@ public class HandRailClass {
 
     public void goToSH_Level(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoPercent(100,90,1);
+            gotoHandRail(100,90,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoPercent(100,50,1);
+            gotoHandRail(100,50,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoPercent(100,70,1);
+            gotoHandRail(100,70,1);
         }
 //        else if (abc == abc.X){
 //            gotoPercent(5,5,1);
 //        }
     }
 
-    public void gotoPercent(int railPos, int handPos, double power) {
+    public void gotoHandRail(int railPos, int handPos, double power) {
         // GOTO
         handPos = (int)this.clamp((double)handPos, 100, 0);
+        railPos = convRail_percent2ticks(railPos);
         if(this.hand.getCurrentPosition() != handPos) {
             rail.setTargetPosition(railPos);
             rail.setPower(power);
@@ -318,7 +325,6 @@ public class HandRailClass {
     }
 
     public void carouselRun(double power) {
-
         carousel.setPower(power);
     }
 

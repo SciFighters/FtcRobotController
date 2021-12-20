@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 @Autonomous(group = "blue carousel")
 @Disabled
 public class RedCarouselLong extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPosY.CAR, AutoFlow.Auto.LONG);
+	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPos.CAROUSEL, AutoFlow.Auto.LONG);
 	@Override
 	public void runOpMode() throws InterruptedException {
 

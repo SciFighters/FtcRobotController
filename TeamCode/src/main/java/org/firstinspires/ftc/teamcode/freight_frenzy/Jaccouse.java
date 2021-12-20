@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 // TODO: clean code
@@ -93,6 +93,7 @@ public class Jaccouse extends LinearOpMode {
 
 				if (homingHand.isClicked())
 					handRail.searchHomeHand();
+				continue;
 			}
 
 
@@ -141,19 +142,15 @@ public class Jaccouse extends LinearOpMode {
 				turn = delta * gain;
 			}
 
-//			if (A.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.A);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
-//			} else if (B.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.B);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
-//			} else if (C.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.C);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
-//			}
-//			else if (X.isClicked()) {
-//				handRail.goToABC(DuckLine.ABC.X);
-//			}
+			if (A.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
+			} else if (B.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
+			} else if (C.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
+			} else if (X.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Collect);
+			}
 
 			if (!release) {
 				if (collector.getState()) {
