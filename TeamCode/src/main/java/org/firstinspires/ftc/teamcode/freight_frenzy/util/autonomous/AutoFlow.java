@@ -1,20 +1,14 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
-import org.firstinspires.ftc.teamcode.ultimate_goal.study.Auto;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
 	private LinearOpMode opMode = null; // First I declared it as OpMode now its LinearOpMode
-	private Location statLine = new Location(0,0);
 	DriveClass drive = null;
 	final double tile = 0.6;
 
@@ -28,12 +22,12 @@ public class AutoFlow {
 			this.multiplier = multiplier;
 		}
 	}
-	public enum StartPosY {
-		CAR(1),
-		BuMP(-1);
+	public enum StartPos {
+		CAROUSEL(1),
+		BARRIER(-1);
 
 		int multiplier;
-		StartPosY(int multiplier) {
+		StartPos(int multiplier) {
 			this.multiplier = multiplier;
 		}
 	}
@@ -47,7 +41,7 @@ public class AutoFlow {
 	private HandRailClass handrail = null;
 	private DuckLine duckLine = null;
 
-	int mul;
+	private int mul;
 
 
 	final int screenWidth = 640;
@@ -56,38 +50,44 @@ public class AutoFlow {
 	Location a_pos;
 	Location b_pos;
 	Location c_pos;
-	Location shippingHub = new Location(0.6, 0.75);
-	Location carousel = new Location(1.1, 0.0);
-	Location Barrier;
-	Location freight = new Location(1.5,2.5);
-	Location parkPos = new Location(0,0);
-	ALLIANCE alliance;
-	Location tempStartPos = new Location(0.6,1.5);
-	StartPosY startPos;
+	Location startCarousel = new Location(0.6, 0.4572/2); //1.1, 0.0
+	Location startBarrier = new Location(-0.6, 0.4572/2); //1.1, 0.0
+	Location shippingHub = new Location(0.3, 0.6); //0.6, 0.75
+	Location carousel = new Location(1.0, 0.16);
+	Location barrier = new Location(-1.2, 1.0);
 
-	/***
-	 *
+	Location freight = new Location(1.5,-0.35); // 1.5, 2.5
+	Location parkPos = new Location(0,0); //0.0, 0.0
+	ALLIANCE alliance;
+	Location tempStartPos = new Location(0.0, 0.6);
+	StartPos startPos;
+
+	/**
 	 * @param opMode
 	 * @param alliance
-	 * @param startPosY
+	 * @param startPos
 	 * @param auto
 	 */
-	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPosY startPosY, Auto auto) {
+	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPos startPos, Auto auto) {
 		this.opMode = opMode;
 		this.alliance = alliance;
-		this.startPos = startPosY ;
-		 this.auto = auto;
+		this.startPos = startPos;
+		this.auto = auto;
 
-		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, statLine);
+		Location startingPosition = startPos == StartPos.CAROUSEL ? startCarousel : startBarrier;
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startingPosition);
 		this.handrail = new HandRailClass(opMode);
+	}
 
+	public void init() {
 		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
 
+		handrail.searchHomeRail();
 
 		// TODO: separate to util class
 		//Webcam
-		// int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+		int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
 
 		/*WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "webcam");
 		OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
@@ -110,49 +110,56 @@ public class AutoFlow {
 		*/
 		mul = alliance.multiplier;
 
-//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
-		DuckLine.SH_Levels shLevel = duckLine.getDuck(screenWidth);
+		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Middle; //duckLine.getDuck(screenWidth);
+		opMode.telemetry.addData("Init - ABC", shLevel);
+		opMode.telemetry.update();
+	}
+
+	public void run() { //Autonomous starts
+		//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
+		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Top; //duckLine.getDuck(screenWidth);
+		opMode.telemetry.addData("Start - ABC", shLevel);
+		opMode.telemetry.update();
 
 		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		//DuckLine.ABC abc = DuckLine.ABC.C;
+		int mulPos = startPos.multiplier;
+
 		double heading = drive.getHeading();
-		int mulPos;
-		if (startPos == StartPosY.CAR){
-			mulPos = 1;
-		}else {
-			mulPos =-1;
-		}
 
+		opMode.telemetry.addData("goTo ShippingHub Y:", shippingHub.y);
+		opMode.telemetry.update();
+		handrail.goToSH_Level(shLevel);
+		drive.goToLocation(shippingHub, 1, -45.0, 0.05);
 
-		//Autonomous starts
-		if (auto != Auto.PARK && startPosY != StartPosY.BuMP){
-			drive.goToLocation(carousel,1, heading, 0.5);
+		handrail.grabberRelease();
+		this.opMode.sleep(200);
+		drive.drive(-0.2, 0, 0.8, drive.getHeading(), false);
+		handrail.grabberStop();
 
-			handrail.carouselRun(1);
-			this.opMode.sleep(2000);
-			handrail.carouselStop();
+		handrail.gotoRail(50, 0.8);
 
-		}
+		opMode.telemetry.addData("goTo Carousel Y:", carousel.y);
+		opMode.telemetry.update();
+		drive.goToLocation(carousel, 1, 45.0, 0.15);
 
-		if (auto != Auto.PARK){
-			drive.goToLocation(shippingHub, 1, heading, 0.5);
+		opMode.telemetry.addLine("After goto carousel");
+		opMode.telemetry.update();
 
-//			handrail.goToABC(abc);
-			handrail.goToSH_Level(shLevel);
-		}
+		handrail.carouselRun(1);
+		this.opMode.sleep(2000);
+		handrail.carouselStop();
 
-		if (auto == Auto.FULL || startPosY == StartPosY.BuMP){
-			drive.goToLocation(freight, 1, heading, 0.5);
+		if (auto == Auto.FULL || this.startPos == StartPos.BARRIER){
+			drive.goToLocation(freight, 1, heading, 0.05);
+			//TODO: change handrail to a position which is reasonable for grabbing a freight item
 			handrail.grabberGrab(); //takes block
-			drive.goToLocation(shippingHub, 1, heading, 0.5);
+			drive.goToLocation(shippingHub, 1, heading, 0.05);
 //			handrail.goToABC(abc);
 			handrail.goToSH_Level(shLevel);
-			drive.goToLocation(parkPos,1, heading, 0.5);
-		}else {
+			drive.goToLocation(parkPos,1, heading, 0.05);
+		} else {
 			drive.goToLocation(parkPos, 1, heading, 0.05);
 		}
-
-
 	}
-
 }

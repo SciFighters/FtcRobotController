@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 // TODO: clean code
@@ -44,6 +44,9 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle B = new Toggle();
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
+	private Toggle testGotoA = new Toggle();
+	private Toggle testGotoB = new Toggle();
+
 
 	@Override
 	public void runOpMode() {
@@ -90,6 +93,7 @@ public class Jaccouse extends LinearOpMode {
 
 				if (homingHand.isClicked())
 					handRail.searchHomeHand();
+				continue;
 			}
 
 
@@ -103,7 +107,7 @@ public class Jaccouse extends LinearOpMode {
 			double turn = gamepad1.right_stick_x * boost;
 
 			// Hand rail
-			double railPower = -gamepad2.left_stick_x;
+			double railPower = gamepad2.left_stick_x;
 			double armPower =   gamepad2.right_stick_x;
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
@@ -116,6 +120,8 @@ public class Jaccouse extends LinearOpMode {
 			B.update(gamepad2.b);
 			C.update(gamepad2.y);
 			X.update(gamepad2.x);
+			testGotoA.update(gamepad1.dpad_up);
+			testGotoB.update(gamepad1.dpad_down);
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
 
@@ -136,19 +142,15 @@ public class Jaccouse extends LinearOpMode {
 				turn = delta * gain;
 			}
 
-//			if (A.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.A);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
-//			} else if (B.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.B);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
-//			} else if (C.isClicked()) {
-////				handRail.goToABC(DuckLine.ABC.C);
-//				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
-//			}
-//			else if (X.isClicked()) {
-//				handRail.goToABC(DuckLine.ABC.X);
-//			}
+			if (A.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
+			} else if (B.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
+			} else if (C.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
+			} else if (X.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Collect);
+			}
 
 			if (!release) {
 				if (collector.getState()) {
@@ -166,6 +168,19 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselRun(0.6);
 			else {
 				handRail.carouselStop();
+			}
+
+			if(testGotoA.isClicked()) { // TODO: for debug and tests.
+				drive.goTo(0, 1, 0.5, drive.getHeading(), 0.05);
+			} else if(testGotoB.isClicked()) {
+				drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
+			}
+
+			if (gamepad1.x){
+				//drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
+				//sleep(2000);
+				//drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
+				drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
 			}
 
 			this.handRail.update_handRail();

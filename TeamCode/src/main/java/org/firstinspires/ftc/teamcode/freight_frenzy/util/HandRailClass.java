@@ -24,6 +24,7 @@ public class HandRailClass {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
+    private int potentiometer_offset;
 
     private DcMotorEx carousel = null;
 
@@ -56,6 +57,10 @@ public class HandRailClass {
         carousel = hw.get(DcMotorEx.class, "carousel");
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
+
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        potentiometer_offset = pot_to_ticks(getPotentiometerValue(false));
     }
 
 
@@ -80,7 +85,7 @@ public class HandRailClass {
 
     public void gotoPoint(gotoPoints point) {
         this.gotoRail(point.railPercentage, point.railPower);
-        this.gotoPercent(0, point.handPercentage, point.handPower);
+        this.gotoHandRail(0, point.handPercentage, point.handPower);
     }
 
 
@@ -109,7 +114,13 @@ public class HandRailClass {
     }
 
 
+    public double convRail_ticks2percent(int ticks) {
+        return (ticks / railRange) * 100;
+    }
 
+    public int convRail_percent2ticks(double percent) {
+        return (int)(percent * railRange);
+    }
 
 
 
@@ -252,17 +263,19 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    private void pot_to_ticks() {
+    public int pot_to_ticks(double pot_val) {
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
-        // TODO: get 2nd range values, call this at start and offset reset accordingly
-        // return (((getPotentiometerValue() - 0.6) * (new_max - new_min)) / (1.6 - 0.6)) + new_min
+        double old_range_min = 0.02;
+        double old_range_max = 3.336;
+        double new_range_min = 0;
+        double new_range_max = -5885;
+        return (int)((((pot_val - old_range_min) * (new_range_max - new_range_min)) / (old_range_max - old_range_min)) + new_range_min);
     }
 
     public void gotoRail(double railPercents, double power) {
         // GOTO
-
         int railTicks = (int)(railPercents/100 * railRange + 0.5);
         if(this.rail.getCurrentPosition() != railTicks) {
             hand.setTargetPosition(hand.getCurrentPosition());
@@ -274,24 +287,25 @@ public class HandRailClass {
 
     public void goToSH_Level(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoPercent(100,90,1);
+            gotoHandRail(100,90,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoPercent(100,50,1);
+            gotoHandRail(100,50,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoPercent(100,70,1);
+            gotoHandRail(100,70,1);
         }
 //        else if (abc == abc.X){
 //            gotoPercent(5,5,1);
 //        }
     }
 
-    public void gotoPercent(int railPos, int handPos, double power) {
+    public void gotoHandRail(int railPos, int handPos, double power) {
         // GOTO
         handPos = (int)this.clamp((double)handPos, 100, 0);
+        railPos = convRail_percent2ticks(railPos);
         if(this.hand.getCurrentPosition() != handPos) {
             rail.setTargetPosition(railPos);
             rail.setPower(power);
-            hand.setTargetPosition(handPos);
+            hand.setTargetPosition(handPos + potentiometer_offset);
             hand.setPower(power);
 
         }
