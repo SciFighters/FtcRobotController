@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -70,7 +71,10 @@ public class DriveClass {
         this.startingPosition = startingPosition;
 
 
-        if (robot == ROBOT.SCORPION) {
+        if (robot == ROBOT.JACCOUSE) {
+            this.forwardTicksPerMeter = 1562.5;
+            this.strafeTicksPerMeter = 1645.83;
+        } else if (robot == ROBOT.SCORPION) {
             this.forwardTicksPerMeter = 2455;
             this.strafeTicksPerMeter = 2587;
         } else if (robot == ROBOT.COBALT) {
@@ -148,7 +152,7 @@ public class DriveClass {
             opMode.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
         }
 
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1);
+        imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 1);
 
         opMode.telemetry.update();
 
@@ -342,7 +346,7 @@ public class DriveClass {
         opMode.telemetry.addData("goto hypocampus total dist", totalDist);
         opMode.telemetry.update();
 
-        while (currentDist > totalDist - tolerance) { // TODO: there a NaN here somewhere (the attack of the NaNs)
+        while (opMode.opModeIsActive() && (currentDist < totalDist - tolerance)) { // TODO: there a NaN here somewhere (the attack of the NaNs)
             double power = targetPower;
 
             currentX = getPosX();

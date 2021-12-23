@@ -40,8 +40,8 @@ public class BlueAutoCarouselLong extends LinearOpMode {
 	AutoFlow auto;
 	@Override
 	public void runOpMode() throws InterruptedException {
-		auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.CAR, AutoFlow.Auto.FULL);
-		auto.Init();
+		auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPos.CAROUSEL, AutoFlow.Auto.FULL);
+		auto.init();
 		waitForStart();
 		auto.run();
 	}
