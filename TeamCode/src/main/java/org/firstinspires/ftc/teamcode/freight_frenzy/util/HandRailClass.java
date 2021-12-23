@@ -105,7 +105,7 @@ public class HandRailClass {
 
     public double getPotentiometerValue(boolean applyScale) {
         double degreesScale = 0.0;
-        return applyScale ? potentiometer.getVoltage() * degreesScale : potentiometer.getVoltage() ;
+        return potentiometer.getVoltage() * (applyScale ? degreesScale : 1);
     }
 
 
@@ -262,6 +262,7 @@ public class HandRailClass {
 
     public void gotoRail(double railPercents, double power) {
         // GOTO
+
         int railTicks = (int)(railPercents/100 * railRange + 0.5);
         if(this.rail.getCurrentPosition() != railTicks) {
             hand.setTargetPosition(hand.getCurrentPosition());
@@ -336,6 +337,21 @@ public class HandRailClass {
         else{
             gotoRail(0, 1);
         }
+    }
+
+    public void railDrive(double power) {
+        if(isRailLimited(true) && power < 0 || isRailLimited(false) && power > 0)
+            this.rail.setPower(power);
+    }
+
+
+    public boolean isRailLimited(boolean forward) {
+        double currentRailPercentage = (double)(this.rail.getCurrentPosition() / this.railRange) * 100;
+        double currentHandPercentage = (double)(this.getPotentiometerValue(true));
+        if(forward)
+            return (currentHandPercentage <= 20 && currentRailPercentage <= 75);
+        else
+            return (currentHandPercentage >= 140 && currentRailPercentage >= 25);
     }
 
 }
