@@ -24,6 +24,7 @@ public class HandRailClass {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
+    private int potentiometer_offset;
 
     private DcMotorEx carousel = null;
 
@@ -56,6 +57,10 @@ public class HandRailClass {
         carousel = hw.get(DcMotorEx.class, "carousel");
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
+
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        potentiometer_offset = pot_to_ticks(getPotentiometerValue());
     }
 
 
@@ -103,9 +108,8 @@ public class HandRailClass {
     }
 
 
-    public double getPotentiometerValue(boolean applyScale) {
-        double degreesScale = 0.0;
-        return applyScale ? potentiometer.getVoltage() * degreesScale : potentiometer.getVoltage() ;
+    public double getPotentiometerValue() {
+        return potentiometer.getVoltage();
     }
 
 
@@ -252,12 +256,15 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    private void pot_to_ticks() {
+    public int pot_to_ticks(double pot_val) {
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
-        // TODO: get 2nd range values, call this at start and offset reset accordingly
-        // return (((getPotentiometerValue() - 0.6) * (new_max - new_min)) / (1.6 - 0.6)) + new_min
+        double old_range_min = 0.02;
+        double old_range_max = 3.336;
+        double new_range_min = 0;
+        double new_range_max = -5885;
+        return (int)((((pot_val - old_range_min) * (new_range_max - new_range_min)) / (old_range_max - old_range_min)) + new_range_min);
     }
 
     public void gotoRail(double railPercents, double power) {
@@ -290,7 +297,7 @@ public class HandRailClass {
         if(this.hand.getCurrentPosition() != handPos) {
             rail.setTargetPosition(railPos);
             rail.setPower(power);
-            hand.setTargetPosition(handPos);
+            hand.setTargetPosition(handPos + potentiometer_offset);
             hand.setPower(power);
 
         }
