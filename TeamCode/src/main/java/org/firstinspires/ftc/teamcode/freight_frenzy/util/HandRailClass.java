@@ -39,6 +39,8 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        hand.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 
@@ -342,6 +344,10 @@ public class HandRailClass {
         else{
             gotoRail(0, 1);
         }
+    }
+
+    public boolean isBusy(){
+        return rail.isBusy() || false;
     }
 
 }

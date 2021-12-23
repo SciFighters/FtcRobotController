@@ -17,18 +17,18 @@ public class AutoFlow {
 		BLUE(1),
 		RED(-1);
 
-		int multiplier;
-		ALLIANCE(int multiplier) {
-			this.multiplier = multiplier;
+		int mul;
+		ALLIANCE(int mul) {
+			this.mul = mul;
 		}
 	}
 	public enum StartPos {
 		CAROUSEL(1),
 		BARRIER(-1);
 
-		int multiplier;
-		StartPos(int multiplier) {
-			this.multiplier = multiplier;
+		int mul;
+		StartPos(int mul) {
+			this.mul = mul;
 		}
 	}
 
@@ -43,21 +43,20 @@ public class AutoFlow {
 
 	private int mul;
 
-
+	final double robotLength =  0.4572;
 	final int screenWidth = 640;
 	final int screenHeight = 360;
 	Auto auto;
 	Location a_pos;
 	Location b_pos;
 	Location c_pos;
-	Location startCarousel = new Location(0.6, 0.4572/2); //1.1, 0.0
-	Location startBarrier = new Location(-0.6, 0.4572/2); //1.1, 0.0
-	Location shippingHub = new Location(0.3, 0.6); //0.6, 0.75
+	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
+	Location shippingHubLocation = new Location(0.3, 0.6); //0.6, 0.75
 	Location carousel = new Location(1.0, 0.16);
 	Location barrier = new Location(-1.2, 1.0);
 
-	Location freight = new Location(1.5,-0.35); // 1.5, 2.5
-	Location parkPos = new Location(0,0); //0.0, 0.0
+	Location freightLocation = new Location(1.5,-0.35); // 1.5, 2.5
+	Location storagLocation = new Location(0,0); //0.0, 0.0
 	ALLIANCE alliance;
 	Location tempStartPos = new Location(0.0, 0.6);
 	StartPos startPos;
@@ -74,8 +73,7 @@ public class AutoFlow {
 		this.startPos = startPos;
 		this.auto = auto;
 
-		Location startingPosition = startPos == StartPos.CAROUSEL ? startCarousel : startBarrier;
-		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startingPosition);
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
 		this.handrail = new HandRailClass(opMode);
 	}
 
@@ -84,6 +82,11 @@ public class AutoFlow {
 		handrail.init(opMode.hardwareMap);
 
 		handrail.searchHomeRail();
+
+		if(startPos == StartPos.BARRIER) {
+			this.startLocation.flipX();
+			this.shippingHubLocation.flipX();
+		}
 
 		// TODO: separate to util class
 		//Webcam
@@ -108,7 +111,7 @@ public class AutoFlow {
 			}
 		});
 		*/
-		mul = alliance.multiplier;
+		mul = alliance.mul;
 
 		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Middle; //duckLine.getDuck(screenWidth);
 		opMode.telemetry.addData("Init - ABC", shLevel);
@@ -123,43 +126,62 @@ public class AutoFlow {
 
 		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		//DuckLine.ABC abc = DuckLine.ABC.C;
-		int mulPos = startPos.multiplier;
+		int mulPos = startPos.mul;
 
-		double heading = drive.getHeading();
-
-		opMode.telemetry.addData("goTo ShippingHub Y:", shippingHub.y);
+		opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
 		opMode.telemetry.update();
+
+		// Go to Shipping Hub
 		handrail.goToSH_Level(shLevel);
-		drive.goToLocation(shippingHub, 1, -45.0, 0.05);
+		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05);
 
+		// wait for handRail to get into position (both not busy)
+		while (opMode.opModeIsActive() && handrail.isBusy());
+
+		// Put the cube on shipping hub
 		handrail.grabberRelease();
-		this.opMode.sleep(200);
-		drive.drive(-0.2, 0, 0.8, drive.getHeading(), false);
+		this.opMode.sleep(100);
 		handrail.grabberStop();
-
+		// retract arm.
 		handrail.gotoRail(50, 0.8);
 
-		opMode.telemetry.addData("goTo Carousel Y:", carousel.y);
-		opMode.telemetry.update();
-		drive.goToLocation(carousel, 1, 45.0, 0.15);
+		if (startPos == StartPos.CAROUSEL) {
+			// Go to carousel
+			opMode.telemetry.addData("goTo Carousel Y:", carousel.y);
+			opMode.telemetry.update();
+			drive.goToLocation(carousel, 1, 45.0, 0.15);
 
-		opMode.telemetry.addLine("After goto carousel");
-		opMode.telemetry.update();
+			opMode.telemetry.addLine("After goto carousel");
+			opMode.telemetry.update();
 
-		handrail.carouselRun(1);
-		this.opMode.sleep(2000);
-		handrail.carouselStop();
+			handrail.carouselRun(1);
+			this.opMode.sleep(2000);
+			handrail.carouselStop();
 
-		if (auto == Auto.FULL || this.startPos == StartPos.BARRIER){
-			drive.goToLocation(freight, 1, heading, 0.05);
-			//TODO: change handrail to a position which is reasonable for grabbing a freight item
-			handrail.grabberGrab(); //takes block
-			drive.goToLocation(shippingHub, 1, heading, 0.05);
-//			handrail.goToABC(abc);
-			handrail.goToSH_Level(shLevel);
-			drive.goToLocation(parkPos,1, heading, 0.05);
+
+			if (auto == Auto.FULL){
+				drive.goTo(0.6,0.6,1,90,0.05);
+				handrail.gotoHandRail(0,70,1);
+				drive.goToLocation(freightLocation, 1, 90, 0.05);
+			} else {
+				// go to parking at storage unit
+				drive.goToLocation(storagLocation, 0.8, 0, 0.02);
+			}
 		} else {
-			drive.goToLocation(parkPos, 1, heading, 0.05);
+			// TODO: BARRIER
+			//drive.goToLocation(shippingHubLocation, 1,-90 ,0.5);
+			drive.turnTo(90,1);
+			handrail.gotoHandRail(0,85,1);
+			drive.goToLocation(freightLocation, 1, 90, 0.05);
+			drive.turnTo(45,1);
+			handrail.gotoHandRail(0,100,1);
+			while (opMode.opModeIsActive() && handrail.isBusy());
+			handrail.grabberGrab(); //takes block
+
+//			drive.goToLocation(shippingHubLocation, 1, heading, 0.05);
+//			handrail.goToABC(abc);
+//			handrail.goToSH_Level(shLevel);
+//			drive.goToLocation(freightLocation, 1, heading, 0.05);
 		}
 	}
 }

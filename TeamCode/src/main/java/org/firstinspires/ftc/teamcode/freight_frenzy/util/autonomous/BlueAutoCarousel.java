@@ -14,6 +14,7 @@ public class BlueAutoCarousel extends LinearOpMode {
 		waitForStart();
 
 		auto.run();
+
 		while (opModeIsActive());
 	}
 }

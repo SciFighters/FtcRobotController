@@ -108,7 +108,7 @@ public class Jaccouse extends LinearOpMode {
 
 			// Hand rail
 			double railPower = gamepad2.left_stick_x;
-			double armPower =   gamepad2.right_stick_x;
+			double armPower  = gamepad2.right_stick_x;
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
 			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
@@ -138,7 +138,7 @@ public class Jaccouse extends LinearOpMode {
 
 			if (!turningToggle.isPressed() && turningCount < 0) {
 				double delta = drive.getDeltaHeading(targetHeading);
-				double gain = 0.05;
+				double gain = 0.02;
 				turn = delta * gain;
 			}
 
