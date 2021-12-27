@@ -42,10 +42,10 @@ public class HandRailClass {
     }
 
 
-    public void gotoPoint(gotoPoints point) {
-        this.gotoRail(point.railPercentage, point.railPower);
-        this.gotoHand(0, point.handPercentage, point.handPower);
-    }
+    //public void gotoPoint(gotoPoints point) {
+        //this.gotoRail(point.railPercentage, point.railPower);
+        //this.gotoHand(0, point.handPercentage, point.handPower);
+    //  }
 
 
     public enum State {
