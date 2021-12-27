@@ -10,7 +10,15 @@ public class Location {
 		this.y = y;
 	}
 
-	public Location offset(double offset) {
+	public void flipX() {
+		this.x *= -1;
+	}
+	public void flipY() {
+		this.y *= -1;
+	}
+
+	public Location offsetY(double offset) {
 		return new Location(this.x, this.y + offset);
 	}
+	public Location offsetX(double offset) { return new Location(this.x + offset, this.y ); }
 }

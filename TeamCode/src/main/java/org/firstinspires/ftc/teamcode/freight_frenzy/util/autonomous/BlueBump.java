@@ -31,12 +31,13 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(group = "blue carousel")
-//@Disabled
+@Disabled
 public class BlueBump extends LinearOpMode {
-	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPosY.BuMP, AutoFlow.Auto.FULL);
+	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPos.BARRIER, AutoFlow.Auto.FULL);
 	@Override
 	public void runOpMode() throws InterruptedException {
 

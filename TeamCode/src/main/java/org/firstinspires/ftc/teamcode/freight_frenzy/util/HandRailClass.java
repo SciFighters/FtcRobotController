@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -22,45 +23,12 @@ public class HandRailClass {
     private DigitalChannel rail_limit_B = null;
     private DigitalChannel rail_limit_F = null;
 
+    private AnalogInput potentiometer = null;
+    private int potentiometer_offset;
+
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public enum gotoPoints {
-        pointA(0,0),
-        pointB(0,0),
-        pointC(0,0),
-        pointX(0,0);
-
-        public double railPower = 0.8;
-        public float handPower = (float)0.8;
-        public double railPercentage;
-        public int handPercentage;
-        gotoPoints(double railPercentage, int handPercentage) {
-            this.railPercentage = railPercentage;
-            this.handPercentage = handPercentage;
-        }
-    }
-
-
-    //public void gotoPoint(gotoPoints point) {
-        //this.gotoRail(point.railPercentage, point.railPower);
-        //this.gotoHand(0, point.handPercentage, point.handPower);
-    //  }
-
-
-    public enum State {
-        Drive,
-        Goto
-    }
-
-    public State state = State.Drive;
-    private int RAIL_MAX = 1000;
-
-    private LinearOpMode opMode;
-
-    public HandRailClass(LinearOpMode opMode) {
-        this.opMode = opMode;
-    }
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -79,7 +47,7 @@ public class HandRailClass {
         grabber_right.setDirection(CRServo.Direction.REVERSE);
 
         grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
-//        hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
+//       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
 
@@ -87,14 +55,75 @@ public class HandRailClass {
         hand_limit_F = hw.get(DigitalChannel.class, "hand_limit_front");
 
         carousel = hw.get(DcMotorEx.class, "carousel");
+
+        potentiometer = hw.get(AnalogInput.class, "potentiometer");
+
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        potentiometer_offset = pot_to_ticks(getPotentiometerValue(false));
     }
 
+
+    public enum gotoPoints {
+        pointA(0,0),
+        pointB(0,0),
+        pointC(0,0),
+        pointX(0,0);
+
+        public double railPower = 0.8;
+        public float handPower = (float)0.8;
+        public double railPercentage;
+        public int handPercentage;
+
+
+        gotoPoints(double railPercentage, int handPercentage) {
+            this.railPercentage = railPercentage;
+            this.handPercentage = handPercentage;
+        }
+    }
+
+
+    public void gotoPoint(gotoPoints point) {
+        this.gotoRail(point.railPercentage, point.railPower);
+        this.gotoHandRail(0, point.handPercentage, point.handPower);
+    }
+
+
+    public enum State {
+        Drive,
+        Goto
+    }
+
+    public State state = State.Drive;
+    private LinearOpMode opMode;
+
+    public HandRailClass(LinearOpMode opMode) {
+        this.opMode = opMode;
+    }
 
     public int getRailPos(){
         int pos = rail.getCurrentPosition();
         int railTicks = (int)(pos/100 * railRange + 0.5);
         return railTicks;
     }
+
+
+    public double getPotentiometerValue(boolean applyScale) {
+        double degreesScale = 0.0;
+        return potentiometer.getVoltage() * (applyScale ? degreesScale : 1);
+    }
+
+
+    public double convRail_ticks2percent(int ticks) {
+        return (ticks / railRange) * 100;
+    }
+
+    public int convRail_percent2ticks(double percent) {
+        return (int)(percent * railRange);
+    }
+
+
+
     public void setServosPower(double power) {
         grabber_left.setPower(power);
         grabber_right.setPower(power);
@@ -194,11 +223,10 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    public void searchHomeHand(){
+    public void searchHomeHand() {
         //rail got middle
         opMode.telemetry.addData("[Homing] Start: ", hand.getCurrentPosition());
         opMode.telemetry.update();
-        opMode.sleep(1000);
 
         gotoRail(75, 0.7);
         while (rail.isBusy());
@@ -211,11 +239,19 @@ public class HandRailClass {
         opMode.telemetry.addData("[Homing] Begin search: ", hand.getCurrentPosition());
         opMode.telemetry.update();
 
-        opMode.sleep(5000);
         // Hand go to limiter
         while(hand_limit_F.getState() && hand_limit_B.getState()) {
             hand.setPower(0.6);
             opMode.telemetry.addData("[Homing] Ticks: ", hand.getCurrentPosition());
+
+            opMode.telemetry.addData("[Homing]", "tmp in loop");
+            opMode.telemetry.addData("target:", hand.getTargetPosition());
+            opMode.telemetry.addData("cur:", hand.getCurrentPosition());
+            opMode.telemetry.addData("cur mode:", hand.getMode());
+            opMode.telemetry.addData("cur:", hand.getCurrentPosition());
+            opMode.telemetry.addData("cur mode:", hand.getMode());
+            opMode.telemetry.addData("hand_front:", hand_limit_F.getState());
+            opMode.telemetry.addData("hand_back:", hand_limit_B.getState());
             opMode.telemetry.update();
         }
         hand.setPower(0);
@@ -225,6 +261,17 @@ public class HandRailClass {
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+    }
+
+    public int pot_to_ticks(double pot_val) {
+        // map
+        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+
+        double old_range_min = 0.02;
+        double old_range_max = 3.336;
+        double new_range_min = 0;
+        double new_range_max = -5885;
+        return (int)((((pot_val - old_range_min) * (new_range_max - new_range_min)) / (old_range_max - old_range_min)) + new_range_min);
     }
 
     public void gotoRail(double railPercents, double power) {
@@ -238,30 +285,34 @@ public class HandRailClass {
         this.setState(State.Goto);
     }
 
-    public  void goToABC(DuckLine.ABC abc){
-        if (abc == abc.A){
-            gotoPercent(90,90,1);
-        }else if (abc == abc.A){
-            gotoPercent(90,80,1);
-        }else if (abc == abc.C){
-            gotoPercent(90,70,1);
-        } else if (abc == abc.X){
-            gotoPercent(5,5,1);
+    public void goToSH_Level(DuckLine.SH_Levels shLevel){
+        if (shLevel == DuckLine.SH_Levels.Top) {
+            gotoHandRail(100,90,1);
+        } else if (shLevel == DuckLine.SH_Levels.Middle) {
+            gotoHandRail(100,50,1);
+        } else if (shLevel == DuckLine.SH_Levels.Bottom) {
+            gotoHandRail(100,70,1);
         }
+//        else if (abc == abc.X){
+//            gotoPercent(5,5,1);
+//        }
     }
 
-    public void gotoPercent(int railPos, int handPos, float pow) {
+    public void gotoHandRail(int railPos, int handPos, double power) {
         // GOTO
         handPos = (int)this.clamp((double)handPos, 100, 0);
+        railPos = convRail_percent2ticks(railPos);
         if(this.hand.getCurrentPosition() != handPos) {
-            hand.setTargetPosition(handPos);
-            hand.setPower(pow);
+            rail.setTargetPosition(railPos);
+            rail.setPower(power);
+            hand.setTargetPosition(handPos + potentiometer_offset);
+            hand.setPower(power);
+
         }
         this.setState(State.Goto);
     }
     //updates
     public void update_handRail() {
-
         opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
     }
@@ -269,19 +320,19 @@ public class HandRailClass {
     public void setState(State state) {
         if(this.state != state) {
             this.state = state;
-            if(state == State.Drive)
+            if (state == State.Drive) {
                 this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                opMode.telemetry.addData("handRail","DRIVE");
-            if(state == State.Goto)
+                opMode.telemetry.addData("handRail", "DRIVE");
+            } else if (state == State.Goto) {
                 this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                opMode.telemetry.addData("handRail","GOTO");
+                opMode.telemetry.addData("handRail", "GOTO");
+            }
         }
     }
 
     public void carouselRun(double power) {
-
         carousel.setPower(power);
     }
 
@@ -299,10 +350,26 @@ public class HandRailClass {
         else{
             gotoRail(0, 1);
         }
+    }
 
+    public boolean isBusy(){
+        return rail.isBusy() || false;
+    }
+
+    public void railDrive(double power) {
+        if(isRailLimited(true) && power < 0 || isRailLimited(false) && power > 0)
+            this.rail.setPower(power);
     }
 
 
+    public boolean isRailLimited(boolean forward) {
+        double currentRailPercentage = (double)(this.rail.getCurrentPosition() / this.railRange) * 100;
+        double currentHandPercentage = (double)(this.getPotentiometerValue(true));
+        if(forward)
+            return (currentHandPercentage <= 20 && currentRailPercentage <= 75);
+        else
+            return (currentHandPercentage >= 140 && currentRailPercentage >= 25);
+    }
 
 }
 

@@ -59,7 +59,7 @@ public class ArmClass extends Thread {
         arm0 = hardwareMap.get(DcMotorEx.class, "arm0");
         arm1 = hardwareMap.get(DcMotorEx.class, "arm1");
         zeroArm0 = hardwareMap.get(DigitalChannel.class, "zero_arm0");
-        zeroArm1 = hardwareMap.get(DigitalChannel.class, "zero_arm1"); // TODO change names
+        zeroArm1 = hardwareMap.get(DigitalChannel.class, "zero_arm1"); //          TODO change names
 
         clamps = hardwareMap.get(Servo.class, "clamps");
         clampsRotate = hardwareMap.get(Servo.class, "clamps_rotate");

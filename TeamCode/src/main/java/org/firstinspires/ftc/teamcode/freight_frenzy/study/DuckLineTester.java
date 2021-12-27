@@ -42,15 +42,21 @@ public class DuckLineTester extends LinearOpMode {
 			}
 		});
 
+		telemetry.addLine("Initialized v1");
+		telemetry.update();
+
 		waitForStart();
 
-		DuckLine.ABC abc = null;
+		DuckLine.SH_Levels sh_level = null;
 
 		while(opModeIsActive()) {
-			abc = duckline.getDuck(screenWidth);
+			sh_level = duckline.getDuck(screenWidth);
 
-			if(abc != null) telemetry.addData("Duck at:", abc); //if duck is on screen, adding telemetry about it's location...
-			else telemetry.addData("The Duck is: ", "not found"); // if the duck isn't on screen or not found
+			if (sh_level != null)
+				telemetry.addData("sh level:", sh_level.toString());
+			else
+				telemetry.addLine("no duck");
+
 			telemetry.update();
 		}
 	}

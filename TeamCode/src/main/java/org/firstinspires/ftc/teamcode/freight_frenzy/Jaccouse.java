@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 // TODO: clean code
@@ -44,6 +44,9 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle B = new Toggle();
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
+	private Toggle testGotoA = new Toggle();
+	private Toggle testGotoB = new Toggle();
+
 
 	@Override
 	public void runOpMode() {
@@ -68,11 +71,11 @@ public class Jaccouse extends LinearOpMode {
 
 			if (gamepad1.start) {
 				if (gamepad1.x) {
-					drive.resetOrientation(90);
+					drive.resetOrientation(0);
 				}
-				if (gamepad1.y) {
-					drive.resetOrientation(-90);
-				}
+//				if (gamepad1.y) {
+//					drive.resetOrientation(-90);
+//				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
 				continue;
@@ -90,6 +93,7 @@ public class Jaccouse extends LinearOpMode {
 
 				if (homingHand.isClicked())
 					handRail.searchHomeHand();
+				continue;
 			}
 
 
@@ -103,8 +107,8 @@ public class Jaccouse extends LinearOpMode {
 			double turn = gamepad1.right_stick_x * boost;
 
 			// Hand rail
-			double railPower = -gamepad2.left_stick_x;
-			double armPower =   gamepad2.right_stick_x;
+			double railPower = gamepad2.left_stick_x;
+			double armPower  = gamepad2.right_stick_x;
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
 			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
@@ -116,6 +120,8 @@ public class Jaccouse extends LinearOpMode {
 			B.update(gamepad2.b);
 			C.update(gamepad2.y);
 			X.update(gamepad2.x);
+			testGotoA.update(gamepad1.dpad_up);
+			testGotoB.update(gamepad1.dpad_down);
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
 
@@ -132,18 +138,18 @@ public class Jaccouse extends LinearOpMode {
 
 			if (!turningToggle.isPressed() && turningCount < 0) {
 				double delta = drive.getDeltaHeading(targetHeading);
-				double gain = 0.05;
+				double gain = 0.02;
 				turn = delta * gain;
 			}
 
-			if(A.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.A);
-			} else if (B.isClicked()){
-				handRail.goToABC(DuckLine.ABC.B);
+			if (A.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
+			} else if (B.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
-				handRail.goToABC(DuckLine.ABC.C);
-			} else if (X.isClicked()){
-				handRail.goToABC(DuckLine.ABC.X);
+				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
+			} else if (X.isClicked()) {
+				handRail.goToSH_Level(DuckLine.SH_Levels.Collect);
 			}
 
 			if (!release) {
@@ -164,6 +170,19 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselStop();
 			}
 
+			if(testGotoA.isClicked()) { // TODO: for debug and tests.
+				drive.goTo(0, 1, 0.5, drive.getHeading(), 0.05);
+			} else if(testGotoB.isClicked()) {
+				drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
+			}
+
+			if (gamepad1.x){
+				//drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
+				//sleep(2000);
+				//drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
+				drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
+			}
+
 			this.handRail.update_handRail();
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
@@ -173,7 +192,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-			telemetry.addData("Kagan is ", "a duck");
+			telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
 			telemetry.update();
 		}
 	}
