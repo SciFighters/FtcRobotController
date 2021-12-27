@@ -259,7 +259,7 @@ public class DriveClass {
     }
 
     public double getPosX() {
-        return imu.getPosition().y;
+        return imu.getPosition().x;
     }
 
     public double getAbsolutesPosX() {

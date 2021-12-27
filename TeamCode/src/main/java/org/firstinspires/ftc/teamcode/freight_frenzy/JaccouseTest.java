@@ -24,7 +24,7 @@ public class JaccouseTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
+    Location startingPosition = new Location(0, 0.225); //last x = -1.75*tile, y = 0*tile
     private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition).useEncoders().useBrake();
     private Toggle turningToggle = new Toggle();
     org.firstinspires.ftc.teamcode.freight_frenzy.util.Location startingPoisition = new org.firstinspires.ftc.teamcode.freight_frenzy.util.Location(0 * tile, 0 * tile);
