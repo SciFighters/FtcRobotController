@@ -61,7 +61,7 @@ public class HandRailClass {
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        potentiometer_offset = pot_to_ticks(getPotentiometerValue(false));
+        potentiometer_offset = getScaledPotentiometerValue();
     }
 
 
@@ -166,9 +166,9 @@ public class HandRailClass {
     public void rail_drive(double power) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setState(State.Drive);
-            if (power > 0 && rail_limit_F.getState())
+            if (power > 0 && isRailLimited(false) &&  rail_limit_F.getState())
                 rail.setPower(power);
-            else if (power < 0 && rail_limit_B.getState())
+            else if (isRailLimited(true) && power < 0 && rail_limit_B.getState())
                 rail.setPower(power);
             else
                 rail.setPower(0);
@@ -273,7 +273,9 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    public int pot_to_ticks(double pot_val) {
+    public int getScaledPotentiometerValue() {
+        double pot_val = potentiometer.getVoltage();
+
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
@@ -361,21 +363,16 @@ public class HandRailClass {
         return rail.isBusy() || hand.isBusy();
     }
 
-    public void railDrive(double power) {
-        if(isRailLimited(true) && power < 0 || isRailLimited(false) && power > 0)
-            this.rail.setPower(power);
-    }
 
 
     public boolean isRailLimited(boolean forward) {
         double currentRailPercentage = (double)(this.rail.getCurrentPosition() / this.railRange) * 100;
-        double currentHandPercentage = (double)(this.getPotentiometerValue(true));
+        double currentHandPercentage = (double)(this.getScaledPotentiometerValue());
         if(forward)
             return (currentHandPercentage <= 20 && currentRailPercentage <= 75);
         else
             return (currentHandPercentage >= 140 && currentRailPercentage >= 25);
     }
-
 }
 
 
