@@ -183,7 +183,7 @@ public class Jaccouse extends LinearOpMode {
 				drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
 			}
 
-			this.handRail.update_handRail();
+			this.handRail.telemetry_handRail();
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
 
@@ -193,6 +193,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
+			telemetry.addData("hand pos percent:", handRail.getHandPercent());
 			telemetry.update();
 		}
 	}

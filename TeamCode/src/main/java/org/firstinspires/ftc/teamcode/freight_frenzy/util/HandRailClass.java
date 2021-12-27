@@ -29,6 +29,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
+    private int handRange = 5885;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -101,10 +102,14 @@ public class HandRailClass {
         this.opMode = opMode;
     }
 
-    public int getRailPos(){
+    public int getRailPercent(){
         int pos = rail.getCurrentPosition();
         int railTicks = (int)(pos/100 * railRange + 0.5);
         return railTicks;
+    }
+
+    public int getHandPercent() {
+        return ((hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
     }
 
 
@@ -122,6 +127,11 @@ public class HandRailClass {
         return (int)(percent * railRange);
     }
 
+    //updates
+    public void telemetry_handRail() {
+        opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
+        opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
+    }
 
 
     public void setServosPower(double power) {
@@ -311,11 +321,7 @@ public class HandRailClass {
         }
         this.setState(State.Goto);
     }
-    //updates
-    public void update_handRail() {
-        opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
-        opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
-    }
+
 
     public void setState(State state) {
         if(this.state != state) {
@@ -337,13 +343,12 @@ public class HandRailClass {
     }
 
     public void carouselStop() {
-
         carousel.setPower(0);
     }
 
     public void switchSides(){
         setState(State.Goto);
-        int pos = getRailPos();
+        int pos = getRailPercent();
         if (pos < 50){
             gotoRail(100, 1);
         }
@@ -353,7 +358,7 @@ public class HandRailClass {
     }
 
     public boolean isBusy(){
-        return rail.isBusy() || false;
+        return rail.isBusy() || hand.isBusy();
     }
 
     public void railDrive(double power) {

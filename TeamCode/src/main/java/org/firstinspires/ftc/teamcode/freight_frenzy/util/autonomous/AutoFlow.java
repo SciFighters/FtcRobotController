@@ -56,7 +56,7 @@ public class AutoFlow {
 	Location barrier = new Location(-1.2, 1.0);
 
 	Location freightLocation = new Location(1.5,-0.35); // 1.5, 2.5
-	Location storagLocation = new Location(0,0); //0.0, 0.0
+	Location storageLocation = new Location(0,0); //0.0, 0.0
 	ALLIANCE alliance;
 	Location tempStartPos = new Location(0.0, 0.6);
 	StartPos startPos;
@@ -136,11 +136,12 @@ public class AutoFlow {
 		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05);
 
 		// wait for handRail to get into position (both not busy)
-		while (opMode.opModeIsActive() && handrail.isBusy());
+		opMode.sleep(5000);
+		// TODO: while (opMode.opModeIsActive() && handrail.isBusy());
 
 		// Put the cube on shipping hub
 		handrail.grabberRelease();
-		this.opMode.sleep(100);
+		this.opMode.sleep(2000);
 		handrail.grabberStop();
 		// retract arm.
 		handrail.gotoRail(50, 0.8);
@@ -165,7 +166,7 @@ public class AutoFlow {
 				drive.goToLocation(freightLocation, 1, 90, 0.05);
 			} else {
 				// go to parking at storage unit
-				drive.goToLocation(storagLocation, 0.8, 0, 0.02);
+				drive.goToLocation(storageLocation, 0.8, 0, 0.02);
 			}
 		} else {
 			// TODO: BARRIER

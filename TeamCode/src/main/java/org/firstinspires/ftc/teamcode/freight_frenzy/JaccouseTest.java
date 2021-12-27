@@ -209,7 +209,7 @@ public class JaccouseTest extends LinearOpMode {
                 drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
             }
 
-            this.handRail.update_handRail();
+            this.handRail.telemetry_handRail();
 
             drive.setPowerOriented(y, x, turn, fieldOriented);
 
