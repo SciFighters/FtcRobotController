@@ -41,6 +41,8 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 
@@ -166,9 +168,9 @@ public class HandRailClass {
     public void rail_drive(double power) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setState(State.Drive);
-            if (power > 0 && isRailLimited(false) &&  rail_limit_F.getState())
+            if (power > 0 && isRailBoundless(true) &&  rail_limit_F.getState())
                 rail.setPower(power);
-            else if (isRailLimited(true) && power < 0 && rail_limit_B.getState())
+            else if ( power < 0 && isRailBoundless(false) && rail_limit_B.getState())
                 rail.setPower(power);
             else
                 rail.setPower(0);
@@ -178,9 +180,9 @@ public class HandRailClass {
     public void hand_drive(double power) {
         if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
             setState(State.Drive);
-            if(power > 0 && hand_limit_F.getState())
+            if(power > 0 && isHandBoundless(true) && hand_limit_F.getState())
                 hand.setPower(power);
-            else if (power < 0 && hand_limit_B.getState())
+            else if (power < 0 && isHandBoundless(false) && hand_limit_B.getState())
                 hand.setPower(power);
             else
                 hand.setPower(0);
@@ -363,16 +365,22 @@ public class HandRailClass {
         return rail.isBusy() || hand.isBusy();
     }
 
-
-
-    public boolean isRailLimited(boolean forward) {
-        double currentRailPercentage = (double)(this.rail.getCurrentPosition() / this.railRange) * 100;
-        double currentHandPercentage = (double)(this.getScaledPotentiometerValue());
+    public boolean isRailBoundless(boolean forward) {
+        //returns true if the rail is allowed to move
         if(forward)
-            return (currentHandPercentage <= 20 && currentRailPercentage <= 75);
+            return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
         else
-            return (currentHandPercentage >= 140 && currentRailPercentage >= 25);
+            return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
     }
+
+    public boolean isHandBoundless(boolean forward) {
+        //returns true if the hand is allowed to move (to a certain side)
+        if(forward)
+            return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
+        else
+            return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+    }
+
 }
 
 

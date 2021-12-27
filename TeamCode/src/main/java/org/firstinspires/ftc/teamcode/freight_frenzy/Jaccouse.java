@@ -25,10 +25,10 @@ public class Jaccouse extends LinearOpMode {
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition).useEncoders().useBrake();
-	private Toggle turningToggle = new Toggle();
-	org.firstinspires.ftc.teamcode.freight_frenzy.util.Location startingPoisition = new org.firstinspires.ftc.teamcode.freight_frenzy.util.Location(0 * tile, 0 * tile);
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useEncoders().useBrake();
 	private HandRailClass handRail = new HandRailClass(this);
+
+	private Toggle turningToggle = new Toggle();
 
 	private com.qualcomm.robotcore.hardware.HardwareMap HardwareMap;
 	private int direction = 1;
@@ -44,9 +44,6 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle B = new Toggle();
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
-	private Toggle testGotoA = new Toggle();
-	private Toggle testGotoB = new Toggle();
-
 
 	@Override
 	public void runOpMode() {
@@ -120,8 +117,6 @@ public class Jaccouse extends LinearOpMode {
 			B.update(gamepad2.b);
 			C.update(gamepad2.y);
 			X.update(gamepad2.x);
-			testGotoA.update(gamepad1.dpad_up);
-			testGotoB.update(gamepad1.dpad_down);
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
 
@@ -170,11 +165,6 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselStop();
 			}
 
-			if(testGotoA.isClicked()) { // TODO: for debug and tests.
-				drive.goTo(0, 1, 0.5, drive.getHeading(), 0.05);
-			} else if(testGotoB.isClicked()) {
-				drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
-			}
 
 			if (gamepad1.x){
 				//drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
