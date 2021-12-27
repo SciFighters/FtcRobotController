@@ -1,0 +1,13 @@
+*** Bugs in code:
+
+1) When clicking dpad_down, gamepad1 - the robot suicides.
+
+2)
+
+3)
+
+4)
+
+5)
+
+
