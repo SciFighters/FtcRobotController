@@ -35,8 +35,8 @@ public class HandRailTester extends LinearOpMode {
             double railPower = -gamepad1.left_stick_y;
             double armPower = -gamepad1.right_stick_y;
 
-            handRail.rail_drive(railPower);
-            handRail.hand_drive(armPower);
+            handRail.rail_drive(railPower, true);
+            handRail.hand_drive(armPower, true);
 
             collector.update(gamepad1.a || gamepad2.a); // update toggle (A button)
             homing.update(gamepad1.x || gamepad2.x);

@@ -55,6 +55,7 @@ public class JaccouseTest extends LinearOpMode {
     private Toggle b = new Toggle();
     private Toggle Y = new Toggle();
     private Toggle xl = new Toggle();
+    private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
 
     @Override
@@ -118,9 +119,10 @@ public class JaccouseTest extends LinearOpMode {
             // Hand rail
             double railPower = gamepad2.left_stick_x;
             double armPower  = gamepad2.right_stick_x;
+			overrideLimits.update(gamepad2.right_bumper);
 
-            handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
-            handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
+			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower), overrideLimits.getState());
+			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower), overrideLimits.getState());
 
             turningToggle.update(Math.abs(turn) > 0.02);
             spincarousel.update(gamepad1.left_bumper);
@@ -219,6 +221,7 @@ public class JaccouseTest extends LinearOpMode {
             telemetry.addData("Target", targetHeading);
             telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
             telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
+			handRail.telemetry_handRail();
             telemetry.update();
         }
     }

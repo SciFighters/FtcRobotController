@@ -64,6 +64,8 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         potentiometer_offset = getScaledPotentiometerValue();
+
+        this.searchHomeRail();
     }
 
 
@@ -104,14 +106,12 @@ public class HandRailClass {
         this.opMode = opMode;
     }
 
-    public int getRailPercent(){
-        int pos = rail.getCurrentPosition();
-        int railTicks = (int)(pos/100 * railRange + 0.5);
-        return railTicks;
+    public double getRailPercent(){
+        return (double)rail.getCurrentPosition() / railRange * 100;
     }
 
-    public int getHandPercent() {
-        return ((hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
+    public double getHandPercent() {
+        return 100 - ((double)(hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
     }
 
 
@@ -131,8 +131,9 @@ public class HandRailClass {
 
     //updates
     public void telemetry_handRail() {
-        opMode.telemetry.addData("hand position: ", this.hand.getCurrentPosition());
-        opMode.telemetry.addData("rail position: ", this.rail.getCurrentPosition());
+        opMode.telemetry.addData("hand:", "%3.2f, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
+        opMode.telemetry.addData("rail: ","%3.2f, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
+        opMode.telemetry.addData("potentiometer offset: ", potentiometer_offset);
     }
 
 
@@ -165,24 +166,24 @@ public class HandRailClass {
         setServosPower(-0.6);
     }
 
-    public void rail_drive(double power) {
+    public void rail_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setState(State.Drive);
-            if (power > 0 && isRailBoundless(true) &&  rail_limit_F.getState())
+            if (power > 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
                 rail.setPower(power);
-            else if ( power < 0 && isRailBoundless(false) && rail_limit_B.getState())
+            else if ( power < 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
                 rail.setPower(power);
             else
                 rail.setPower(0);
         }
     }
 
-    public void hand_drive(double power) {
+    public void hand_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
             setState(State.Drive);
-            if(power > 0 && isHandBoundless(true) && hand_limit_F.getState())
+            if(power > 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
                 hand.setPower(power);
-            else if (power < 0 && isHandBoundless(false) && hand_limit_B.getState())
+            else if (power < 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
                 hand.setPower(power);
             else
                 hand.setPower(0);
@@ -197,7 +198,7 @@ public class HandRailClass {
 
     public boolean grabber_ts() { // grabber touch switch update (limit of the grabber), and returns grabber state (pressed / unpressed)
         /*if(grabber_switch.getState()) {
-            // updates
+            // updates  `
             stop(); // if touch switch is pressed then stop
 
         }*/
@@ -206,6 +207,17 @@ public class HandRailClass {
 
 
     public void searchHomeRail(){
+        //repositioning hand...
+//         while(this.getScaledPotentiometerValue() > 40) {
+//            this.hand_drive(0.4, true);
+//        }
+//        this.hand_drive(0, true);
+//        while(this.getScaledPotentiometerValue() < 60) {
+//            this.hand_drive(0.3, true);
+//        }
+//
+//        this.hand_drive(0, true);
+
         int lastPos = rail.getCurrentPosition();
         int tempPos = lastPos;
         int counter = 0;
@@ -352,7 +364,7 @@ public class HandRailClass {
 
     public void switchSides(){
         setState(State.Goto);
-        int pos = getRailPercent();
+        double pos = getRailPercent();
         if (pos < 50){
             gotoRail(100, 1);
         }
@@ -361,25 +373,38 @@ public class HandRailClass {
         }
     }
 
-    public boolean isBusy(){
+    public boolean isBusy() {
+        opMode.telemetry.addData("is rail busy: ", rail.isBusy());
+        opMode.telemetry.addData("is hand busy: ", hand.isBusy());
+        opMode.telemetry.update();
+
         return rail.isBusy() || hand.isBusy();
     }
 
-    public boolean isRailBoundless(boolean forward) {
+    public boolean isRailBoundless(boolean forward, boolean override) {
         //returns true if the rail is allowed to move
-        if(forward)
-            return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
-        else
-            return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
+        if (!override) {
+            if (forward)
+                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
+            else
+                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
+        } else
+            return true;
     }
 
-    public boolean isHandBoundless(boolean forward) {
+    public boolean isHandBoundless(boolean forward, boolean override) {
         //returns true if the hand is allowed to move (to a certain side)
-        if(forward)
-            return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
-        else
-            return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+        if (!override) {
+            if (forward)
+                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
+            else
+                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+        } else
+            return true;
     }
+
+
+
 
 }
 

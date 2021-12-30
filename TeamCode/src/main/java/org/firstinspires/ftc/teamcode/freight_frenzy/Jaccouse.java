@@ -44,6 +44,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle B = new Toggle();
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
+	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
 	@Override
 	public void runOpMode() {
@@ -106,9 +107,10 @@ public class Jaccouse extends LinearOpMode {
 			// Hand rail
 			double railPower = gamepad2.left_stick_x;
 			double armPower  = gamepad2.right_stick_x;
+			overrideLimits.update(gamepad2.right_bumper);
 
-			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower));
-			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower));
+			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower), overrideLimits.getState());
+			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower), overrideLimits.getState());
 
 			turningToggle.update(Math.abs(turn) > 0.02);
 			spincarousel.update(gamepad1.left_bumper);
@@ -117,6 +119,7 @@ public class Jaccouse extends LinearOpMode {
 			B.update(gamepad2.b);
 			C.update(gamepad2.y);
 			X.update(gamepad2.x);
+
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
 
@@ -183,8 +186,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
-			telemetry.addData("hand pos percent:", handRail.getHandPercent());
-			telemetry.addData("rail pos percent:", handRail.getRailPercent());
+			handRail.telemetry_handRail();
 			telemetry.update();
 		}
 	}
