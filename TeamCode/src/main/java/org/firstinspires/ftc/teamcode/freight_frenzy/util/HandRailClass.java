@@ -68,6 +68,91 @@ public class HandRailClass {
         this.searchHomeRail();
     }
 
+    private LinearOpMode opMode;
+
+    public HandRailClass(LinearOpMode opMode) {
+        this.opMode = opMode;
+    }
+
+
+
+    public enum State {
+        Drive,
+        Goto
+    }
+
+    public State handState = State.Drive;
+    public State railState = State.Drive;
+
+    public void setHandState(State state){
+        if(this.handState != state) {
+            this.handState = state;
+        }
+        if (state == State.Drive) {
+            this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            opMode.telemetry.addData("handRail", "DRIVE");
+        } else if (state == State.Goto) {
+            this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            opMode.telemetry.addData("handRail", "GOTO");
+        }
+    }
+
+    public void setRailState(State state) {
+        if(this.railState != state) {
+            this.railState = state;
+            if (state == State.Drive) {
+                this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                opMode.telemetry.addData("handRail", "DRIVE");
+            } else if (state == State.Goto) {
+                this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                opMode.telemetry.addData("handRail", "GOTO");
+            }
+        }
+    }
+
+    public void setState (State state){
+        setHandState(state);
+        setRailState(state);
+    }
+
+    public void gotoRail(double railPercents, double power) {
+        // GOTO
+        int railTicks = convRail_percent2ticks(railPercents);
+        if(this.rail.getCurrentPosition() != railTicks) {
+            hand.setTargetPosition(hand.getCurrentPosition());
+            rail.setTargetPosition(railTicks);
+            rail.setPower(power);
+        }
+        this.setRailState(State.Goto);
+    }
+
+    public void gotoHandRail(int railPos, int handPos, double power) {
+        // GOTO
+        handPos = convHand_percent2ticks(handPos);
+        railPos = convRail_percent2ticks(railPos);
+        if(this.hand.getCurrentPosition() != handPos) {
+            rail.setTargetPosition(railPos);
+            rail.setPower(power);
+            hand.setTargetPosition(handPos);
+            hand.setPower(power);
+
+        }
+        this.setRailState(State.Goto);
+        this.setHandState(State.Goto);
+    }
+
+    public void goToSH_Level(DuckLine.SH_Levels shLevel){
+        if (shLevel == DuckLine.SH_Levels.Top) {
+            gotoHandRail(100,90,1);
+        } else if (shLevel == DuckLine.SH_Levels.Middle) {
+            gotoHandRail(100,50,1);
+        } else if (shLevel == DuckLine.SH_Levels.Bottom) {
+            gotoHandRail(100,70,1);
+        }
+//        else if (abc == abc.X){
+//            gotoPercent(5,5,1);
+//        }
+    }
 
     public enum gotoPoints {
         pointA(0,0),
@@ -87,31 +172,27 @@ public class HandRailClass {
         }
     }
 
-
     public void gotoPoint(gotoPoints point) {
         this.gotoRail(point.railPercentage, point.railPower);
         this.gotoHandRail(0, point.handPercentage, point.handPower);
     }
 
 
-    public enum State {
-        Drive,
-        Goto
-    }
-
-    public State state = State.Drive;
-    private LinearOpMode opMode;
-
-    public HandRailClass(LinearOpMode opMode) {
-        this.opMode = opMode;
-    }
-
     public double getRailPercent(){
         return (double)rail.getCurrentPosition() / railRange * 100;
     }
 
+    public int convRail_percent2ticks(double percent) {
+        return (int)(percent / 100 * railRange);
+    }
+
+
     public double getHandPercent() {
         return 100 - ((double)(hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
+    }
+
+    public int convHand_percent2ticks(double percent) {
+        return (int)((100 - percent) / 100 * handRange) - potentiometer_offset;
     }
 
 
@@ -120,14 +201,6 @@ public class HandRailClass {
         return potentiometer.getVoltage() * (applyScale ? degreesScale : 1);
     }
 
-
-    public double convRail_ticks2percent(int ticks) {
-        return (ticks / railRange) * 100;
-    }
-
-    public int convRail_percent2ticks(double percent) {
-        return (int)(percent * railRange);
-    }
 
     //updates
     public void telemetry_handRail() {
@@ -168,7 +241,7 @@ public class HandRailClass {
 
     public void rail_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
-            setState(State.Drive);
+            setRailState(State.Drive);
             if (power > 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
                 rail.setPower(power);
             else if ( power < 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
@@ -180,7 +253,7 @@ public class HandRailClass {
 
     public void hand_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
-            setState(State.Drive);
+            setHandState(State.Drive);
             if(power > 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
                 hand.setPower(power);
             else if (power < 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
@@ -300,59 +373,8 @@ public class HandRailClass {
         return (int)((((pot_val - old_range_min) * (new_range_max - new_range_min)) / (old_range_max - old_range_min)) + new_range_min);
     }
 
-    public void gotoRail(double railPercents, double power) {
-        // GOTO
-        int railTicks = (int)(railPercents/100 * railRange + 0.5);
-        if(this.rail.getCurrentPosition() != railTicks) {
-            hand.setTargetPosition(hand.getCurrentPosition());
-            rail.setTargetPosition(railTicks);
-            rail.setPower(power);
-        }
-        this.setState(State.Goto);
-    }
-
-    public void goToSH_Level(DuckLine.SH_Levels shLevel){
-        if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(100,90,1);
-        } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(100,50,1);
-        } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(100,70,1);
-        }
-//        else if (abc == abc.X){
-//            gotoPercent(5,5,1);
-//        }
-    }
-
-    public void gotoHandRail(int railPos, int handPos, double power) {
-        // GOTO
-        handPos = (int)this.clamp((double)handPos, 100, 0);
-        railPos = convRail_percent2ticks(railPos);
-        if(this.hand.getCurrentPosition() != handPos) {
-            rail.setTargetPosition(railPos);
-            rail.setPower(power);
-            hand.setTargetPosition(handPos + potentiometer_offset);
-            hand.setPower(power);
-
-        }
-        this.setState(State.Goto);
-    }
 
 
-    public void setState(State state) {
-        if(this.state != state) {
-            this.state = state;
-            if (state == State.Drive) {
-                this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                opMode.telemetry.addData("handRail", "DRIVE");
-            } else if (state == State.Goto) {
-                this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                opMode.telemetry.addData("handRail", "GOTO");
-            }
-        }
-    }
 
     public void carouselRun(double power) {
         carousel.setPower(power);
