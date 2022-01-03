@@ -58,8 +58,7 @@ public class JaccouseTest extends LinearOpMode {
     private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
 
-    @Override
-    public void runOpMode() {
+    @Override    public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -204,12 +203,12 @@ public class JaccouseTest extends LinearOpMode {
                 drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
             }
 
-            if (gamepad1.x){
-                //drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
-                //sleep(2000);
-                //drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
-                drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
-            }
+//            if (gamepad1.x){
+//                //drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
+//                //sleep(2000);
+//                //drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
+//                drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
+//            }
 
             this.handRail.telemetry_handRail();
 
@@ -220,7 +219,7 @@ public class JaccouseTest extends LinearOpMode {
             telemetry.addData("Heading", drive.getHeading());
             telemetry.addData("Target", targetHeading);
             telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-            telemetry.addData("potentiometer", handRail.getPotentiometerValue(false));
+            telemetry.addData("potentiometer", handRail.getPotentiometerValue());
 			handRail.telemetry_handRail();
             telemetry.update();
         }

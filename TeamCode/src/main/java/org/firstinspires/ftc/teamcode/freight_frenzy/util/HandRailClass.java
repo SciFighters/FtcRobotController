@@ -188,7 +188,8 @@ public class HandRailClass {
 
 
     public double getHandPercent() {
-        return 100 - ((double)(hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
+        //                                               v might need to invert
+        return 100 - ((double)(hand.getCurrentPosition() - potentiometer_offset) / -handRange) * 100;
     }
 
     public int convHand_percent2ticks(double percent) {
@@ -196,15 +197,15 @@ public class HandRailClass {
     }
 
 
-    public double getPotentiometerValue(boolean applyScale) {
-        double degreesScale = 0.0;
-        return potentiometer.getVoltage() * (applyScale ? degreesScale : 1);
+    public double getPotentiometerValue() {
+        return potentiometer.getVoltage();
     }
 
 
     //updates
     public void telemetry_handRail() {
         opMode.telemetry.addData("hand:", "%3.2f, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
+        opMode.telemetry.addData();
         opMode.telemetry.addData("rail: ","%3.2f, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
         opMode.telemetry.addData("potentiometer offset: ", potentiometer_offset);
     }
@@ -366,7 +367,7 @@ public class HandRailClass {
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
-        double old_range_min = 0.02;
+        double old_range_min = // 0.02;
         double old_range_max = 3.336;
         double new_range_min = 0;
         double new_range_max = -5885;
@@ -404,25 +405,29 @@ public class HandRailClass {
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {
+        return true;
+
         //returns true if the rail is allowed to move
-        if (!override) {
-            if (forward)
-                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
-            else
-                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
-        } else
-            return true;
+//        if (!override) {
+//            if (forward)
+//                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
+//            else
+//                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
+//        } else
+//            return true;
     }
 
     public boolean isHandBoundless(boolean forward, boolean override) {
+        return true;
+
         //returns true if the hand is allowed to move (to a certain side)
-        if (!override) {
-            if (forward)
-                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
-            else
-                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
-        } else
-            return true;
+//        if (!override) {
+//            if (forward)
+//                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
+//            else
+//                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+//        } else
+//            return true;
     }
 
 
