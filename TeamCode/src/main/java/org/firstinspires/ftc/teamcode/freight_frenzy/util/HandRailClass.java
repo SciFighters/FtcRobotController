@@ -30,6 +30,7 @@ public class HandRailClass {
 
     private int railRange = 1470;
     private int handRange = 5885;
+    private boolean gotoBool = false;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -70,6 +71,7 @@ public class HandRailClass {
 
     private LinearOpMode opMode;
 
+    /**** @param linearOpMode opMode */
     public HandRailClass(LinearOpMode opMode) {
         this.opMode = opMode;
     }
@@ -91,9 +93,11 @@ public class HandRailClass {
         if (state == State.Drive) {
             this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             opMode.telemetry.addData("handRail", "DRIVE");
+            gotoBool = false;
         } else if (state == State.Goto) {
             this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             opMode.telemetry.addData("handRail", "GOTO");
+            gotoBool = true;
         }
     }
 
@@ -103,9 +107,11 @@ public class HandRailClass {
             if (state == State.Drive) {
                 this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 opMode.telemetry.addData("handRail", "DRIVE");
+                gotoBool = false;
             } else if (state == State.Goto) {
                 this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 opMode.telemetry.addData("handRail", "GOTO");
+                gotoBool = true;
             }
         }
     }
@@ -124,6 +130,7 @@ public class HandRailClass {
             rail.setPower(power);
         }
         this.setRailState(State.Goto);
+
     }
 
     public void gotoHandRail(int railPos, int handPos, double power) {
@@ -205,7 +212,6 @@ public class HandRailClass {
     //updates
     public void telemetry_handRail() {
         opMode.telemetry.addData("hand:", "%3.2f, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
-        opMode.telemetry.addData();
         opMode.telemetry.addData("rail: ","%3.2f, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
         opMode.telemetry.addData("potentiometer offset: ", potentiometer_offset);
     }
@@ -367,7 +373,7 @@ public class HandRailClass {
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
 
-        double old_range_min = // 0.02;
+        double old_range_min = 0.02;
         double old_range_max = 3.336;
         double new_range_min = 0;
         double new_range_max = -5885;
@@ -399,9 +405,10 @@ public class HandRailClass {
     public boolean isBusy() {
         opMode.telemetry.addData("is rail busy: ", rail.isBusy());
         opMode.telemetry.addData("is hand busy: ", hand.isBusy());
+        opMode.telemetry.addData("goto bool (is goto operating: ", gotoBool);
         opMode.telemetry.update();
 
-        return rail.isBusy() || hand.isBusy();
+        return (rail.isBusy() || hand.isBusy()) && gotoBool;
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {
