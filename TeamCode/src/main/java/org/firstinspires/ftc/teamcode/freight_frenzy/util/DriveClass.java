@@ -152,7 +152,7 @@ public class DriveClass {
             opMode.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
         }
 
-        imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 1);
+        imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 2);
 
         opMode.telemetry.update();
 
@@ -359,26 +359,26 @@ public class DriveClass {
             double remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
 
             //double leftDist = totalDist - currentDist;
-            double minPower = 0.2;
-            double acclGain = 2;
+            double minPower = 0.1;
+            double acclGain = 1.5;
             double acclPower = currentDist * acclGain + minPower;
 
             double RVy = deltaY / remainDist;  // y velocity ratio
             double RVx = deltaX / remainDist;  // x velocity ratio
 
-            if (acclPower + 0.2 < power) {
+            if (acclPower < power) {
                 power = acclPower;
             }
 
-            double breakgain = 0.7;
-            double breakPower = remainDist * breakgain + minPower;
+            double breakGain = 0.5;
+            double breakPower = remainDist * breakGain + minPower;
 
             if (breakPower < power) { //&& tolerance > 0.05
                 power = breakPower;
             }
 
             double headingErr = getDeltaHeading(targetHeading) / 180;
-            double headingGain = 0.9;
+            double headingGain = 0.7;
             double correction = headingGain * headingErr;
             double Vy = RVy * power;
             double Vx = RVx * power;

@@ -24,6 +24,7 @@ public class Jaccouse extends LinearOpMode {
 
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
+
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
 	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useEncoders().useBrake();
 	private HandRailClass handRail = new HandRailClass(this);
@@ -141,13 +142,13 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if (A.isClicked()) {
-				handRail.goToSH_Level(DuckLine.SH_Levels.Top);
+				handRail.gotoLevel(DuckLine.SH_Levels.Top);
 			} else if (B.isClicked()) {
-				handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
+				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
-				handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
+				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
 			} else if (X.isClicked()) {
-				handRail.goToSH_Level(DuckLine.SH_Levels.Collect);
+				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
 			}
 
 			if (!release) {
@@ -166,14 +167,6 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselRun(0.6);
 			else {
 				handRail.carouselStop();
-			}
-
-
-			if (gamepad1.x){
-				//drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
-				//sleep(2000);
-				//drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
-				drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
 			}
 
 			this.handRail.telemetry_handRail();
