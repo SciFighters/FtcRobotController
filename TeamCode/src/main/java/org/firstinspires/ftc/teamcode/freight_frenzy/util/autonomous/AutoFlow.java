@@ -132,7 +132,7 @@ public class AutoFlow {
 		opMode.telemetry.update();
 
 		// Go to Shipping Hub
-		handrail.goToSH_Level(shLevel);
+		handrail.gotoLevel(shLevel);
 		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05);
 
 		// wait for handRail to get into position (both not busy)

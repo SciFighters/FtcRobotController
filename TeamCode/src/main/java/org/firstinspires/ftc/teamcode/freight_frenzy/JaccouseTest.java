@@ -24,11 +24,12 @@ public class JaccouseTest extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+
     Location startingPosition = new Location(0, 0.225); //last x = -1.75*tile, y = 0*tile
     private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useEncoders().useBrake();
-    private Toggle turningToggle = new Toggle();
-    org.firstinspires.ftc.teamcode.freight_frenzy.util.Location startingPoisition = new org.firstinspires.ftc.teamcode.freight_frenzy.util.Location(0 * tile, 0 * tile);
     private HandRailClass handRail = new HandRailClass(this);
+
+    private Toggle turningToggle = new Toggle();
 
     Location aLocation = new Location(0, 0.225);
     Location bLocation = new Location(0.6, 1.2);
@@ -57,8 +58,8 @@ public class JaccouseTest extends LinearOpMode {
     private Toggle xl = new Toggle();
     private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
-
-    @Override    public void runOpMode() {
+	@Override
+	public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -154,30 +155,8 @@ public class JaccouseTest extends LinearOpMode {
             if (!turningToggle.isPressed() && turningCount < 0) {
                 double delta = drive.getDeltaHeading(targetHeading);
                 double gain = 0.02;
-                turn = delta * gain;
+                // todo turn = delta * gain;
             }
-
-            if (A.isClicked()) {
-                handRail.goToSH_Level(DuckLine.SH_Levels.Top);
-            } else if (B.isClicked()) {
-                handRail.goToSH_Level(DuckLine.SH_Levels.Middle);
-            } else if (C.isClicked()) {
-                handRail.goToSH_Level(DuckLine.SH_Levels.Bottom);
-            } else if (X.isClicked()) {
-                handRail.goToSH_Level(DuckLine.SH_Levels.Collect);
-            }
-
-            if (a.isClicked()){
-                drive.goToLocation(aLocation, 0.5, 0, 0.05);
-            } else if(b.isClicked()){
-                drive.goToLocation(bLocation, 0.5, 0, 0.05);
-            } else if(Y.isClicked()) {
-                drive.goToLocation(yLocation, 0.5, 0, 0.05);
-            } else if(X.isClicked()) {
-                drive.goToLocation(xLocation, 0.5, 0, 0.05);
-            }
-
-
 
             if (!release) {
                 if (collector.getState()) {
@@ -197,30 +176,44 @@ public class JaccouseTest extends LinearOpMode {
                 handRail.carouselStop();
             }
 
-            if(testGotoA.isClicked()) { // TODO: for debug and tests.
-                drive.goTo(0, 1, 0.5, drive.getHeading(), 0.05);
-            } else if(testGotoB.isClicked()) {
-                drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
+
+            if (A.isClicked()) {
+                handRail.gotoLevel(DuckLine.SH_Levels.Top);
+            } else if (B.isClicked()) {
+                handRail.gotoLevel(DuckLine.SH_Levels.Middle);
+            } else if (C.isClicked()) {
+                handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
+            } else if (X.isClicked()) {
+                handRail.gotoLevel(DuckLine.SH_Levels.Collect);
             }
 
-//            if (gamepad1.x){
-//                //drive.goTo(-1.1, 0.1, 0.5, 90, 0.05);
-//                //sleep(2000);
-//                //drive.goTo(0, 0, 0.5, drive.getHeading(), 0.01);
-//                drive.goTo(-160, 137,0.5, drive.getHeading(),0.01);
-//            }
+            if (a.isClicked()){
+                drive.goToLocation(aLocation, 0.5, 0, 0.05);
+            } else if(b.isClicked()){
+                drive.goToLocation(bLocation, 0.5, 0, 0.05);
+            } else if(Y.isClicked()) {
+                drive.goToLocation(yLocation, 0.5, -45, 0.05);
+            } else if(xl.isClicked()) {
+                drive.goToLocation(xLocation, 0.5, 45, 0.05);
+            }
 
-            this.handRail.telemetry_handRail();
+
+            if(testGotoA.isClicked()) { // TODO: for debug and tests.
+                //drive.goTo(0, 1, 0.5, drive.getHeading(), 0.05);
+                handRail.gotoHandRail(50,50,0.5);
+
+            } else if(testGotoB.isClicked()) {
+                handRail.gotoHandRail(100,75,0.5);
+                //drive.goTo(0,0, 0.5, drive.getHeading(), 0.05);
+            }
 
             drive.setPowerOriented(y, x, turn, fieldOriented);
 
-            telemetry.addData("X Pos", drive.getPosX());
-            telemetry.addData("Y Pos", drive.getPosY());
+            this.handRail.telemetry_handRail();
+            telemetry.addData("Pos", "X: %2.2f, \t Y: %2.2f", drive.getPosX(), drive.getPosY());
             telemetry.addData("Heading", drive.getHeading());
             telemetry.addData("Target", targetHeading);
             telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-            telemetry.addData("potentiometer", handRail.getPotentiometerValue());
-			handRail.telemetry_handRail();
             telemetry.update();
         }
     }

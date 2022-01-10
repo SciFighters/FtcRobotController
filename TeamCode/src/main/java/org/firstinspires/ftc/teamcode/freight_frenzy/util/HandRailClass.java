@@ -24,7 +24,7 @@ public class HandRailClass {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
-    private int potentiometer_offset;
+    private int potentiometer_offset = 0;
 
     private DcMotorEx carousel = null;
 
@@ -148,13 +148,13 @@ public class HandRailClass {
         this.setHandState(State.Goto);
     }
 
-    public void goToSH_Level(DuckLine.SH_Levels shLevel){
+    public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(100,90,1);
+            gotoHandRail(100,75,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(100,50,1);
+            gotoHandRail(100,83,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(100,70,1);
+            gotoHandRail(100,90,1);
         }
 //        else if (abc == abc.X){
 //            gotoPercent(5,5,1);
@@ -196,11 +196,11 @@ public class HandRailClass {
 
     public double getHandPercent() {
         //                                               v might need to invert
-        return 100 - ((double)(hand.getCurrentPosition() - potentiometer_offset) / -handRange) * 100;
+        return ((double)(hand.getCurrentPosition() - potentiometer_offset) / handRange) * 100 - 100;
     }
 
     public int convHand_percent2ticks(double percent) {
-        return (int)((100 - percent) / 100 * handRange) - potentiometer_offset;
+        return (int)((percent + 100) / 100 * handRange) + potentiometer_offset;
     }
 
 
@@ -208,12 +208,11 @@ public class HandRailClass {
         return potentiometer.getVoltage();
     }
 
-
     //updates
     public void telemetry_handRail() {
         opMode.telemetry.addData("hand:", "%3.2f, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail: ","%3.2f, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
-        opMode.telemetry.addData("potentiometer offset: ", potentiometer_offset);
+        opMode.telemetry.addData("potentiometer","offset: %d  %3.2f:", potentiometer_offset, this.getPotentiometerValue());
     }
 
 
