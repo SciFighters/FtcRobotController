@@ -30,7 +30,6 @@ public class HandRailClass {
 
     private int railRange = 1470;
     private int handRange = 5885;
-    private boolean gotoBool = false;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -66,7 +65,7 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         potentiometer_offset = getScaledPotentiometerValue();
 
-        this.searchHomeRail();
+        // this.searchHomeRail();
     }
 
     private LinearOpMode opMode;
@@ -79,8 +78,13 @@ public class HandRailClass {
 
 
     public enum State {
-        Drive,
-        Goto
+        Drive(DcMotor.RunMode.RUN_USING_ENCODER),
+        Goto(DcMotor.RunMode.RUN_TO_POSITION);
+
+        DcMotor.RunMode runmode;
+        State(DcMotor.RunMode runmode) {
+            this.runmode = runmode;
+        }
     }
 
     public State handState = State.Drive;
@@ -93,11 +97,9 @@ public class HandRailClass {
         if (state == State.Drive) {
             this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             opMode.telemetry.addData("handRail", "DRIVE");
-            gotoBool = false;
         } else if (state == State.Goto) {
             this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             opMode.telemetry.addData("handRail", "GOTO");
-            gotoBool = true;
         }
     }
 
@@ -107,11 +109,9 @@ public class HandRailClass {
             if (state == State.Drive) {
                 this.rail.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 opMode.telemetry.addData("handRail", "DRIVE");
-                gotoBool = false;
             } else if (state == State.Goto) {
                 this.rail.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 opMode.telemetry.addData("handRail", "GOTO");
-                gotoBool = true;
             }
         }
     }
@@ -122,30 +122,30 @@ public class HandRailClass {
     }
 
     public void gotoRail(double railPercents, double power) {
-        // GOTO
-        int railTicks = convRail_percent2ticks(railPercents);
-        if(this.rail.getCurrentPosition() != railTicks) {
-            hand.setTargetPosition(hand.getCurrentPosition());
-            rail.setTargetPosition(railTicks);
+        // GOTO rail
+        railPercents = convRail_percent2ticks(railPercents);
+        if(this.rail.getCurrentPosition() != (int)railPercents) {
+            rail.setTargetPosition((int)railPercents);
             rail.setPower(power);
+            this.setRailState(State.Goto);
         }
-        this.setRailState(State.Goto);
 
     }
 
-    public void gotoHandRail(int railPos, int handPos, double power) {
-        // GOTO
-        handPos = convHand_percent2ticks(handPos);
-        railPos = convRail_percent2ticks(railPos);
-        if(this.hand.getCurrentPosition() != handPos) {
-            rail.setTargetPosition(railPos);
-            rail.setPower(power);
-            hand.setTargetPosition(handPos);
+    public void gotoHand(double handPercents, double power) {
+        //GOTO hand
+        handPercents = convHand_percent2ticks(handPercents);
+        if(this.hand.getCurrentPosition() != (int)handPercents) {
+            hand.setTargetPosition((int)handPercents);
             hand.setPower(power);
-
+            this.setHandState(State.Goto);
         }
-        this.setRailState(State.Goto);
-        this.setHandState(State.Goto);
+    }
+
+    public void gotoHandRail(int railPos, int handPos, double power) {
+        // GOTO handrail
+        gotoHand((double)handPos, power);
+        gotoRail((double)railPos, power);
     }
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
@@ -402,12 +402,10 @@ public class HandRailClass {
     }
 
     public boolean isBusy() {
-        opMode.telemetry.addData("is rail busy: ", rail.isBusy());
-        opMode.telemetry.addData("is hand busy: ", hand.isBusy());
-        opMode.telemetry.addData("goto bool (is goto operating: ", gotoBool);
+        opMode.telemetry.addData( "isBusy: ","rail: %d, hand: %d", rail.isBusy(), hand.isBusy());
         opMode.telemetry.update();
 
-        return (rail.isBusy() || hand.isBusy()) && gotoBool;
+        return (rail.isBusy() || hand.isBusy());
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {
