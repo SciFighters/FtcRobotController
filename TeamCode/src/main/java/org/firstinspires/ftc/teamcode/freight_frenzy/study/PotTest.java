@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 public class PotTest extends LinearOpMode {
     @Override
     public void runOpMode() {
-        AnalogInput pot = hardwareMap.get(AnalogInput.class, "pot");
+        AnalogInput pot = hardwareMap.get(AnalogInput.class, "potentiometer");
 
         telemetry.addData(">", "Hardware Initialized");
         telemetry.update();
@@ -18,7 +18,7 @@ public class PotTest extends LinearOpMode {
         pot.getVoltage();
 
         while (opModeIsActive()) {
-            telemetry.addData("pot:", pot.getVoltage());
+            telemetry.addData("potentiometer:", pot.getVoltage());
             telemetry.update();
         }
     }
