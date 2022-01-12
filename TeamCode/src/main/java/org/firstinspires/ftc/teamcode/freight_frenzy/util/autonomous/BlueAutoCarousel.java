@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class BlueAutoCarousel extends LinearOpMode {
 	@Override
 	public void runOpMode() {
-		AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPos.CAROUSEL, AutoFlow.Auto.FULL);
+		AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPos.CAROUSEL, AutoFlow.Auto.LONG);
 
 		auto.init();
 
