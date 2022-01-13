@@ -178,11 +178,11 @@ public class JaccouseTest extends LinearOpMode {
 
 
             if (A.isClicked()) {
-                handRail.gotoLevel(DuckLine.SH_Levels.Top);
+                handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
             } else if (B.isClicked()) {
                 handRail.gotoLevel(DuckLine.SH_Levels.Middle);
             } else if (C.isClicked()) {
-                handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
+                handRail.gotoLevel(DuckLine.SH_Levels.Top);
             } else if (X.isClicked()) {
                 handRail.gotoLevel(DuckLine.SH_Levels.Collect);
             }

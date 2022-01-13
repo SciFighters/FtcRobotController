@@ -52,11 +52,11 @@ public class AutoFlow {
 	Location c_pos;
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
 	Location shippingHubLocation = new Location(0.3, 0.6); //0.6, 0.75
-	Location carousel = new Location(1.0, 0.16);
+	Location carousel = new Location(1.32, 0.27);
 	Location barrier = new Location(-1.2, 1.0);
 
 	Location freightLocation = new Location(1.5,-0.35); // 1.5, 2.5
-	Location storageLocation = new Location(0,0); //0.0, 0.0
+	Location storageLocation = new Location(1.5,0.9); //0.0, 0.0
 	ALLIANCE alliance;
 	Location tempStartPos = new Location(0.0, 0.6);
 	StartPos startPos;
@@ -132,19 +132,23 @@ public class AutoFlow {
 		opMode.telemetry.update();
 
 		// Go to Shipping Hub
-		handrail.gotoLevel(shLevel);
+		handrail.gotoRail(50, 0.5);
 		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05);
 
 		// wait for handRail to get into position (both not busy)
-		opMode.sleep(5000);
-		// TODO: while (opMode.opModeIsActive() && handrail.isBusy());
+		handrail.gotoLevel(shLevel);
+		while (opMode.opModeIsActive() && handrail.isBusy());
+		handrail.gotoRail(100, 0.5);
+		while (opMode.opModeIsActive() && handrail.isBusy());
 
 		// Put the cube on shipping hub
 		handrail.grabberRelease();
-		this.opMode.sleep(2000);
+		opMode.sleep(500);
+		handrail.gotoRail(0, 0.4);
+		opMode.sleep(500);
 		handrail.grabberStop();
 		// retract arm.
-		handrail.gotoRail(50, 0.8);
+		handrail.gotoHand(70, 1);
 
 		if (startPos == StartPos.CAROUSEL) {
 			// Go to carousel
@@ -156,9 +160,13 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			handrail.carouselRun(1);
-			this.opMode.sleep(2000);
+			opMode.telemetry.addLine("running carousel");
+			opMode.telemetry.update();
+			opMode.sleep(2000);
 			handrail.carouselStop();
 
+			opMode.telemetry.addLine("stop carousel");
+			opMode.telemetry.update();
 
 			if (auto == Auto.FULL){
 				drive.goTo(0.6,0.6,1,90,0.05);
@@ -166,7 +174,7 @@ public class AutoFlow {
 				drive.goToLocation(freightLocation, 1, 90, 0.05);
 			} else {
 				// go to parking at storage unit
-				drive.goToLocation(storageLocation, 0.8, 0, 0.02);
+				drive.goToLocation(storageLocation, 0.8, 90, 0.02);
 			}
 		} else {
 			// TODO: BARRIER

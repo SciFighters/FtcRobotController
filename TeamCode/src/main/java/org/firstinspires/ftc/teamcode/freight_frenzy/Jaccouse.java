@@ -142,11 +142,11 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if (A.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Top);
+				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
 			} else if (B.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
+				handRail.gotoLevel(DuckLine.SH_Levels.Top);
 			} else if (X.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
 			}
@@ -173,13 +173,11 @@ public class Jaccouse extends LinearOpMode {
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
 
-			telemetry.addData("X Pos", drive.getPosX());
-			telemetry.addData("Y Pos", drive.getPosY());
+            this.handRail.telemetry_handRail();
+            telemetry.addData("Pos", "X: %2.2f, \t Y: %2.2f", drive.getPosX(), drive.getPosY());
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-			telemetry.addData("potentiometer", handRail.getPotentiometerValue());
-			handRail.telemetry_handRail();
 			telemetry.update();
 		}
 	}

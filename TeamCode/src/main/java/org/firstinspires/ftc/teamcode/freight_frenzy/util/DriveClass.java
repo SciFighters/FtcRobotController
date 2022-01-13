@@ -359,7 +359,7 @@ public class DriveClass {
             double remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
 
             //double leftDist = totalDist - currentDist;
-            double minPower = 0.1;
+            double minPower = 0.15;
             double acclGain = 1.5;
             double acclPower = currentDist * acclGain + minPower;
 

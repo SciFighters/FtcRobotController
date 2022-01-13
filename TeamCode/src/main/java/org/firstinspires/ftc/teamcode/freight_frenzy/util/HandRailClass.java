@@ -65,6 +65,8 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         potentiometer_offset = getScaledPotentiometerValue();
 
+        hand.setTargetPositionTolerance(50);
+        rail.setTargetPositionTolerance(10);
         // this.searchHomeRail();
     }
 
@@ -93,13 +95,13 @@ public class HandRailClass {
     public void setHandState(State state){
         if(this.handState != state) {
             this.handState = state;
-        }
-        if (state == State.Drive) {
-            this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            opMode.telemetry.addData("handRail", "DRIVE");
-        } else if (state == State.Goto) {
-            this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            opMode.telemetry.addData("handRail", "GOTO");
+            if (state == State.Drive) {
+                this.hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                opMode.telemetry.addData("handRail", "DRIVE");
+            } else if (state == State.Goto) {
+                this.hand.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                opMode.telemetry.addData("handRail", "GOTO");
+            }
         }
     }
 
@@ -123,9 +125,9 @@ public class HandRailClass {
 
     public void gotoRail(double railPercents, double power) {
         // GOTO rail
-        railPercents = convRail_percent2ticks(railPercents);
-        if(this.rail.getCurrentPosition() != (int)railPercents) {
-            rail.setTargetPosition((int)railPercents);
+        int ticks = convRail_percent2ticks(railPercents);
+        if(this.rail.getCurrentPosition() != ticks) {
+            rail.setTargetPosition(ticks);
             rail.setPower(power);
             this.setRailState(State.Goto);
         }
@@ -134,31 +136,30 @@ public class HandRailClass {
 
     public void gotoHand(double handPercents, double power) {
         //GOTO hand
-        handPercents = convHand_percent2ticks(handPercents);
-        if(this.hand.getCurrentPosition() != (int)handPercents) {
-            hand.setTargetPosition((int)handPercents);
+        int tiks = convHand_percent2ticks(handPercents);
+        if(this.hand.getCurrentPosition() != tiks) {
+            hand.setTargetPosition(tiks);
             hand.setPower(power);
             this.setHandState(State.Goto);
         }
     }
 
-    public void gotoHandRail(int railPos, int handPos, double power) {
+    public void gotoHandRail(double railPos, double handPos, double power) {
         // GOTO handrail
-        gotoHand((double)handPos, power);
-        gotoRail((double)railPos, power);
+        gotoHand(handPos, power);
+        gotoRail(railPos, power/3);
     }
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(100,75,1);
+            gotoHandRail(65,75,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(100,83,1);
+            gotoHandRail(65,84,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(100,90,1);
+            gotoHandRail(65,90,1);
+        } else if (shLevel == DuckLine.SH_Levels.Collect){
+            gotoHandRail(20,8,1);
         }
-//        else if (abc == abc.X){
-//            gotoPercent(5,5,1);
-//        }
     }
 
     public enum gotoPoints {
@@ -189,18 +190,26 @@ public class HandRailClass {
         return (double)rail.getCurrentPosition() / railRange * 100;
     }
 
+    public double getRailTicks() {
+        return (double)rail.getCurrentPosition();
+    }
+
     public int convRail_percent2ticks(double percent) {
-        return (int)(percent / 100 * railRange);
+        return (int)(percent / 100.0 * (double) railRange);
     }
 
 
     public double getHandPercent() {
         //                                               v might need to invert
-        return ((double)(hand.getCurrentPosition() - potentiometer_offset) / handRange) * 100 - 100;
+        return ((double)(hand.getCurrentPosition() + potentiometer_offset) / handRange) * 100;
+    }
+
+    public double getHandTicks() {
+        return (double)hand.getCurrentPosition();
     }
 
     public int convHand_percent2ticks(double percent) {
-        return (int)((percent + 100) / 100 * handRange) + potentiometer_offset;
+        return (int)(percent / 100.0 * (double)handRange) - potentiometer_offset;
     }
 
 
@@ -210,9 +219,9 @@ public class HandRailClass {
 
     //updates
     public void telemetry_handRail() {
-        opMode.telemetry.addData("hand:", "%3.2f, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
-        opMode.telemetry.addData("rail: ","%3.2f, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
-        opMode.telemetry.addData("potentiometer","offset: %d  %3.2f:", potentiometer_offset, this.getPotentiometerValue());
+        opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
+        opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
+        opMode.telemetry.addData("potentiometer","offset: %d  %3.2fv:", potentiometer_offset, this.getPotentiometerValue());
     }
 
 
@@ -371,12 +380,13 @@ public class HandRailClass {
 
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        // int tick = (int)(5000.0 * (1- pot_val / 3.33));
 
-        double old_range_min = 0.02;
-        double old_range_max = 3.336;
-        double new_range_min = 0;
-        double new_range_max = -5885;
-        return (int)((((pot_val - old_range_min) * (new_range_max - new_range_min)) / (old_range_max - old_range_min)) + new_range_min);
+        double potVoltRange = 3.33;
+        double potTickRange = 5000.0;
+        double offset = ((double)handRange - potTickRange)/2;
+        int tick = (int)(potTickRange * (1- pot_val / potVoltRange) + offset) ;
+        return tick;
     }
 
 
@@ -402,7 +412,8 @@ public class HandRailClass {
     }
 
     public boolean isBusy() {
-        opMode.telemetry.addData( "isBusy: ","rail: %d, hand: %d", rail.isBusy(), hand.isBusy());
+        opMode.telemetry.addData( "Rail.isBusy: ",rail.isBusy());
+        opMode.telemetry.addData( "Hand.isBusy: ", hand.isBusy());
         opMode.telemetry.update();
 
         return (rail.isBusy() || hand.isBusy());
