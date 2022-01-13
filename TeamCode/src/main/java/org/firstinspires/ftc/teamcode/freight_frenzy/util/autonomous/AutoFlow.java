@@ -81,7 +81,7 @@ public class AutoFlow {
 		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
 
-		handrail.searchHomeRail();
+		handrail.searchHome();
 
 		if(startPos == StartPos.BARRIER) {
 			this.startLocation.flipX();

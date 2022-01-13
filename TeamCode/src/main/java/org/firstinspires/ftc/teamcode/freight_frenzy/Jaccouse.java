@@ -87,11 +87,11 @@ public class Jaccouse extends LinearOpMode {
 
 				if (homing.isClicked()) {
 					telemetry.addData("[searchHome]", "starting");
-					handRail.searchHomeRail();
+					handRail.searchHome();
 				}
 
 				if (homingHand.isClicked())
-					handRail.searchHomeHand();
+					//handRail.searchHomeHand();
 				continue;
 			}
 

@@ -22,8 +22,8 @@ public class isBusyTest extends LinearOpMode {
 	}
 
 	private void runAct() {
-		this.handrail.searchHomeRail();
-		this.handrail.searchHomeHand();
+		this.handrail.searchHome();
+		//this.handrail.searchHomeHand();
 		try {
 			Thread.sleep(500);
 		} catch(Exception e) {

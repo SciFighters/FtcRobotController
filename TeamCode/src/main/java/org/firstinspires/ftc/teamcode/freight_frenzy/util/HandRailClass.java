@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
 
@@ -61,9 +62,7 @@ public class HandRailClass {
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        potentiometer_offset = getScaledPotentiometerValue();
+        this.ResetHand();
 
         hand.setTargetPositionTolerance(50);
         rail.setTargetPositionTolerance(10);
@@ -77,15 +76,22 @@ public class HandRailClass {
         this.opMode = opMode;
     }
 
+    private void ResetHand() {
+        //resetting hand, potentiometer offset
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        potentiometer_offset = getScaledPotentiometerValue();
+    }
 
 
     public enum State {
         Drive(DcMotor.RunMode.RUN_USING_ENCODER),
         Goto(DcMotor.RunMode.RUN_TO_POSITION);
 
-        DcMotor.RunMode runmode;
-        State(DcMotor.RunMode runmode) {
-            this.runmode = runmode;
+        DcMotor.RunMode runMode;
+
+        State(DcMotor.RunMode runMode) {
+            this.runMode = runMode;
         }
     }
 
@@ -294,7 +300,7 @@ public class HandRailClass {
     }
 
 
-    public void searchHomeRail(){
+    public void searchHome(){
         //repositioning hand...
 //         while(this.getScaledPotentiometerValue() > 40) {
 //            this.hand_drive(0.4, true);
@@ -305,6 +311,13 @@ public class HandRailClass {
 //        }
 //
 //        this.hand_drive(0, true);
+        if(this.getHandPercent() > 80) {
+            this.gotoHand(80, 0.8);
+            //Timeout
+            ElapsedTime timer = new ElapsedTime();
+            while(hand.isBusy() && timer.seconds() < 1.75);
+        }
+
 
         int lastPos = rail.getCurrentPosition();
         int tempPos = lastPos;
@@ -335,45 +348,8 @@ public class HandRailClass {
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
-    public void searchHomeHand() {
-        //rail got middle
-        opMode.telemetry.addData("[Homing] Start: ", hand.getCurrentPosition());
-        opMode.telemetry.update();
 
-        gotoRail(75, 0.7);
-        while (rail.isBusy());
-        rail.setPower(0);
 
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //setState(State.Drive);
-
-        opMode.telemetry.addData("[Homing] Begin search: ", hand.getCurrentPosition());
-        opMode.telemetry.update();
-
-        // Hand go to limiter
-        while(hand_limit_F.getState() && hand_limit_B.getState()) {
-            hand.setPower(0.6);
-            opMode.telemetry.addData("[Homing] Ticks: ", hand.getCurrentPosition());
-
-            opMode.telemetry.addData("[Homing]", "tmp in loop");
-            opMode.telemetry.addData("target:", hand.getTargetPosition());
-            opMode.telemetry.addData("cur:", hand.getCurrentPosition());
-            opMode.telemetry.addData("cur mode:", hand.getMode());
-            opMode.telemetry.addData("cur:", hand.getCurrentPosition());
-            opMode.telemetry.addData("cur mode:", hand.getMode());
-            opMode.telemetry.addData("hand_front:", hand_limit_F.getState());
-            opMode.telemetry.addData("hand_back:", hand_limit_B.getState());
-            opMode.telemetry.update();
-        }
-        hand.setPower(0);
-
-        opMode.telemetry.addData("[Homing] Found: ", hand.getCurrentPosition());
-        opMode.telemetry.update();
-
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    }
 
     public int getScaledPotentiometerValue() {
         double pot_val = potentiometer.getVoltage();
