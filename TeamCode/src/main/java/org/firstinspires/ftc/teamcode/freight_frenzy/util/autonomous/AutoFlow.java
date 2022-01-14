@@ -41,8 +41,6 @@ public class AutoFlow {
 	private HandRailClass handrail = null;
 	private DuckLine duckLine = null;
 
-	private int mul;
-
 	final double robotLength =  0.4572;
 	final int screenWidth = 640;
 	final int screenHeight = 360;
@@ -55,7 +53,7 @@ public class AutoFlow {
 	Location carousel = new Location(1.32, 0.27);
 	Location barrier = new Location(-1.2, 1.0);
 
-	Location freightLocation = new Location(1.5,-0.35); // 1.5, 2.5
+	Location freightLocation = new Location(-1.5,0.8); // 1.5, 2.5
 	Location storageLocation = new Location(1.5,0.9); //0.0, 0.0
 	ALLIANCE alliance;
 	Location tempStartPos = new Location(0.0, 0.6);
@@ -73,6 +71,11 @@ public class AutoFlow {
 		this.startPos = startPos;
 		this.auto = auto;
 
+		if(startPos == StartPos.BARRIER) {
+			this.startLocation.flipX();
+			this.shippingHubLocation.flipX();
+		}
+
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
 		this.handrail = new HandRailClass(opMode);
 	}
@@ -83,10 +86,6 @@ public class AutoFlow {
 
 		handrail.searchHomeRail();
 
-		if(startPos == StartPos.BARRIER) {
-			this.startLocation.flipX();
-			this.shippingHubLocation.flipX();
-		}
 
 		// TODO: separate to util class
 		//Wqebcam
@@ -111,8 +110,6 @@ public class AutoFlow {
 			}
 		});
 		*/
-		mul = alliance.mul;
-
 		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Middle; //duckLine.getDuck(screenWidth);
 		opMode.telemetry.addData("Init - ABC", shLevel);
 		opMode.telemetry.update();
@@ -126,14 +123,12 @@ public class AutoFlow {
 
 		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
 		//DuckLine.ABC abc = DuckLine.ABC.C;
-		int mulPos = startPos.mul;
-
 		opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
 		opMode.telemetry.update();
 
 		// Go to Shipping Hub
 		handrail.gotoRail(50, 0.5);
-		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05);
+		drive.goToLocation(shippingHubLocation, 1, -45.0 * startPos.mul, 0.05, 0);
 
 		// wait for handRail to get into position (both not busy)
 		handrail.gotoLevel(shLevel);
@@ -143,9 +138,8 @@ public class AutoFlow {
 
 		// Put the cube on shipping hub
 		handrail.grabberRelease();
-		opMode.sleep(500);
+		opMode.sleep(2000); //wait for drop
 		handrail.gotoRail(0, 0.4);
-		opMode.sleep(500);
 		handrail.grabberStop();
 		// retract arm.
 		handrail.gotoHand(70, 1);
@@ -154,43 +148,52 @@ public class AutoFlow {
 			// Go to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carousel.y);
 			opMode.telemetry.update();
-			drive.goToLocation(carousel, 1, 45.0, 0.15);
+			handrail.carouselRun(0.5);
+			drive.goToLocation(carousel, 1, 45.0, 0.15, 6);
+			//drive.setPower(0,0,0.4);
+			//opMode.sleep(3000);
 
 			opMode.telemetry.addLine("After goto carousel");
+			opMode.telemetry.addLine("Kagan is a duck");
 			opMode.telemetry.update();
 
-			handrail.carouselRun(1);
 			opMode.telemetry.addLine("running carousel");
+			opMode.telemetry.addLine("Kagan is a duck");
 			opMode.telemetry.update();
-			opMode.sleep(2000);
+			opMode.sleep(2300);  //wait for carusel
 			handrail.carouselStop();
 
 			opMode.telemetry.addLine("stop carousel");
+			opMode.telemetry.addLine("Kagan is a duck");
 			opMode.telemetry.update();
 
 			if (auto == Auto.FULL){
-				drive.goTo(0.6,0.6,1,90,0.05);
+				drive.goTo(0.6,0.80,1,90,0.15, 0);
 				handrail.gotoHandRail(0,70,1);
-				drive.goToLocation(freightLocation, 1, 90, 0.05);
+				drive.goTo(-0.60,0.80,1,90,0.15,0); //first location
+				drive.goToLocation(freightLocation, 1, 90, 0.05, 0);
+				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			} else {
 				// go to parking at storage unit
-				drive.goToLocation(storageLocation, 0.8, 90, 0.02);
+				drive.goTo(1.1,0.9,1,90,0.05,0); //first location
+				opMode.telemetry.addData("after", drive.getHeading());
+				drive.goToLocation(storageLocation, 0.8, 90, 0.02, 0);
+				opMode.telemetry.addData("now", drive.getHeading());
+
 			}
 		} else {
 			// TODO: BARRIER
-			//drive.goToLocation(shippingHubLocation, 1,-90 ,0.5);
-			drive.turnTo(90,1);
-			handrail.gotoHandRail(0,85,1);
-			drive.goToLocation(freightLocation, 1, 90, 0.05);
-			drive.turnTo(45,1);
-			handrail.gotoHandRail(0,100,1);
-			while (opMode.opModeIsActive() && handrail.isBusy());
-			handrail.grabberGrab(); //takes block
-
-//			drive.goToLocation(shippingHubLocation, 1, heading, 0.05);
-//			handrail.goToABC(abc);
-//			handrail.goToSH_Level(shLevel);
-//			drive.goToLocation(freightLocation, 1, heading, 0.05);
+			//drive.goToLocation(shippingHubLocation, 1,-90 ,0.2, 0);
+			//drive.turnTo(90,1);
+			//handrail.gotoHandRail(0,85,1);
+			drive.goTo(-0.60,0.80,1,90,0.15,0); //first location
+			drive.goToLocation(freightLocation, 1, 90, 0.05, 0);
+			handrail.gotoLevel(DuckLine.SH_Levels.Collect);
+			drive.goTo(-1.5,0.7,0.7,135,0.05,0);
+			//drive.turnTo(45,1);
+			//handrail.gotoHandRail(0,100,1);
+			//while (opMode.opModeIsActive() && handrail.isBusy());
+		//	handrail.grabberGrab(); //takes block
 		}
 	}
 }

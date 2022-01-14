@@ -188,13 +188,13 @@ public class JaccouseTest extends LinearOpMode {
             }
 
             if (a.isClicked()){
-                drive.goToLocation(aLocation, 0.5, 0, 0.05);
+                drive.goToLocation(aLocation, 0.5, 0, 0.05,0);
             } else if(b.isClicked()){
-                drive.goToLocation(bLocation, 0.5, 0, 0.05);
+                drive.goToLocation(bLocation, 0.5, 0, 0.05,0);
             } else if(Y.isClicked()) {
-                drive.goToLocation(yLocation, 0.5, -45, 0.05);
+                drive.goToLocation(yLocation, 0.5, -45, 0.05,0);
             } else if(xl.isClicked()) {
-                drive.goToLocation(xLocation, 0.5, 45, 0.05);
+                drive.goToLocation(xLocation, 0.5, 45, 0.05,0);
             }
 
 

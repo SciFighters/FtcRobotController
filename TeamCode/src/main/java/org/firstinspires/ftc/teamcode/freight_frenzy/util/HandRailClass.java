@@ -39,7 +39,7 @@ public class HandRailClass {
         hand.setDirection(DcMotorEx.Direction.FORWARD);
 
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -62,11 +62,11 @@ public class HandRailClass {
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         potentiometer_offset = getScaledPotentiometerValue();
 
-        hand.setTargetPositionTolerance(50);
-        rail.setTargetPositionTolerance(10);
+        hand.setTargetPositionTolerance(20);
+        rail.setTargetPositionTolerance(20);
         // this.searchHomeRail();
     }
 
@@ -372,7 +372,7 @@ public class HandRailClass {
         opMode.telemetry.update();
 
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public int getScaledPotentiometerValue() {

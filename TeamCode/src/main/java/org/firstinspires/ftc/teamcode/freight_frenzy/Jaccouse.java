@@ -106,8 +106,9 @@ public class Jaccouse extends LinearOpMode {
 			double turn = gamepad1.right_stick_x * boost;
 
 			// Hand rail
-			double railPower = gamepad2.left_stick_x;
-			double armPower  = gamepad2.right_stick_x;
+			double boostHand = gamepad2.right_trigger * 0.3 + 0.7;
+			double railPower = gamepad2.left_stick_x * boostHand;
+			double armPower  = gamepad2.right_stick_x * boostHand;
 			overrideLimits.update(gamepad2.right_bumper);
 
 			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower), overrideLimits.getState());
@@ -115,6 +116,7 @@ public class Jaccouse extends LinearOpMode {
 
 			turningToggle.update(Math.abs(turn) > 0.02);
 			spincarousel.update(gamepad1.left_bumper);
+
 
 			A.update(gamepad2.a);
 			B.update(gamepad2.b);
@@ -165,8 +167,10 @@ public class Jaccouse extends LinearOpMode {
 
 			if(spincarousel.getState())
 				handRail.carouselRun(0.6);
+
 			else {
-				handRail.carouselStop();
+				handRail.carouselRun(gamepad1.left_trigger);
+				//handRail.carouselStop();
 			}
 
 			this.handRail.telemetry_handRail();
