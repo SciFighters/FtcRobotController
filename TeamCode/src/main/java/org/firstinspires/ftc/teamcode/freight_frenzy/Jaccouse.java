@@ -48,8 +48,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
 	public double pow(double x){
-		double ssqr = Math.pow(x, 2) * Math.signum(x);
-		return ssqr;
+		return Math.pow(x, 2) * Math.signum(x);
 	}
 
 	@Override
