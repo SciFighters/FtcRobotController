@@ -47,6 +47,11 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle X = new Toggle();
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 
+	public double pow(double x){
+		double ssqr = Math.pow(x, 2) * Math.signum(x);
+		return ssqr;
+	}
+
 	@Override
 	public void runOpMode() {
 		telemetry.addData("Status", "Initialized");
@@ -101,18 +106,18 @@ public class Jaccouse extends LinearOpMode {
 			boolean fieldOriented = !gamepad1.y;
 			double boost = gamepad1.right_trigger * 0.6 + 0.4;
 
-			double y = -gamepad1.left_stick_y * boost;
-			double x = gamepad1.left_stick_x * boost;
-			double turn = gamepad1.right_stick_x * boost;
+			double y = pow(-gamepad1.left_stick_y) * boost;
+			double x = pow(gamepad1.left_stick_x) * boost;
+			double turn = pow(gamepad1.right_stick_x * boost);
 
 			// Hand rail
 			double boostHand = gamepad2.right_trigger * 0.3 + 0.7;
-			double railPower = gamepad2.left_stick_x * boostHand;
-			double armPower  = gamepad2.right_stick_x * boostHand;
+			double railPower = pow(gamepad2.left_stick_x * boostHand);
+			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 
-			handRail.rail_drive(Math.pow(railPower,2) * Math.signum(railPower), overrideLimits.getState());
-			handRail.hand_drive(Math.pow(armPower,2) * Math.signum(armPower), overrideLimits.getState());
+			handRail.rail_drive(railPower, overrideLimits.getState());
+			handRail.hand_drive(armPower, overrideLimits.getState());
 
 			turningToggle.update(Math.abs(turn) > 0.02);
 			spincarousel.update(gamepad1.left_bumper);
