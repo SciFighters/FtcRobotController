@@ -17,7 +17,6 @@ public class DuckLineTester extends LinearOpMode {
 
 	@Override
 	public void runOpMode() {
-		// TODO: separate to util class
 		int cameraMonitorViewID = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
 		WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam");

@@ -2,14 +2,23 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
 	private LinearOpMode opMode = null; // First I declared it as OpMode now its LinearOpMode
-	DriveClass drive = null;
+
+	private DriveClass drive = null;
+	private HandRailClass handrail = null;
+	private DuckLine duckline = null;
+
 	final double tile = 0.6;
 
 
@@ -38,8 +47,6 @@ public class AutoFlow {
 		PARK,
 		FULL
 	}
-	private HandRailClass handrail = null;
-	private DuckLine duckLine = null;
 
 	final double robotLength =  0.4572;
 	final int screenWidth = 640;
@@ -99,30 +106,19 @@ public class AutoFlow {
 		this.handrail = new HandRailClass(opMode);
 	}
 
-
-
-
-	public void init() {
-		drive.init(opMode.hardwareMap);
-		handrail.init(opMode.hardwareMap);
-
-		handrail.searchHomeRail();
-
-
-		// TODO: separate to util class
-		//Wqebcam
+	void initWebcam() {
 		int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
 
-		/*WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "webcam");
+		WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "webcam");
 		OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
-		this.duckLine = new DuckLine();
-		webcam.setPipeline(duckLine);
+		this.duckline = new DuckLine();
+		webcam.setPipeline(this.duckline);
 
 		webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
 			@Override
 			public void onOpened() {
-				webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
+				webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT); //
 			}
 
 			@Override
@@ -131,20 +127,21 @@ public class AutoFlow {
 				opMode.telemetry.update();
 			}
 		});
-		*/
-		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Middle; //duckLine.getDuck(screenWidth);
-		opMode.telemetry.addData("Init - ABC", shLevel);
-		opMode.telemetry.update();
+	}
+
+	public void init() {
+		initWebcam();
+		drive.init(opMode.hardwareMap);
+		handrail.init(opMode.hardwareMap);
+
+		handrail.searchHomeRail();
 	}
 
 	public void run() { //Autonomous starts
-		//		DuckLine.ABC abc = duckLine.getDuck(screenWidth);
-		DuckLine.SH_Levels shLevel = DuckLine.SH_Levels.Top; //duckLine.getDuck(screenWidth);
-		opMode.telemetry.addData("Start - ABC", shLevel);
+		DuckLine.SH_Levels shLevel = this.duckline.getDuck(screenWidth);
+		opMode.telemetry.addData("SH Level:", shLevel);
 		opMode.telemetry.update();
 
-		//DuckLine.ABC abc = duckLine.getDuck(screenWidth);
-		//DuckLine.ABC abc = DuckLine.ABC.C;
 		opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
 		opMode.telemetry.update();
 
