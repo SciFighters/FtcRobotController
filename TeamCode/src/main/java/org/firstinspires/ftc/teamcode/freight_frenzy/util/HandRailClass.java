@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
-
 // Handrail class
 public class HandRailClass {
     //motors, servos and touch switch
@@ -24,7 +22,7 @@ public class HandRailClass {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
-    private int potentiometer_offset = 0;
+    private int potentiometer_offset;
 
     private DcMotorEx carousel = null;
 

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 // TODO: clean code
 // TODO: hand rail boost
 // TODO: hand rail coupling

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.freight_frenzy.study;
+package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
