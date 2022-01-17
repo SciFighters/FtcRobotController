@@ -26,7 +26,7 @@ public class Jaccouse extends LinearOpMode {
 	private ElapsedTime runtime = new ElapsedTime();
 
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useEncoders().useBrake();
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useBrake(); // TODO: useEncoders().
 	private HandRailClass handRail = new HandRailClass(this);
 
 	private Toggle turningToggle = new Toggle();
@@ -51,6 +51,9 @@ public class Jaccouse extends LinearOpMode {
 		return Math.pow(x, 2) * Math.signum(x);
 	}
 
+	private final double defaultOrientationAngle = -90;
+
+
 	@Override
 	public void runOpMode() {
 		telemetry.addData("Status", "Initialized");
@@ -63,7 +66,7 @@ public class Jaccouse extends LinearOpMode {
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
 
-		drive.resetOrientation(0); //default blue
+		drive.resetOrientation(defaultOrientationAngle); //default blue
 
 		runtime.reset();
 
@@ -74,11 +77,11 @@ public class Jaccouse extends LinearOpMode {
 
 			if (gamepad1.start) {
 				if (gamepad1.x) {
+					drive.resetOrientation(defaultOrientationAngle);
+				}
+				if (gamepad1.y) {
 					drive.resetOrientation(0);
 				}
-//				if (gamepad1.y) {
-//					drive.resetOrientation(-90);
-//				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
 
@@ -104,14 +107,17 @@ public class Jaccouse extends LinearOpMode {
 			boolean stopAll = gamepad1.y;
 			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
 			boolean fieldOriented = !gamepad1.y;
-			double boost = gamepad1.right_trigger * 0.6 + 0.4;
+			final double boostK = 0.5;
+			double boost = gamepad1.right_trigger * boostK + (1 - boostK);
+
 
 			double y = pow(-gamepad1.left_stick_y) * boost;
 			double x = pow(gamepad1.left_stick_x) * boost;
 			double turn = pow(gamepad1.right_stick_x * boost);
 
 			// Hand rail
-			double boostHand = gamepad2.right_trigger * 0.3 + 0.7;
+			final double handBoostK = 0.3;
+			double boostHand = gamepad2.right_trigger * handBoostK + (1 - handBoostK);
 			double railPower = pow(gamepad2.left_stick_x * boostHand);
 			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
@@ -170,11 +176,11 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 			}
 
+			double carouselBoost = gamepad1.left_trigger;
 			if(spincarousel.getState())
-				handRail.carouselRun(0.6);
-
+				handRail.carouselRun(0.6 + carouselBoost);
 			else {
-				handRail.carouselRun(gamepad1.left_trigger);
+				handRail.carouselRun(carouselBoost);
 				//handRail.carouselStop();
 			}
 

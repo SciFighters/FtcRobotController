@@ -22,12 +22,12 @@ public class AutoFlow {
 			this.mul = mul;
 		}
 	}
-	public enum StartPos {
+	public enum STARTPOS {
 		CAROUSEL(1),
 		BARRIER(-1);
 
 		int mul;
-		StartPos(int mul) {
+		STARTPOS(int mul) {
 			this.mul = mul;
 		}
 	}
@@ -58,9 +58,9 @@ public class AutoFlow {
 	Location storageLocation = new Location(1.5,0.9); //0.0, 0.0
 	Location firstStorageLocation = new Location(1.1,0.9); //0.0, 0.0
 	Location SecondFreightLocation = new Location(0.6,0.80);
+
 	ALLIANCE alliance;
-	Location tempStartPos = new Location(0.0, 0.6);
-	StartPos startPos;
+	STARTPOS startPos;
 
 	/**
 	 * @param opMode
@@ -68,20 +68,39 @@ public class AutoFlow {
 	 * @param startPos
 	 * @param auto
 	 */
-	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPos startPos, Auto auto) {
+	public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, STARTPOS startPos, Auto auto) {
 		this.opMode = opMode;
 		this.alliance = alliance;
 		this.startPos = startPos;
 		this.auto = auto;
 
-		if(startPos == StartPos.BARRIER) {
+		if(startPos == STARTPOS.BARRIER) {
 			this.startLocation.flipX();
 			this.shippingHubLocation.flipX();
+		}
+
+		if (alliance == ALLIANCE.RED){
+			//TODO: flip all location on x axis (<location>.flipX())
+			this.startLocation.flipX();
+			this.shippingHubLocation.flipX();
+			this.startLocation.flipX();
+			this.shippingHubLocation.flipX();
+			this.carousel.flipX();
+			this.barrier.flipX();
+			this.freightLocation.flipX();
+			this.firstFreightLocation.flipX();
+			this.storageLocation.flipX();
+			this.firstStorageLocation.flipX();
+			this.SecondFreightLocation.flipX();
+
 		}
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
 		this.handrail = new HandRailClass(opMode);
 	}
+
+
+
 
 	public void init() {
 		drive.init(opMode.hardwareMap);
@@ -147,12 +166,12 @@ public class AutoFlow {
 		// retract arm.
 		handrail.gotoHand(70, 1);
 
-		if (startPos == StartPos.CAROUSEL) {
+		if (startPos == STARTPOS.CAROUSEL) {
 			// Go to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carousel.y);
 			opMode.telemetry.update();
 			handrail.carouselRun(0.5);
-			drive.goToLocation(carousel, 1, 45.0, 0.15, 6);
+			drive.goToLocation(carousel, 1, 45.0 * alliance.mul, 0.15, 6);
 			//drive.setPower(0,0,0.4);
 			//opMode.sleep(3000);
 
