@@ -81,6 +81,7 @@ public class Jaccouse extends LinearOpMode {
 //				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
+
 				continue;
 			}
 

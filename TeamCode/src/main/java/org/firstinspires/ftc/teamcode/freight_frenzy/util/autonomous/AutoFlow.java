@@ -54,7 +54,10 @@ public class AutoFlow {
 	Location barrier = new Location(-1.2, 1.0);
 
 	Location freightLocation = new Location(-1.5,0.8); // 1.5, 2.5
+	Location firstFreightLocation = new Location(-0.60,0.80);
 	Location storageLocation = new Location(1.5,0.9); //0.0, 0.0
+	Location firstStorageLocation = new Location(1.1,0.9); //0.0, 0.0
+	Location SecondFreightLocation = new Location(0.6,0.80);
 	ALLIANCE alliance;
 	Location tempStartPos = new Location(0.0, 0.6);
 	StartPos startPos;
@@ -168,14 +171,14 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			if (auto == Auto.FULL){
-				drive.goTo(0.6,0.80,1,90,0.15, 0);
+				drive.goToLocation(SecondFreightLocation,1,90,0.15, 0);
 				handrail.gotoHandRail(0,70,1);
-				drive.goTo(-0.60,0.80,1,90,0.15,0); //first location
+				drive.goToLocation(firstFreightLocation,1,90,0.15,0); //first location
 				drive.goToLocation(freightLocation, 1, 90, 0.05, 0);
 				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			} else {
 				// go to parking at storage unit
-				drive.goTo(1.1,0.9,1,90,0.05,0); //first location
+				drive.goToLocation(firstStorageLocation,1,90,0.05,0); //first location
 				opMode.telemetry.addData("after", drive.getHeading());
 				drive.goToLocation(storageLocation, 0.8, 90, 0.02, 0);
 				opMode.telemetry.addData("now", drive.getHeading());
@@ -186,7 +189,7 @@ public class AutoFlow {
 			//drive.goToLocation(shippingHubLocation, 1,-90 ,0.2, 0);
 			//drive.turnTo(90,1);
 			//handrail.gotoHandRail(0,85,1);
-			drive.goTo(-0.60,0.80,1,90,0.15,0); //first location
+			drive.goToLocation(firstFreightLocation,1,90,0.15,0); //first location
 			drive.goToLocation(freightLocation, 1, 90, 0.05, 0);
 			handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			drive.goTo(-1.5,0.7,0.7,135,0.05,0);
