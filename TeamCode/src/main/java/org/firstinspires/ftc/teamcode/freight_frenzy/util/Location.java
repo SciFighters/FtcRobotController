@@ -11,7 +11,7 @@ public class Location {
 	}
 
 	public void flipX() {
-		this.x *= -1;
+		this.x = -1;
 	}
 	public void flipY() {
 		this.y *= -1;

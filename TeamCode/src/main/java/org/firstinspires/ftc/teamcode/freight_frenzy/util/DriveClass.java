@@ -323,11 +323,11 @@ public class DriveClass {
         stopPower();
     }
 
-    public void goToLocation(Location location, double power, double targetHeading, double tolerance) {
-        goTo(location.x, location.y, power, targetHeading, tolerance);
+    public void goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout) {
+        goTo(location.x, location.y, power, targetHeading, tolerance, timeout);
     }
 
-    public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance) {
+    public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
         double currentX = getPosX();
         double currentY = getPosY();
         double deltaX = x - currentX;
@@ -338,6 +338,8 @@ public class DriveClass {
         //double totalDist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
         double totalDist = Math.hypot(deltaX, deltaY);
         double currentDist = 0;
+
+        ElapsedTime timer = new ElapsedTime();
 
         opMode.telemetry.addData("goto x", x);
         opMode.telemetry.addData("goto y", y);
@@ -366,6 +368,7 @@ public class DriveClass {
             double RVy = deltaY / remainDist;  // y velocity ratio
             double RVx = deltaX / remainDist;  // x velocity ratio
 
+
             if (acclPower < power) {
                 power = acclPower;
             }
@@ -389,6 +392,7 @@ public class DriveClass {
             double strafe = Vy * Math.sin(phiRad) + Vx * Math.cos(phiRad);
             setPower(forward, correction, strafe);
 
+
             opMode.telemetry.addData("distance", "%2.3f, %2.3f", currentDist, remainDist);
             opMode.telemetry.addData("Abs Pos", "X,Y %2.3f, %2.3f", getAbsolutesPosX(), getAbsolutesPosY());
             opMode.telemetry.addData("> currnt", "X,Y: %2.3f, %2.3f", currentX, currentY);
@@ -398,6 +402,9 @@ public class DriveClass {
             opMode.telemetry.addData("heading error", headingErr);
             opMode.telemetry.addData("power", power);
             opMode.telemetry.update();
+
+            if (timeout != 0 && timeout <= timer.seconds())
+                break;
         }
         setPower(0, 0, 0);
     }

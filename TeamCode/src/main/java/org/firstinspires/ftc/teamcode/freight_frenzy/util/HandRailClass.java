@@ -9,8 +9,6 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
-
 // Handrail class
 public class HandRailClass {
     //motors, servos and touch switch
@@ -25,7 +23,7 @@ public class HandRailClass {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
-    private int potentiometer_offset = 0;
+    private int potentiometer_offset;
 
     private DcMotorEx carousel = null;
 
@@ -40,7 +38,7 @@ public class HandRailClass {
         hand.setDirection(DcMotorEx.Direction.FORWARD);
 
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -62,10 +60,12 @@ public class HandRailClass {
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
-        this.ResetHand();
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        potentiometer_offset = getScaledPotentiometerValue();
 
-        hand.setTargetPositionTolerance(50);
-        rail.setTargetPositionTolerance(10);
+        hand.setTargetPositionTolerance(20);
+        rail.setTargetPositionTolerance(20);
         // this.searchHomeRail();
     }
 
@@ -74,13 +74,6 @@ public class HandRailClass {
     /**** @param linearOpMode opMode */
     public HandRailClass(LinearOpMode opMode) {
         this.opMode = opMode;
-    }
-
-    private void ResetHand() {
-        //resetting hand, potentiometer offset
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        potentiometer_offset = getScaledPotentiometerValue();
     }
 
 
@@ -387,12 +380,18 @@ public class HandRailClass {
         }
     }
 
-    public boolean isBusy() {
+    public boolean isBusy(float... timeout) {
         opMode.telemetry.addData( "Rail.isBusy: ",rail.isBusy());
         opMode.telemetry.addData( "Hand.isBusy: ", hand.isBusy());
         opMode.telemetry.update();
 
-        return (rail.isBusy() || hand.isBusy());
+        ElapsedTime Timer = new ElapsedTime();
+
+        if(timeout.length == 0) return (rail.isBusy() || hand.isBusy());
+        else if(timeout.length == 1) return (rail.isBusy() || hand.isBusy()) && timeout[0] <= Timer.seconds();
+        else
+        return false;
+
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {

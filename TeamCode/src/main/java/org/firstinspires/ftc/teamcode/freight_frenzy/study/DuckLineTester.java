@@ -4,10 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.ultimate_goal.AutoFlows;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.BananaPipeline;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -20,7 +17,6 @@ public class DuckLineTester extends LinearOpMode {
 
 	@Override
 	public void runOpMode() {
-		// TODO: separate to util class
 		int cameraMonitorViewID = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
 		WebcamName webcamName = hardwareMap.get(WebcamName.class, "webcam");
@@ -42,7 +38,7 @@ public class DuckLineTester extends LinearOpMode {
 			}
 		});
 
-		telemetry.addLine("Initialized v1");
+		telemetry.addLine("Initialized v2");
 		telemetry.update();
 
 		waitForStart();

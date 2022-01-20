@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.study.DuckLine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 // TODO: clean code
 // TODO: hand rail boost
 // TODO: hand rail coupling
@@ -101,8 +101,8 @@ public class JaccouseTest extends LinearOpMode {
                     handRail.searchHome();
                 }
 
-                if (homingHand.isClicked())
-                    handRail.searchHomeHand();
+//                if (homingHand.isClicked())
+//                    handRail.searchHomeHand();
                 continue;
             }
 
@@ -188,13 +188,13 @@ public class JaccouseTest extends LinearOpMode {
             }
 
             if (a.isClicked()){
-                drive.goToLocation(aLocation, 0.5, 0, 0.05);
+                drive.goToLocation(aLocation, 0.5, 0, 0.05,0);
             } else if(b.isClicked()){
-                drive.goToLocation(bLocation, 0.5, 0, 0.05);
+                drive.goToLocation(bLocation, 0.5, 0, 0.05,0);
             } else if(Y.isClicked()) {
-                drive.goToLocation(yLocation, 0.5, -45, 0.05);
+                drive.goToLocation(yLocation, 0.5, -45, 0.05,0);
             } else if(xl.isClicked()) {
-                drive.goToLocation(xLocation, 0.5, 45, 0.05);
+                drive.goToLocation(xLocation, 0.5, 45, 0.05,0);
             }
 
 
