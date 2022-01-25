@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 @TeleOp
+@Disabled
 public class CarouselSpeedTest extends LinearOpMode {
 	DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, new Location(0, 0)).useEncoders().useBrake();
 	HandRailClass handRail = new HandRailClass(this);

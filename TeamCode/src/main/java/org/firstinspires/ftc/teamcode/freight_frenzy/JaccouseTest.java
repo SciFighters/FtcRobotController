@@ -31,10 +31,16 @@ public class JaccouseTest extends LinearOpMode {
 
     private Toggle turningToggle = new Toggle();
 
-    Location aLocation = new Location(0, 0.225);
-    Location bLocation = new Location(0.6, 1.2);
-    Location yLocation = new Location(0, 1.8);
-    Location xLocation = new Location(-0.6, 1.2);
+//    Location aLocation = new Location(0, 0.225);
+//    Location bLocation = new Location(0.6, 1.2);
+//    Location yLocation = new Location(0, 1.8);
+//    Location xLocation = new Location(-0.6, 1.2);
+    // Redo
+    Location aLocation = new Location(1.32, 0.27); // blue carousel location
+    Location bLocation = new Location(0.3, 0.6); // blue shipping hub location
+    Location yLocation = new Location(-1.32, 0.27); // red carousel location
+    Location xLocation = new Location(-0.3, 0.6); // red shipping hub location
+
 
     private com.qualcomm.robotcore.hardware.HardwareMap HardwareMap;
     private int direction = 1;
@@ -188,13 +194,13 @@ public class JaccouseTest extends LinearOpMode {
             }
 
             if (a.isClicked()){
-                drive.goToLocation(aLocation, 0.5, 0, 0.05,0);
+                drive.goToLocation(aLocation, 1, 45, 0.05,0);
             } else if(b.isClicked()){
-                drive.goToLocation(bLocation, 0.5, 0, 0.05,0);
+                drive.goToLocation(bLocation, 1, -45, 0.05,0);
             } else if(Y.isClicked()) {
-                drive.goToLocation(yLocation, 0.5, -45, 0.05,0);
+                drive.goToLocation(yLocation, 1, 135, 0.05,0);
             } else if(xl.isClicked()) {
-                drive.goToLocation(xLocation, 0.5, 45, 0.05,0);
+                drive.goToLocation(xLocation, 15,45 , 0.05,0);
             }
 
 
