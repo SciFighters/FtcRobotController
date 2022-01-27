@@ -25,7 +25,7 @@ public class JaccouseTest extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
 
-    Location startingPosition = new Location(0, 0.225); //last x = -1.75*tile, y = 0*tile
+    Location startingPosition = new Location(-0.6, 0.225); //last x = -1.75*tile, y = 0*tile
     private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useEncoders().useBrake();
     private HandRailClass handRail = new HandRailClass(this);
 

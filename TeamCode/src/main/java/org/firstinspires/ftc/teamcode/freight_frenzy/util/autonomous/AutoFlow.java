@@ -91,12 +91,10 @@ public class AutoFlow {
 			this.shippingHubLocation.flipX();
 		}
 
-		if (alliance == ALLIANCE.RED){
+		if (alliance == ALLIANCE.RED) {
 			//TODO: flip all location on x axis (<location>.flipX())
 			opMode.telemetry.addLine("red");
 			opMode.telemetry.update();
-			this.startLocation.flipX();
-			this.shippingHubLocation.flipX();
 			this.startLocation.flipX();
 			this.shippingHubLocation.flipX();
 			this.carouselLocation.flipX();
