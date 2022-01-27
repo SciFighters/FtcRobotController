@@ -32,8 +32,6 @@ public class DuckLine extends OpenCvPipeline {
 		return targetRect;
 	}
 
-//	public enum ABC {A, B, C, X}
-
 	// SH - Shipping Hub
 	public enum SH_Levels {
 		Top,
@@ -54,12 +52,15 @@ public class DuckLine extends OpenCvPipeline {
 //		}
 //	}
 
-	public SH_Levels getDuck(int screenWidth) {
+	private double divider_bottom_middle;
+	private double divider_middle_top;
+
+	public SH_Levels getDuck() {
 		if (targetPos == null) return null;
 		else {
-			if (targetPos.x <= screenWidth / 3) {
+			if (targetPos.x <= this.divider_bottom_middle) {
 				return SH_Levels.Bottom;
-			} else if (targetPos.x >= screenWidth / 3 * 2) {
+			} else if (targetPos.x >= this.divider_middle_top) {
 				return SH_Levels.Top;
 			} else {
 				return SH_Levels.Middle;
@@ -79,11 +80,13 @@ public class DuckLine extends OpenCvPipeline {
 		height = hsv.height();
 		subRect = new Rect(new Point(width * 2 / 5, height * 5 / 12), new Point(width * 3 / 5, height * 6 / 12));
 		subMat = hsv.submat(subRect);
+
+		this.divider_bottom_middle = (width / 3.0) + 40;
+		this.divider_middle_top = ((width / 3.0) * 2) + 40;
 	}
 
 	@Override
 	public Mat processFrame(Mat frame) {
-		// search for the orange Rings
 //        Mat smallFrame = new Mat(frame, new Range(frame.height() / 2, frame.height()));
 		Mat smallFrame = frame;
 		Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
@@ -152,10 +155,13 @@ public class DuckLine extends OpenCvPipeline {
 		}
 
 		// show the sub Rect for color testing
-		Scalar c = Core.mean(subMat);  // Calcs the average color in the sub Rect area
-		Imgproc.rectangle(smallFrame, subRect, new Scalar(0, 255, 0), 2); // Draw a green rect around the subRect area
-		Point textPoint = new Point(10, subRect.y - 20);
-		Imgproc.putText(smallFrame, String.format("H: %03.1f, S: %03.1f, V: %03.1f", c.val[0], c.val[1], c.val[2]), textPoint, Imgproc.FONT_HERSHEY_PLAIN, 2, new Scalar(0, 255, 00), 2);
+		// Scalar c = Core.mean(subMat);  // Calcs the average color in the sub Rect area
+		// Imgproc.rectangle(smallFrame, subRect, new Scalar(0, 255, 0), 2); // Draw a green rect around the subRect area
+		// Point textPoint = new Point(10, subRect.y - 20);
+		// Imgproc.putText(smallFrame, String.format("H: %03.1f, S: %03.1f, V: %03.1f", c.val[0], c.val[1], c.val[2]), textPoint, Imgproc.FONT_HERSHEY_PLAIN, 2, new Scalar(0, 255, 00), 2);
+
+		Imgproc.line(smallFrame, new Point(this.divider_bottom_middle, 0), new Point(this.divider_bottom_middle, this.height), new Scalar(86, 123, 47));
+		Imgproc.line(smallFrame, new Point(this.divider_middle_top, 0), new Point(this.divider_middle_top, this.height), new Scalar(86, 123, 47));
 
 		return smallFrame;
 	}

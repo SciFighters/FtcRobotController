@@ -12,8 +12,8 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 @TeleOp
 public class DuckLineTester extends LinearOpMode {
-	public int screenWidth = 640;
-	public int screenHeight = 360;
+	final private int screenWidth = 640;
+	final private int screenHeight = 360;
 
 	@Override
 	public void runOpMode() {
@@ -43,10 +43,10 @@ public class DuckLineTester extends LinearOpMode {
 
 		waitForStart();
 
-		DuckLine.SH_Levels sh_level = null;
+		DuckLine.SH_Levels sh_level;
 
 		while(opModeIsActive()) {
-			sh_level = duckline.getDuck(screenWidth);
+			sh_level = duckline.getDuck();
 
 			if (sh_level != null)
 				telemetry.addData("sh level:", sh_level.toString());

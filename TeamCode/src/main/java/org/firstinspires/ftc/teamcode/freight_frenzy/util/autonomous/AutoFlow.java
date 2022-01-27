@@ -73,6 +73,7 @@ public class AutoFlow {
 
 	ALLIANCE alliance;
 	StartPos startPos;
+
 	/**
 	 * @param opMode
 	 * @param alliance
@@ -145,9 +146,8 @@ public class AutoFlow {
 	public void run() { //Autonomous starts
 		//drive.goTo(0,0,1,0,0.03,0);
 
-		DuckLine.SH_Levels shLevel = this.duckline.getDuck(screenWidth);
+		DuckLine.SH_Levels shLevel = this.duckline.getDuck();
 		opMode.telemetry.addData("SH Level:", shLevel);
-		opMode.telemetry.update();
 
 		opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
 		opMode.telemetry.update();
