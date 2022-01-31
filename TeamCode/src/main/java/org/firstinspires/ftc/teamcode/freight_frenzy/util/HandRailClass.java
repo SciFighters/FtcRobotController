@@ -220,7 +220,7 @@ public class HandRailClass {
     public void telemetry_handRail() {
         opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
-        opMode.telemetry.addData("potentiometer","offset: %d  %3.2fv:", potentiometer_offset, this.getPotentiometerValue());
+        opMode.telemetry.addData("potentiometer","offset: %d  %3.2fv  scaled %d", potentiometer_offset, this.getPotentiometerValue(), getScaledPotentiometerValue());
     }
 
 
@@ -351,11 +351,19 @@ public class HandRailClass {
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
         // int tick = (int)(5000.0 * (1- pot_val / 3.33));
 
-        double potVoltRange = 3.33;
-        double potTickRange = 5000.0;
-        double offset = ((double)handRange - potTickRange)/2;
-        int tick = (int)(potTickRange * (1- pot_val / potVoltRange) + offset) ;
-        return tick;
+//        double potVoltRange = 3.33;
+//        double potTickRange = 5000.0;
+//        double offset = ((double)handRange - potTickRange)/2;
+//        int tick = (int)(potTickRange * (1- pot_val / potVoltRange) + offset) ;
+//        return tick;
+
+        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+        double old_min = 0.75;
+        double old_max = 2.96;
+
+        double new_min = 0;
+        double new_max = -4970;
+        return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
     }
 
 
