@@ -28,7 +28,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    private int handRange = 5885;
+    private int handRange = 6000;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -199,7 +199,6 @@ public class HandRailClass {
 
 
     public double getHandPercent() {
-        //                                               v might need to invert
         return ((double)(hand.getCurrentPosition() + potentiometer_offset) / handRange) * 100;
     }
 
@@ -358,11 +357,11 @@ public class HandRailClass {
 //        return tick;
 
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.75;
-        double old_max = 2.96;
+        double old_min = 0.6;
+        double old_max = 3.21;
 
-        double new_min = 0;
-        double new_max = -4970;
+        double new_min = handRange;
+        double new_max = 0;
         return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
     }
 
