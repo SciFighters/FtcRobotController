@@ -2,6 +2,8 @@
 // Freight Frenzy 2021 - 2022
 package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
+import android.util.Log;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -330,7 +332,13 @@ public class DriveClass {
         goTo(location.x, location.y, power, location.angle, tolerance, timeout);
     }
 
-        public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
+    public final long maxIdleCount = 250;
+    public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
+        long goToIdle = 0; //if not moving
+        boolean isCheckingIdle = false;
+        double lastX = 0;
+        double lastY = 0;
+
         double currentX = getPosX();
         double currentY = getPosY();
         double deltaX = x - currentX;
@@ -352,6 +360,8 @@ public class DriveClass {
         opMode.telemetry.update();
 
         while (opMode.opModeIsActive() && (currentDist < totalDist - tolerance)) { // TODO: there a NaN here somewhere (the attack of the NaNs)
+
+
             double power = targetPower;
 
             currentX = getPosX();
@@ -406,11 +416,29 @@ public class DriveClass {
             opMode.telemetry.addData("power", power);
             opMode.telemetry.update();
 
-            if (timeout != 0 && timeout <= timer.seconds())
-                break;
+            if((timeout != 0 && timeout <= timer.seconds())) break;
+
+            // Idle checker
+            double moveRange = 0.001;
+
+            double dx = Math.abs(lastX - currentX);
+            double dy = Math.abs(lastY - currentY);
+            double dist2 = Math.hypot(dx, dy);
+            Log.d("distance from last time (delta)", String.valueOf(dist2));
+//            if((currentDist / remainDist) < 25 && dist2 < moveRange) goToIdle += 1;
+            lastX = currentX; lastY = currentY;
+
+//            if(goToIdle >= (long)(maxIdleCount / 2)) break;
         }
         setPower(0, 0, 0);
     }
+
+    private boolean inRange(double min, double max, double value) {
+        if(max < min) { double tempMax = max; max = min; min = tempMax; }
+        if(value > min && value < max) return true;
+        return false;
+    }
+
 
     public void drive(double forward, double sideward, double targetPower, double targetAngle) {
         drive(forward, sideward, targetPower, targetAngle, true);

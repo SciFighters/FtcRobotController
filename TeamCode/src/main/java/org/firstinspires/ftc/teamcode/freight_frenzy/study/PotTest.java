@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.study;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -14,10 +16,14 @@ public class PotTest extends LinearOpMode {
     private AnalogInput pot = null;
     private final double handRang = 5000;
     private DigitalChannel limit_front = null, limit_back = null;
-    private int patent(double pv){
-        int tick = (int)(handRang * (1- pv / 3.33));
+    public static double maxVoltagePot = 0;
+    Toggle maxVoltageToggle = new Toggle();
+
+    private int patent(double PowerVoltage, double MaxVoltage) {
+        int tick = (int)(handRang * (1 - PowerVoltage / MaxVoltage));
         return tick;
     }
+
 
 
     private void initPot() {
@@ -58,13 +64,17 @@ public class PotTest extends LinearOpMode {
             if(gamepad1.y) this.shutHand();
             // emergency exit
             if(gamepad1.x) break;
+            // Potentiometer max voltage value
+            maxVoltagePot = Math.max(pot.getVoltage(), maxVoltagePot);
+            maxVoltageToggle.update(gamepad1.a);
+            if(maxVoltageToggle.isClicked()) telemetry.addData("current max voltage: ", String.valueOf(maxVoltagePot));
             // Telemetry
             telemetry.addData("potentiometer V", pot.getVoltage());
-            telemetry.addData("potentiometer %",pot.getVoltage() / pot.getMaxVoltage()* 100);
+            telemetry.addData("potentiometer %",pot.getVoltage() / pot.getMaxVoltage() * 100);
             telemetry.addData("ticks: ", hand.getCurrentPosition());
-            telemetry.addData("current offset", patent(pot.getVoltage()));
-            telemetry.addData("current diff", hand.getCurrentPosition() - patent(pot.getVoltage()));
+            telemetry.addData("current offset", patent(pot.getVoltage(), 3.33));
+            telemetry.addData("current diff", hand.getCurrentPosition() - patent(pot.getVoltage(), 3.33));
             telemetry.update();
-        }
+        } //     |/0\v/0\|
     }
 }

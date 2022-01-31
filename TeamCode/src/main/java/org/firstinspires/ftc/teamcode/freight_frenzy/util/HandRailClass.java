@@ -66,7 +66,7 @@ public class HandRailClass {
 
         hand.setTargetPositionTolerance(20);
         rail.setTargetPositionTolerance(20);
-        // this.searchHomeRail();
+        this.searchHome();
     }
 
     private LinearOpMode opMode;
@@ -155,7 +155,7 @@ public class HandRailClass {
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
             gotoHandRail(65,84,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(65,90,1);
+            gotoHandRail(65,93,1);
         } else if (shLevel == DuckLine.SH_Levels.Collect){
             gotoHandRail(20,8,1);
         }
@@ -199,7 +199,7 @@ public class HandRailClass {
 
 
     public double getHandPercent() {
-        return ((double)(hand.getCurrentPosition() + potentiometer_offset) / handRange) * 100;
+        return ((double)(hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
     }
 
     public double getHandTicks() {
@@ -303,8 +303,8 @@ public class HandRailClass {
 //        }
 //
 //        this.hand_drive(0, true);
-        if(this.getHandPercent() > 80) {
-            this.gotoHand(80, 0.8);
+        if(this.getHandPercent() > 90) {
+            this.gotoHand(90, 0.8);
             //Timeout
             ElapsedTime timer = new ElapsedTime();
             while(hand.isBusy() && timer.seconds() < 1.75);
@@ -402,29 +402,29 @@ public class HandRailClass {
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {
-        return true;
+        //return true;
 
-        //returns true if the rail is allowed to move
-//        if (!override) {
-//            if (forward)
-//                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
-//            else
-//                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
-//        } else
-//            return true;
+        // returns true if the rail is allowed to move
+        if (!override) {
+            if (forward)
+                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
+            else
+                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
+        } else
+            return true;
     }
 
     public boolean isHandBoundless(boolean forward, boolean override) {
-        return true;
+//        return true;
 
-        //returns true if the hand is allowed to move (to a certain side)
-//        if (!override) {
-//            if (forward)
-//                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
-//            else
-//                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
-//        } else
-//            return true;
+        // returns true if the hand is allowed to move (to a certain side)
+        if (!override) {
+            if (forward)
+                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
+            else
+                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+        } else
+            return true;
     }
 
 

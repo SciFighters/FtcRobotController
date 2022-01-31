@@ -118,7 +118,7 @@ public class Jaccouse extends LinearOpMode {
 			// Hand rail
 			final double handBoostK = 0.3;
 			double boostHand = gamepad2.right_trigger * handBoostK + (1 - handBoostK);
-			double railPower = pow(gamepad2.left_stick_x * boostHand);
+			double railPower = pow(gamepad2.left_stick_x * boostHand);// possibly changeable to gamepad2.left_stick_x
 			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 

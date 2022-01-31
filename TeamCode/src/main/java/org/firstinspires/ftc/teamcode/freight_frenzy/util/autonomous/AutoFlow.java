@@ -168,16 +168,17 @@ public class AutoFlow {
 		// wait for handRail to get into position (both not busy)
 		handrail.gotoLevel(shLevel);
 		while (opMode.opModeIsActive() && handrail.isBusy());
-		handrail.gotoRail(100, 0.5);
+		handrail.gotoRail(75, 0.5);
 		while (opMode.opModeIsActive() && handrail.isBusy());
 
 		// Put the cube on shipping hub
 		handrail.grabberRelease();
-		opMode.sleep(2000); //wait for drop
-		handrail.gotoRail(0, 0.4);
+		opMode.sleep(1950); //wait for drop
 		handrail.grabberStop();
 		// retract arm.
-		handrail.gotoHand(70, 1);
+		handrail.gotoRail(50, 0.4);
+		while(opMode.opModeIsActive() && handrail.isBusy());
+		handrail.gotoHandRail(0,90, 1);
 
 		if (startPos == StartPos.CAROUSEL) {
 
@@ -202,10 +203,10 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			if (auto == Auto.FULL){
-				drive.goToLocation(freightLocation_Pre1,1,0.15, 0);
+				drive.goToLocation(freightLocation_Pre1,1,0.2, 0);
 				handrail.gotoHandRail(0,70,1);
-				drive.goToLocation(freightLocation_Pre2,1,0.15,0); //first location
-				drive.goToLocation(freightLocation, 1, 0.05, 0);
+				drive.goToLocation(freightLocation_Pre2,1,0.2,0); //first location
+				drive.goToLocation(freightLocation, 1, 0.2, 0);
 				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			} else {
 				// go to parking at storage unit
