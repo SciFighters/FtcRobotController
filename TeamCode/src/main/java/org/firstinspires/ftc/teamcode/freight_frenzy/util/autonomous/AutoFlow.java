@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
@@ -59,17 +60,17 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.6); //0.6, 0.75
-	Location carouselLocation = new Location(1.32, 0.27);
+	Location shippingHubLocation = new Location(0.3, 0.6,-45); //0.6, 0.75
+	Location carouselLocation = new Location(1.32, 0.27,45);
 	Location barrier = new Location(-1.2, 1.0);
 
 	// Freight locations
-	Location freightLocation = new Location(-1.5,0.85); // 1.5, 2.5
-	Location freightLocation_Pre1 = new Location(0.6,0.85); //previously 0.6, 0.80
-	Location freightLocation_Pre2 = new Location(-0.60,0.80);
+	Location freightLocation = new Location(-1.5,0.85, 90); // 1.5, 2.5
+	Location freightLocation_Pre1 = new Location(0.6,0.85, 90); //previously 0.6, 0.80
+	Location freightLocation_Pre2 = new Location(-0.60,0.80, 90);
 	// Storage locations
-	Location storageLocation = new Location(1.5,0.92); //previously 1.5, 0.9
-	Location storageLocation_Pre1 = new Location(1.1,0.92); //1.1, 0.9
+	Location storageLocation = new Location(1.5,0.92, 90); //previously 1.5, 0.9
+	Location storageLocation_Pre1 = new Location(1.1,0.92, 90); //1.1, 0.9
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -89,6 +90,7 @@ public class AutoFlow {
 		if(startPos == StartPos.BARRIER) {
 			this.startLocation.flipX();
 			this.shippingHubLocation.flipX();
+			this.shippingHubLocation.flipAngle();
 		}
 
 		if (alliance == ALLIANCE.RED) {
@@ -104,6 +106,15 @@ public class AutoFlow {
 			this.storageLocation.flipX();
 			this.storageLocation_Pre1.flipX();
 			this.freightLocation_Pre1.flipX();
+
+			//flipping angles
+			this.freightLocation.flipAngle();
+			this.freightLocation_Pre1.flipAngle();
+			this.freightLocation_Pre2.flipAngle();
+			this.storageLocation.flipAngle();
+			this.storageLocation_Pre1.flipAngle();
+			this.carouselLocation.angle = 135;
+			this.shippingHubLocation.flipAngle();
 		}
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
@@ -152,7 +163,7 @@ public class AutoFlow {
 
 		// Go to Shipping Hub
 		handrail.gotoRail(50, 0.5);
-		drive.goToLocation(shippingHubLocation, 1, -45 * alliance.mul * startPos.mul, 0.05, 0);
+		drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
 
 		// wait for handRail to get into position (both not busy)
 		handrail.gotoLevel(shLevel);
@@ -169,11 +180,11 @@ public class AutoFlow {
 		handrail.gotoHand(70, 1);
 
 		if (startPos == StartPos.CAROUSEL) {
-			double carouselHeading = (alliance == ALLIANCE.BLUE) ? 45 : 135;
+
 			// Going to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
 			opMode.telemetry.update();
-			drive.goToLocation(carouselLocation, 1, carouselHeading, 0.05, 6); //previous tolerance 0.15
+			drive.goToLocation(carouselLocation, 1, 0.05, 6); //previous tolerance 0.15
 			handrail.carouselRun(0.5 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
@@ -191,25 +202,27 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			if (auto == Auto.FULL){
-				drive.goToLocation(freightLocation_Pre1,1,90 * alliance.mul,0.15, 0);
+				drive.goToLocation(freightLocation_Pre1,1,0.15, 0);
 				handrail.gotoHandRail(0,70,1);
-				drive.goToLocation(freightLocation_Pre2,1,90 * alliance.mul,0.15,0); //first location
-				drive.goToLocation(freightLocation, 1, 90 * alliance.mul, 0.05, 0);
+				drive.goToLocation(freightLocation_Pre2,1,0.15,0); //first location
+				drive.goToLocation(freightLocation, 1, 0.05, 0);
 				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			} else {
 				// go to parking at storage unit
-				drive.goToLocation(storageLocation_Pre1,1,90 * alliance.mul,0.15,0); //first location
+				RobotLog.d("going to storageLocation");
+				drive.goToLocation(storageLocation_Pre1,1,0.15,0); //first location
 				opMode.telemetry.addData("after", drive.getHeading());
-				drive.goToLocation(storageLocation, 0.8, 90 * alliance.mul, 0.02, 0);
+				drive.goToLocation(storageLocation, 0.8,  0.02, 0);
 				opMode.telemetry.addData("now", drive.getHeading());
 				drive.setPower(0.45,0,0);
 				opMode.sleep(500);
 				drive.setPower(0,0,0);
+
 			}
 		} else {
 			// Barrier (freight)
-			drive.goToLocation(freightLocation_Pre2,1,90 * alliance.mul,0.15,0); //first location
-			drive.goToLocation(freightLocation, 1, 90 * alliance.mul, 0.05, 0);
+			drive.goToLocation(freightLocation_Pre2,1,0.15,0); //first location
+			drive.goToLocation(freightLocation, 1, 0.05, 0);
 			handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 			// TODO: Collect freight item, moreover, place it on the shipping hub
 		}

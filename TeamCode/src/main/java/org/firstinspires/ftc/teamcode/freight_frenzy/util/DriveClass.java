@@ -326,8 +326,11 @@ public class DriveClass {
     public void goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout) {
         goTo(location.x, location.y, power, targetHeading, tolerance, timeout);
     }
+    public void goToLocation(Location location, double power, double tolerance, double timeout) {
+        goTo(location.x, location.y, power, location.angle, tolerance, timeout);
+    }
 
-    public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
+        public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
         double currentX = getPosX();
         double currentY = getPosY();
         double deltaX = x - currentX;
