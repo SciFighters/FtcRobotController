@@ -33,7 +33,7 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(group = "blue carousel")
+@Autonomous(group = "red carousel")
 //@Disabled
 public class RedCarouselLong extends LinearOpMode {
 	@Override

@@ -151,7 +151,7 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(65,75,1);
+            gotoHandRail(90,78,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
             gotoHandRail(65,84,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
@@ -369,7 +369,7 @@ public class HandRailClass {
 
 
     public void carouselRun(double power) {
-        carousel.setPower(power);
+        carousel.setPower(power); //TODO: yavneh had constructed the carousel in the opposite direction
     }
 
     public void carouselStop() {
@@ -402,29 +402,29 @@ public class HandRailClass {
     }
 
     public boolean isRailBoundless(boolean forward, boolean override) {
-        //return true;
+        return true;
 
         // returns true if the rail is allowed to move
-        if (!override) {
-            if (forward)
-                return (this.getHandPercent() > 8 || this.getRailPercent() < 25);
-            else
-                return (this.getHandPercent() < 92 || this.getRailPercent() > 75);
-        } else
-            return true;
+//        if (!override) {
+//            if (forward)
+//                return (this.getHandPercent() > 8 || this.getRailPercent() < 25);
+//            else
+//                return (this.getHandPercent() < 92 || this.getRailPercent() > 75);
+//        } else
+//            return true;
     }
 
     public boolean isHandBoundless(boolean forward, boolean override) {
-//        return true;
+        return true;
 
         // returns true if the hand is allowed to move (to a certain side)
-        if (!override) {
-            if (forward)
-                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
-            else
-                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
-        } else
-            return true;
+//        if (!override) {
+//            if (forward)
+//                return (this.getRailPercent() > 75 || this.getHandPercent() < 90);
+//            else
+//                return (this.getRailPercent() < 25 || this.getHandPercent() > 10);
+//        } else
+//            return true;
     }
 
 

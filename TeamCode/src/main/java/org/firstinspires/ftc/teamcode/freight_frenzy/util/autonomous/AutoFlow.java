@@ -69,8 +69,8 @@ public class AutoFlow {
 	Location freightLocation_Pre1 = new Location(0.6,0.85, 90); //previously 0.6, 0.80
 	Location freightLocation_Pre2 = new Location(-0.60,0.80, 90);
 	// Storage locations
-	Location storageLocation = new Location(1.5,0.92, 90); //previously 1.5, 0.9
-	Location storageLocation_Pre1 = new Location(1.1,0.92, 90); //1.1, 0.9
+	Location storageLocation = new Location(1.5,0.93, 90); //previously 1.5, 0.9
+	Location storageLocation_Pre1 = new Location(1.0,0.93, 90); //1.1, 0.92
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -108,11 +108,11 @@ public class AutoFlow {
 			this.freightLocation_Pre1.flipX();
 
 			//flipping angles
-			this.freightLocation.flipAngle();
-			this.freightLocation_Pre1.flipAngle();
-			this.freightLocation_Pre2.flipAngle();
-			this.storageLocation.flipAngle();
-			this.storageLocation_Pre1.flipAngle();
+			//this.freightLocation.flipAngle();
+			//this.freightLocation_Pre1.flipAngle();
+			//this.freightLocation_Pre2.flipAngle();
+			//this.storageLocation.flipAngle();
+			//this.storageLocation_Pre1.flipAngle();
 			this.carouselLocation.angle = 135;
 			this.shippingHubLocation.flipAngle();
 		}
@@ -168,7 +168,7 @@ public class AutoFlow {
 		// wait for handRail to get into position (both not busy)
 		handrail.gotoLevel(shLevel);
 		while (opMode.opModeIsActive() && handrail.isBusy());
-		handrail.gotoRail(75, 0.5);
+		if(shLevel != DuckLine.SH_Levels.Top) handrail.gotoRail(75, 0.5);
 		while (opMode.opModeIsActive() && handrail.isBusy());
 
 		// Put the cube on shipping hub
@@ -211,9 +211,9 @@ public class AutoFlow {
 			} else {
 				// go to parking at storage unit
 				RobotLog.d("going to storageLocation");
-				drive.goToLocation(storageLocation_Pre1,1,0.15,0); //first location
+				drive.goToLocation(storageLocation_Pre1,1,0.03,0); //first location
 				opMode.telemetry.addData("after", drive.getHeading());
-				drive.goToLocation(storageLocation, 0.8,  0.02, 0);
+				drive.goToLocation(storageLocation, 1,  0.02, 0);
 				opMode.telemetry.addData("now", drive.getHeading());
 				drive.setPower(0.45,0,0);
 				opMode.sleep(500);
