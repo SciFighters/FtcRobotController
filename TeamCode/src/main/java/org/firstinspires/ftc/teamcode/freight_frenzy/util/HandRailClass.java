@@ -28,7 +28,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    private int handRange = 6000;
+    private int handRange = 5885;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -199,7 +199,7 @@ public class HandRailClass {
 
 
     public double getHandPercent() {
-        return ((double)(hand.getCurrentPosition() + potentiometer_offset) / -handRange) * 100;
+        return ((double)(hand.getCurrentPosition() + potentiometer_offset) / handRange) * 100;
     }
 
     public double getHandTicks() {
@@ -357,8 +357,8 @@ public class HandRailClass {
 //        return tick;
 
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.6;
-        double old_max = 3.21;
+        double old_min = 0.622;
+        double old_max = 3.218;
 
         double new_min = handRange;
         double new_max = 0;
@@ -407,9 +407,9 @@ public class HandRailClass {
         // returns true if the rail is allowed to move
         if (!override) {
             if (forward)
-                return (this.getHandPercent() > 10 || this.getRailPercent() < 20);
+                return (this.getHandPercent() > 8 || this.getRailPercent() < 25);
             else
-                return (this.getHandPercent() < 90 || this.getRailPercent() > 80);
+                return (this.getHandPercent() < 92 || this.getRailPercent() > 75);
         } else
             return true;
     }
