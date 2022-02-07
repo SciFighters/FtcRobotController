@@ -22,7 +22,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
 @TeleOp(group = "Cobalt")
-//@Disabled
+@Disabled
 public class DrivingTest extends LinearOpMode {
 	//    BananaPipeline pipeline;
 //    OpenCvInternalCamera phoneCam;

@@ -65,12 +65,12 @@ public class AutoFlow {
 	Location barrier = new Location(-1.2, 1.0);
 
 	// Freight locations
-	Location freightLocation = new Location(-1.5,0.85, 90); // 1.5, 2.5
-	Location freightLocation_Pre1 = new Location(0.6,0.85, 90); //previously 0.6, 0.80
-	Location freightLocation_Pre2 = new Location(-0.60,0.80, 90);
+	Location freightLocation = new Location(-1.5,0.9, 90); // 1.5, 2.5
+	Location freightLocation_Pre1 = new Location(0.6,0.92, 90); //previously 0.6, 0.80
+	Location freightLocation_Pre2 = new Location(-0.60,0.93, 90); //previously -0.60, 0.85
 	// Storage locations
-	Location storageLocation = new Location(1.5,0.93, 90); //previously 1.5, 0.9
-	Location storageLocation_Pre1 = new Location(1.0,0.93, 90); //1.1, 0.92
+	Location storageLocation = new Location(1.5,0.9, 90); //previously 1.5, 0.9
+	Location storageLocation_Pre1 = new Location(1.0,0.9, 90); //1.1, 0.92
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -150,37 +150,41 @@ public class AutoFlow {
 		handrail.init(opMode.hardwareMap);
 
 		handrail.searchHome();
+
+		opMode.telemetry.addData("",this.duckline.getDuck());
+		opMode.telemetry.update();
 	}
 
 	public void run() { //Autonomous starts
-		//drive.goTo(0,0,1,0,0.03,0);
 
-		DuckLine.SH_Levels shLevel = this.duckline.getDuck();
-		opMode.telemetry.addData("SH Level:", shLevel);
+		if (auto != Auto.PARK || auto != Auto.SHORT){
+			DuckLine.SH_Levels shLevel = this.duckline.getDuck();
+			opMode.telemetry.addData("SH Level:", shLevel);
 
-		opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
-		opMode.telemetry.update();
+			opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
+			opMode.telemetry.update();
 
-		// Go to Shipping Hub
-		handrail.gotoRail(50, 0.5);
-		drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
+			// Go to Shipping Hub
+			handrail.gotoRail(50, 0.5);
+			drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
 
-		// wait for handRail to get into position (both not busy)
-		handrail.gotoLevel(shLevel);
-		while (opMode.opModeIsActive() && handrail.isBusy());
-		if(shLevel != DuckLine.SH_Levels.Top) handrail.gotoRail(75, 0.5);
-		while (opMode.opModeIsActive() && handrail.isBusy());
+			// wait for handRail to get into position (both not busy)
+			handrail.gotoLevel(shLevel);
+			while (opMode.opModeIsActive() && handrail.isBusy());
+			if(shLevel != DuckLine.SH_Levels.Top) handrail.gotoRail(75, 0.5);
+			while (opMode.opModeIsActive() && handrail.isBusy());
 
-		// Put the cube on shipping hub
-		handrail.grabberRelease();
-		opMode.sleep(1950); //wait for drop
-		handrail.grabberStop();
-		// retract arm.
-		handrail.gotoRail(50, 0.4);
-		while(opMode.opModeIsActive() && handrail.isBusy());
-		handrail.gotoHandRail(0,90, 1);
+			// Put the cube on shipping hub
+			handrail.grabberRelease();
+			opMode.sleep(1950); //wait for drop
+			handrail.grabberStop();
+			// retract arm.
+			handrail.gotoRail(50, 0.4);
+			while(opMode.opModeIsActive() && handrail.isBusy());
+			handrail.gotoHandRail(0,90, 1);
+		}
 
-		if (startPos == StartPos.CAROUSEL) {
+		if (startPos == StartPos.CAROUSEL && auto != Auto.PARK) {
 
 			// Going to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
@@ -211,13 +215,13 @@ public class AutoFlow {
 			} else {
 				// go to parking at storage unit
 				RobotLog.d("going to storageLocation");
-				drive.goToLocation(storageLocation_Pre1,1,0.03,0); //first location
+				drive.goToLocation(storageLocation_Pre1,1,0.0,0); //first location
 				opMode.telemetry.addData("after", drive.getHeading());
 				drive.goToLocation(storageLocation, 1,  0.02, 0);
 				opMode.telemetry.addData("now", drive.getHeading());
-				drive.setPower(0.45,0,0);
-				opMode.sleep(500);
-				drive.setPower(0,0,0);
+//				drive.setPower(0.45,0,0);
+//				opMode.sleep(100);
+//				drive.setPower(0,0,0);
 
 			}
 		} else {

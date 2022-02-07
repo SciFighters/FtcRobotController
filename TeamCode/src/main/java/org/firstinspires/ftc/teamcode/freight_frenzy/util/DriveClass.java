@@ -374,7 +374,7 @@ public class DriveClass {
             double remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
 
             //double leftDist = totalDist - currentDist;
-            double minPower = 0.15;
+            double minPower = 0.2;
             double acclGain = 1.5;
             double acclPower = currentDist * acclGain + minPower;
 
@@ -425,10 +425,10 @@ public class DriveClass {
             double dy = Math.abs(lastY - currentY);
             double dist2 = Math.hypot(dx, dy);
             Log.d("distance from last time (delta)", String.valueOf(dist2));
-//            if((currentDist / remainDist) < 25 && dist2 < moveRange) goToIdle += 1;
+            if((currentDist / remainDist) < 0.25 && dist2 < moveRange) goToIdle += 1;
             lastX = currentX; lastY = currentY;
 
-//            if(goToIdle >= (long)(maxIdleCount / 2)) break;
+//              if(goToIdle >= (long)(maxIdleCount / 2)) break;
         }
         setPower(0, 0, 0);
     }

@@ -98,7 +98,7 @@ public class Jaccouse extends LinearOpMode {
 					handRail.searchHome();
 				}
 
-				if (homingHand.isClicked())
+				//if (homingHand.isClicked())
 					//handRail.searchHomeHand();
 				continue;
 			}
