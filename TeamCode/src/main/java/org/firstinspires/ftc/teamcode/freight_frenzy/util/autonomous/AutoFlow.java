@@ -65,12 +65,15 @@ public class AutoFlow {
 	Location barrier = new Location(-1.2, 1.0);
 
 	// Freight locations
-	Location freightLocation = new Location(-1.5,0.9, 90); // 1.5, 2.5
-	Location freightLocation_Pre1 = new Location(0.6,0.92, 90); //previously 0.6, 0.80
-	Location freightLocation_Pre2 = new Location(-0.60,0.93, 90); //previously -0.60, 0.85
+	Location freightLocation_Pre1 = new Location(0.6,0.80, 90); //previously 0.6, 0.92
+	Location freightLocation_Pre2 = new Location(-0.60,0.90, 90); //previously -0.60, 0.85
+	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
+	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
+
 	// Storage locations
-	Location storageLocation = new Location(1.5,0.9, 90); //previously 1.5, 0.9
 	Location storageLocation_Pre1 = new Location(1.0,0.9, 90); //1.1, 0.92
+	Location storageLocation = new Location(1.3,0.9, 90); //previously 1.5, 0.9
+
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -106,6 +109,7 @@ public class AutoFlow {
 			this.storageLocation.flipX();
 			this.storageLocation_Pre1.flipX();
 			this.freightLocation_Pre1.flipX();
+			this.freightLocation_Pre3.flipX();
 
 			//flipping angles
 			//this.freightLocation.flipAngle();
@@ -118,7 +122,7 @@ public class AutoFlow {
 		}
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
-		this.handrail = new HandRailClass(opMode);
+		this.handrail = new HandRailClass(opMode, this.alliance);
 	}
 
 	void initWebcam() {
@@ -157,7 +161,8 @@ public class AutoFlow {
 
 	public void run() { //Autonomous starts
 
-		if (auto != Auto.PARK || auto != Auto.SHORT){
+		if (auto != Auto.PARK && auto != Auto.SHORT) {
+			// Put the cube on the shipping hub
 			DuckLine.SH_Levels shLevel = this.duckline.getDuck();
 			opMode.telemetry.addData("SH Level:", shLevel);
 
@@ -185,7 +190,6 @@ public class AutoFlow {
 		}
 
 		if (startPos == StartPos.CAROUSEL && auto != Auto.PARK) {
-
 			// Going to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
 			opMode.telemetry.update();
@@ -193,32 +197,33 @@ public class AutoFlow {
 			handrail.carouselRun(0.5 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
-			drive.setPower(0,0,0.1); //activates carousel motor
+			drive.setPower(0, 0, 0.1); //activates carousel motor
 			opMode.sleep(200); //sleeps (thread) for 0.2 seconds
-			drive.setPower(0,0,0); // stops strafe
+			drive.setPower(0, 0, 0); // stops strafe
 
 			// Spinning carousel
 			opMode.telemetry.addLine("After goto carousel");
 			opMode.telemetry.update();
-			opMode.sleep(2300);  //wait for carousel
+			opMode.sleep(2400);  //wait for carousel
 			handrail.carouselStop(); //Stopping carousel motor
 
 			opMode.telemetry.addLine("stop carousel");
 			opMode.telemetry.update();
 
-			if (auto == Auto.FULL){
-				drive.goToLocation(freightLocation_Pre1,1,0.2, 0);
-				handrail.gotoHandRail(0,70,1);
-				drive.goToLocation(freightLocation_Pre2,1,0.2,0); //first location
+			if (auto == Auto.FULL) {
+				drive.goToLocation(freightLocation_Pre1, 1, 0.2, 0);
+				handrail.gotoHandRail(0, 70, 1);
+				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.2, 0);
-				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
+				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
+				if (alliance == ALLIANCE.BLUE)
+					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
+				else
+					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
+
 			} else {
 				// go to parking at storage unit
-				RobotLog.d("going to storageLocation");
-				drive.goToLocation(storageLocation_Pre1,1,0.0,0); //first location
-				opMode.telemetry.addData("after", drive.getHeading());
-				drive.goToLocation(storageLocation, 1,  0.02, 0);
-				opMode.telemetry.addData("now", drive.getHeading());
+				parkStorage();
 //				drive.setPower(0.45,0,0);
 //				opMode.sleep(100);
 //				drive.setPower(0,0,0);
@@ -226,10 +231,27 @@ public class AutoFlow {
 			}
 		} else {
 			// Barrier (freight)
-			drive.goToLocation(freightLocation_Pre2,1,0.15,0); //first location
-			drive.goToLocation(freightLocation, 1, 0.05, 0);
-			handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-			// TODO: Collect freight item, moreover, place it on the shipping hub
+			if(startPos == StartPos.BARRIER) {
+				drive.goToLocation(freightLocation_Pre3, 1, 0.15, 0); //first location
+				drive.goToLocation(freightLocation_Pre2, 1, 0.15, 0); //first location
+				drive.goToLocation(freightLocation, 1, 0.05, 0);
+				// TODO: Collect freight item, moreover, place it on the shipping hub
+			}else {
+				parkStorage();
+			}
+				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
+			if (alliance == ALLIANCE.BLUE)
+				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
+			else
+				handrail.gotoLevel(DuckLine.SH_Levels.Middle);
 		}
     }
+
+    public void parkStorage() {
+		RobotLog.d("going to storageLocation");
+		drive.goToLocation(storageLocation_Pre1,1,0.02,0); //first location
+		opMode.telemetry.addData("after", drive.getHeading());
+		drive.goToLocation(storageLocation, 1,  0.02, 0);
+		opMode.telemetry.addData("now", drive.getHeading());
+	}
 }

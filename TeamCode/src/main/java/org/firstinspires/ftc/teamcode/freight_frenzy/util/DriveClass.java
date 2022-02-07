@@ -427,7 +427,6 @@ public class DriveClass {
             Log.d("distance from last time (delta)", String.valueOf(dist2));
             if((currentDist / remainDist) < 0.25 && dist2 < moveRange) goToIdle += 1;
             lastX = currentX; lastY = currentY;
-
 //              if(goToIdle >= (long)(maxIdleCount / 2)) break;
         }
         setPower(0, 0, 0);

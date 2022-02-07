@@ -26,6 +26,7 @@ public class Jaccouse extends LinearOpMode {
 
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
+	private AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
 	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useBrake(); // TODO: useEncoders().
@@ -48,6 +49,8 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
+
+
 
 	public double pow(double x){
 		return Math.pow(x, 2) * Math.signum(x);
@@ -118,7 +121,6 @@ public class Jaccouse extends LinearOpMode {
 			double y = pow(-gamepad1.left_stick_y) * boost;
 			double x = pow(gamepad1.left_stick_x) * boost;
 			double turn = pow(gamepad1.right_stick_x * boost);
-			AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
 			// Hand rail
 			final double handBoostK = 0.3;
@@ -191,11 +193,11 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 			}
 
-			double carouselBoost = gamepad1.left_trigger;
+			double carouselBoost = gamepad1.left_trigger ;
 			if(spincarousel.getState())
 				handRail.carouselRun((0.6 + carouselBoost) * alliance.mul);
 			else {
-				handRail.carouselRun(carouselBoost);
+				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
 			}
 

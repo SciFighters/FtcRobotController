@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
+
 // Handrail class
 public class HandRailClass {
     //motors, servos and touch switch
@@ -29,6 +31,8 @@ public class HandRailClass {
 
     private int railRange = 1470;
     private int handRange = 5885;
+
+    AutoFlow.ALLIANCE alliance;
 
     public void init(HardwareMap hw) {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
@@ -72,6 +76,15 @@ public class HandRailClass {
     private LinearOpMode opMode;
 
     /**** @param linearOpMode opMode */
+    public HandRailClass(LinearOpMode opMode, AutoFlow.ALLIANCE alliance) {
+        this.opMode = opMode;
+        this.alliance = alliance;
+    }
+
+    public void setAlliance(AutoFlow.ALLIANCE alliance) {
+        this.alliance = alliance;
+    }
+
     public HandRailClass(LinearOpMode opMode) {
         this.opMode = opMode;
     }
