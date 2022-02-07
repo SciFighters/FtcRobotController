@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.study;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 @TeleOp(name = "PotTest")
+@Disabled
 public class PotTest extends LinearOpMode {
     //declaring variables
     private DcMotorEx hand = null;

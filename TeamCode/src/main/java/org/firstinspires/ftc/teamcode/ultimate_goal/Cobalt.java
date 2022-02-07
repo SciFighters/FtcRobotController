@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp(group = "Cobalt")
-//@Disabled
+@Disabled
 public class Cobalt extends LinearOpMode {
 	final double tile = 0.6;
 

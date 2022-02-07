@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp(group = "Jacouj")
+@Disabled
 public class GoToTest extends LinearOpMode {
 	final double tile = 0.6;
 

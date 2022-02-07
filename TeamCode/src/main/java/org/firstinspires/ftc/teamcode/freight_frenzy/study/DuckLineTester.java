@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.study;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,6 +12,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @TeleOp
+@Disabled
 public class DuckLineTester extends LinearOpMode {
 	final private int screenWidth = 640;
 	final private int screenHeight = 360;

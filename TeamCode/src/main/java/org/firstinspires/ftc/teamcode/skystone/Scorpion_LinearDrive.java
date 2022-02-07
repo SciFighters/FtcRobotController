@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.RobotLog;
  */
 
 @TeleOp(name = "Scorpion", group = "SciFighters")
-//@Disabled
+@Disabled
 public class Scorpion_LinearDrive extends LinearOpMode {
 
     // Declare OpMode members.

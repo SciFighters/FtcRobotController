@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 // TODO: drive heading correction - reduce game
 
 @TeleOp(group = "Jaccouse")
+@Disabled
 public class JaccouseTest extends LinearOpMode {
     final double tile = 0.6;
 

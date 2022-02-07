@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp(group = "Cobalt")
-//@Disabled
+@Disabled
 public class WheelTest extends LinearOpMode {
 	private DcMotorEx fl = null;
 	private DcMotorEx fr = null;
