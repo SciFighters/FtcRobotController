@@ -14,7 +14,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
-	private LinearOpMode opMode = null; // First I declared it as OpMode now its LinearOpMode
+	private LinearOpMode opMode = null; // First I declared it as OpMode now it's LinearOpMode
 
 	private DriveClass drive = null;
 	private HandRailClass handrail = null;
@@ -27,7 +27,7 @@ public class AutoFlow {
 		BLUE(1),
 		RED(-1);
 
-		int mul;
+		public int mul;
 		ALLIANCE(int mul) {
 			this.mul = mul;
 		}
@@ -170,7 +170,6 @@ public class AutoFlow {
 		while (opMode.opModeIsActive() && handrail.isBusy());
 		if(shLevel != DuckLine.SH_Levels.Top) handrail.gotoRail(75, 0.5);
 		while (opMode.opModeIsActive() && handrail.isBusy());
-
 		// Put the cube on shipping hub
 		handrail.grabberRelease();
 		opMode.sleep(1950); //wait for drop

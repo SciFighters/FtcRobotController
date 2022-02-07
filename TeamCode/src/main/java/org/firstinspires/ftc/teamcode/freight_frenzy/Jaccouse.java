@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
+
 // TODO: clean code
 // TODO: hand rail boost
 // TODO: hand rail coupling
@@ -98,7 +100,7 @@ public class Jaccouse extends LinearOpMode {
 					handRail.searchHome();
 				}
 
-				if (homingHand.isClicked())
+				//if (homingHand.isClicked())
 					//handRail.searchHomeHand();
 				continue;
 			}
@@ -109,11 +111,14 @@ public class Jaccouse extends LinearOpMode {
 			boolean fieldOriented = !gamepad1.y;
 			final double boostK = 0.5;
 			double boost = gamepad1.right_trigger * boostK + (1 - boostK);
+			boolean blue = gamepad1.x;
+			boolean red = gamepad1.b;
 
 
 			double y = pow(-gamepad1.left_stick_y) * boost;
 			double x = pow(gamepad1.left_stick_x) * boost;
 			double turn = pow(gamepad1.right_stick_x * boost);
+			AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
 			// Hand rail
 			final double handBoostK = 0.3;
@@ -148,6 +153,16 @@ public class Jaccouse extends LinearOpMode {
 				targetHeading = drive.getHeading();
 			}
 
+			if(blue) {
+				alliance = AutoFlow.ALLIANCE.BLUE;
+				telemetry.addData("Alliance is: ","Blue");
+			}
+
+			else if(red) {
+				alliance = AutoFlow.ALLIANCE.RED;
+				telemetry.addData("Alliance is: ", "Red");
+			}
+
 			if (!turningToggle.isPressed() && turningCount < 0) {
 				double delta = drive.getDeltaHeading(targetHeading);
 				double gain = 0.02;
@@ -178,7 +193,7 @@ public class Jaccouse extends LinearOpMode {
 
 			double carouselBoost = gamepad1.left_trigger;
 			if(spincarousel.getState())
-				handRail.carouselRun(0.6 + carouselBoost);
+				handRail.carouselRun((0.6 + carouselBoost) * alliance.mul);
 			else {
 				handRail.carouselRun(carouselBoost);
 				//handRail.carouselStop();
