@@ -204,7 +204,7 @@ public class AutoFlow {
 			// Spinning carousel
 			opMode.telemetry.addLine("After goto carousel");
 			opMode.telemetry.update();
-			opMode.sleep(2400);  //wait for carousel
+			opMode.sleep(2500);  //wait for carousel
 			handrail.carouselStop(); //Stopping carousel motor
 
 			opMode.telemetry.addLine("stop carousel");
@@ -240,10 +240,12 @@ public class AutoFlow {
 				parkStorage();
 			}
 				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
-			if (alliance == ALLIANCE.BLUE)
-				handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-			else
-				handrail.gotoLevel(DuckLine.SH_Levels.Middle);
+			if(auto != Auto.PARK) {
+				if (alliance == ALLIANCE.BLUE)
+					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
+				else
+					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
+			}
 		}
     }
 

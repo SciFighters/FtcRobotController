@@ -83,9 +83,11 @@ public class Jaccouse extends LinearOpMode {
 			if (gamepad1.start) {
 				if (gamepad1.x) {
 					drive.resetOrientation(defaultOrientationAngle);
+					this.alliance = AutoFlow.ALLIANCE.BLUE;
 				}
 				if (gamepad1.y) {
 					drive.resetOrientation(0);
+					this.alliance = AutoFlow.ALLIANCE.RED;
 				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
@@ -174,7 +176,7 @@ public class Jaccouse extends LinearOpMode {
 			if (A.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
 			} else if (B.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
+				//handRail.gotoLevel(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Top);
 			} else if (X.isClicked()) {
