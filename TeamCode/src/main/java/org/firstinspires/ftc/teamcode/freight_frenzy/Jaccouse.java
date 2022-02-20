@@ -83,11 +83,11 @@ public class Jaccouse extends LinearOpMode {
 			if (gamepad1.start) {
 				if (gamepad1.x) {
 					drive.resetOrientation(defaultOrientationAngle);
-					this.alliance = AutoFlow.ALLIANCE.BLUE;
+					//this.alliance = AutoFlow.ALLIANCE.BLUE;
 				}
 				if (gamepad1.y) {
 					drive.resetOrientation(0);
-					this.alliance = AutoFlow.ALLIANCE.RED;
+					//this.alliance = AutoFlow.ALLIANCE.RED;
 				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
