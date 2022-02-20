@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(group="blue")
 @Disabled
-public class cycling_blue extends LinearOpMode {
-    AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.BLUE, AutoFlow.StartPos.BARRIER, AutoFlow.Auto.CYCLING);
+public class Red_Cycling extends LinearOpMode {
+    AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPos.BARRIER, AutoFlow.Auto.CYCLING);
 
     @Override
     public void runOpMode() {
