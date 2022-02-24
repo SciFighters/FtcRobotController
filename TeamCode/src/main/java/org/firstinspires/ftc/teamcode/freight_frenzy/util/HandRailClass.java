@@ -61,6 +61,7 @@ public class HandRailClass {
         hand_limit_F = hw.get(DigitalChannel.class, "hand_limit_front");
 
         carousel = hw.get(DcMotorEx.class, "carousel");
+        carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
@@ -232,7 +233,7 @@ public class HandRailClass {
     public void telemetry_handRail() {
         opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
-        opMode.telemetry.addData("potentiometer","offset: %d  %3.2fv  scaled %d", potentiometer_offset, this.getPotentiometerValue(), getScaledPotentiometerValue());
+        opMode.telemetry.addData("potent","V: %3.4fv %d scaled %d", this.getPotentiometerValue(), potentiometer_offset, getScaledPotentiometerValue());
     }
 
 
@@ -370,11 +371,12 @@ public class HandRailClass {
 //        return tick;
 
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.67;
-        double old_max = 3.33;
+        double old_min = 0.68;
+        double old_max = 3.328;
 
         double new_min = 0;
         double new_max = handRange;
+        // convert to percentages:
         return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
     }
 

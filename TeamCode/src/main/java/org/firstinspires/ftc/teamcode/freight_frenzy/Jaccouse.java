@@ -133,12 +133,12 @@ public class Jaccouse extends LinearOpMode {
 			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 
-			if (handRail.getHandPercent() > 90 && armPower > 0.4){
-				armPower = 0.1;
+			if (handRail.getHandPercent() > 80 && armPower > 0.4){
+				armPower = 0.2;
 			}
 
-			if (handRail.getHandPercent() < 10 && armPower < -0.4){
-				armPower = -0.1;
+			if (handRail.getHandPercent() < 20 && armPower < -0.4){
+				armPower = -0.2;
 			}
 
 
@@ -212,8 +212,8 @@ public class Jaccouse extends LinearOpMode {
 				if(spincarousel.isChanged()){
 					carouselAccelTime.reset();
 				}
-				double acc = 0.2 * carouselAccelTime.seconds();
-				handRail.carouselRun((0.4 + carouselBoost + acc) * alliance.mul);
+				double acc =  1.1 * carouselAccelTime.seconds();
+				handRail.carouselRun((0.6 + carouselBoost + acc) * alliance.mul);
 			}
 			else {
 				handRail.carouselRun(carouselBoost * alliance.mul);
