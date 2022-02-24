@@ -325,15 +325,15 @@ public class DriveClass {
         stopPower();
     }
 
-    public void goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout) {
-        goTo(location.x, location.y, power, targetHeading, tolerance, timeout);
+    public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout) {
+        return goTo(location.x, location.y, power, targetHeading, tolerance, timeout);
     }
-    public void goToLocation(Location location, double power, double tolerance, double timeout) {
-        goTo(location.x, location.y, power, location.angle, tolerance, timeout);
+    public double goToLocation(Location location, double power, double tolerance, double timeout) {
+        return goTo(location.x, location.y, power, location.angle, tolerance, timeout);
     }
 
     public final long maxIdleCount = 250;
-    public void goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
+    public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
         long goToIdle = 0; //if not moving
         boolean isCheckingIdle = false;
         double lastX = 0;
@@ -345,6 +345,7 @@ public class DriveClass {
         double deltaY = y - currentY;
         double startX = currentX;
         double startY = currentY;
+        double remainDist = 0;
 
         //double totalDist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
         double totalDist = Math.hypot(deltaX, deltaY);
@@ -358,6 +359,9 @@ public class DriveClass {
         opMode.telemetry.addData("goto delta y", deltaY);
         opMode.telemetry.addData("goto hypocampus total dist", totalDist);
         opMode.telemetry.update();
+        // time delta variables
+        double currentTime = System.nanoTime();
+        double lastTime = System.nanoTime();
 
         while (opMode.opModeIsActive() && (currentDist < totalDist - tolerance)) { // TODO: there a NaN here somewhere (the attack of the NaNs)
 
@@ -371,7 +375,7 @@ public class DriveClass {
             currentDist = Math.hypot(deltaY, deltaX); // distance moved from start position.
             deltaX = x - currentX;
             deltaY = y - currentY;
-            double remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
+            remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
 
             //double leftDist = totalDist - currentDist;
             double minPower = 0.2;
@@ -418,18 +422,22 @@ public class DriveClass {
 
             if((timeout != 0 && timeout <= timer.seconds())) break;
 
+            // time delta
+            currentTime = System.nanoTime();
+            double timeDelta = ((currentTime - lastTime) / Math.pow(10,9)); // time delta in seconds
+            lastTime = currentTime;
             // Idle checker
-            double moveRange = 0.001;
-
-            double dx = Math.abs(lastX - currentX);
-            double dy = Math.abs(lastY - currentY);
-            double dist2 = Math.hypot(dx, dy);
-            Log.d("distance from last time (delta)", String.valueOf(dist2));
-            if((currentDist / remainDist) < 0.25 && dist2 < moveRange) goToIdle += 1;
+            double velocityRange = 0.001;
+            double dx = lastX - currentX;
+            double dy = lastY - currentY;
+            double velocity = Math.hypot(dx, dy) / timeDelta;
+            Log.d("velocity", String.valueOf(velocity));
+            if((currentDist / remainDist) < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
             lastX = currentX; lastY = currentY;
-//              if(goToIdle >= (long)(maxIdleCount / 2)) break;
+//              if(goToIdle >= (long)(maxIdleCount / 2)) { remainDist = -1; break; }
         }
         setPower(0, 0, 0);
+        return remainDist;
     }
 
     private boolean inRange(double min, double max, double value) {
