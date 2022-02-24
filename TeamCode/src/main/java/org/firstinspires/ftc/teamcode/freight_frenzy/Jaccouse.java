@@ -133,6 +133,15 @@ public class Jaccouse extends LinearOpMode {
 			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 
+			if (handRail.getHandPercent() > 90 && armPower > 0.4){
+				armPower = 0.1;
+			}
+
+			if (handRail.getHandPercent() < 10 && armPower < -0.4){
+				armPower = -0.1;
+			}
+
+
 			handRail.rail_drive(railPower, overrideLimits.getState());
 			handRail.hand_drive(armPower, overrideLimits.getState());
 
