@@ -46,7 +46,8 @@ public class AutoFlow {
 		SHORT(1),
 		LONG(2),
 		PARK(3),
-		FULL(4);
+		FULL(4),
+		CYCLING(5);
 
 		public int value;
 		Auto(int value) {
@@ -61,6 +62,7 @@ public class AutoFlow {
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
 	Location shippingHubLocation = new Location(0.3, 0.6,-45); //0.6, 0.75
+	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.1, -0.15, 0);
 	Location carouselLocation = new Location(1.32, 0.27,45);
 	Location barrier = new Location(-1.2, 1.0);
 
@@ -69,11 +71,12 @@ public class AutoFlow {
 	Location freightLocation_Pre2 = new Location(-0.60,0.90, 90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
 	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
+	Location freightPickup = new Location(-1.45, 0.3, 90);
+	Location freightSideLocation = new Location(-1.1, 0.1, 90);
 
 	// Storage locations
 	Location storageLocation_Pre1 = new Location(1.0,0.9, 90); //1.1, 0.92
 	Location storageLocation = new Location(1.3,0.9, 90); //previously 1.5, 0.9
-
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -101,6 +104,7 @@ public class AutoFlow {
 			opMode.telemetry.addLine("red");
 			opMode.telemetry.update();
 			this.startLocation.flipX();
+			this.shippingHubLocation_Pre1.flipX();
 			this.shippingHubLocation.flipX();
 			this.carouselLocation.flipX();
 			this.barrier.flipX();
@@ -110,6 +114,8 @@ public class AutoFlow {
 			this.storageLocation_Pre1.flipX();
 			this.freightLocation_Pre1.flipX();
 			this.freightLocation_Pre3.flipX();
+			this.freightSideLocation.flipX();
+			this.freightPickup.flipX();
 
 			//flipping angles
 			//this.freightLocation.flipAngle();
@@ -119,6 +125,8 @@ public class AutoFlow {
 			//this.storageLocation_Pre1.flipAngle();
 			this.carouselLocation.angle = 135;
 			this.shippingHubLocation.flipAngle();
+			this.shippingHubLocation_Pre1.flipAngle();
+			this.freightPickup.flipAngle(); // TODO: adjust it so it turns the right way
 		}
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
@@ -189,7 +197,7 @@ public class AutoFlow {
 			handrail.gotoHandRail(0,90, 1);
 		}
 
-		if (startPos == StartPos.CAROUSEL && auto != Auto.PARK) {
+		if (startPos == StartPos.CAROUSEL && auto != Auto.PARK && auto != Auto.CYCLING) {
 			// Going to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
 			opMode.telemetry.update();
@@ -198,13 +206,20 @@ public class AutoFlow {
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
 			drive.setPower(0, 0, 0.1); //activates carousel motor
-			opMode.sleep(200); //sleeps (thread) for 0.2 seconds
+			if(alliance == ALLIANCE.RED)
+				opMode.sleep(280); //sleeps (thread) for 0.2 seconds
+			else
+				opMode.sleep(200);
 			drive.setPower(0, 0, 0); // stops strafe
 
 			// Spinning carousel
 			opMode.telemetry.addLine("After goto carousel");
 			opMode.telemetry.update();
-			opMode.sleep(2500);  //wait for carousel
+			if(alliance == ALLIANCE.BLUE) {
+				opMode.sleep(2600);  //wait for carousel
+			} else {
+				opMode.sleep(2500);
+			}
 			handrail.carouselStop(); //Stopping carousel motor
 
 			opMode.telemetry.addLine("stop carousel");
@@ -249,11 +264,47 @@ public class AutoFlow {
 		}
     }
 
-    public void parkStorage() {
+    private void parkStorage() {
 		RobotLog.d("going to storageLocation");
 		drive.goToLocation(storageLocation_Pre1,1,0.02,0); //first location
 		opMode.telemetry.addData("after", drive.getHeading());
 		drive.goToLocation(storageLocation, 1,  0.02, 0);
 		opMode.telemetry.addData("now", drive.getHeading());
+	}
+
+	private void cycle() {
+		// TODO: adjust power, tolerance and locations for cycle
+		drive.goToLocation(freightLocation_Pre1, 1, 0.10, 0);
+		drive.goToLocation(freightSideLocation, 0.5, 0.03, 0);
+		drive.goToLocation(freightPickup, 0.5, 0.025, 0);
+
+		//pickup loop
+		short loopCounter = 0;
+		double turnSpeed = 1; //turns per second
+		double turn = 0;
+		double currentTime = System.nanoTime();
+		double lastTime = currentTime;
+		double anchorHeadingAngle = this.drive.getHeading();
+		double turnMultiplier = 30;
+		while(opMode.opModeIsActive()) {
+			// Turning (side to side)
+			turn += turnSpeed * 360 * ((currentTime - lastTime) / Math.pow(10,9));
+			drive.turn(anchorHeadingAngle + Math.sin(turn) * turnMultiplier, 0.3); // sin is better, because it starts at
+			//grabbing
+			handrail.grabberGrab();
+			opMode.sleep(1000); // TODO: adjust sleep duration
+			// Loop break condition
+			if(handrail.grabber_ts() || opMode.opModeIsActive() || loopCounter++ > 30) break;
+		}
+		// Going back to shipping hub
+
+		drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
+		drive.goToLocation(freightLocation_Pre2, 0.6, 0.05, 0);
+		drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
+		handrail.gotoLevel(DuckLine.SH_Levels.Top);
+		drive.goToLocation(shippingHubLocation, 0.75, 0.04, 0);
+		handrail.grabberRelease();
+		opMode.sleep(2000);
+
 	}
 }

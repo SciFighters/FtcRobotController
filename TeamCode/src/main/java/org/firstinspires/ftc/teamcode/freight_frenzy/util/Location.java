@@ -17,6 +17,18 @@ public class Location {
 		this.angle = angle;
 	}
 
+	public Location(Location location) {
+		this.x = location.x;
+		this.y = location.y;
+		this.angle = location.angle;
+	}
+
+	public Location(Location location, double xOffset, double yOffset, double angleOffset) {
+		this.x = location.x + xOffset;
+		this.y = location.y + yOffset;
+		this.angle = location.angle + angleOffset;
+	}
+
 	public void flipX() {
 		this.x *= -1;
 	}
