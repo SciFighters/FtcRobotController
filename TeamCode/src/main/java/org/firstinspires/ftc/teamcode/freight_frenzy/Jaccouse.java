@@ -49,6 +49,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
+	private ElapsedTime carouselAccelTime = new ElapsedTime();
 
 
 
@@ -78,6 +79,7 @@ public class Jaccouse extends LinearOpMode {
 		int turningCount = 0;
 
 		// run until the end of the match (driver presses STOP)
+
 		while (opModeIsActive()) {
 
 			if (gamepad1.start) {
@@ -195,9 +197,15 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 			}
 
+
 			double carouselBoost = gamepad1.left_trigger ;
-			if(spincarousel.getState())
-				handRail.carouselRun((0.6 + carouselBoost) * alliance.mul);
+			if(spincarousel.getState()) {
+				if(spincarousel.isChanged()){
+					carouselAccelTime.reset();
+				}
+				double acc = 0.2 * carouselAccelTime.seconds();
+				handRail.carouselRun((0.4 + carouselBoost + acc) * alliance.mul);
+			}
 			else {
 				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
