@@ -30,7 +30,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    private int handRange = 5885;
+    private int handRange = 5968; // 5885;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -370,11 +370,11 @@ public class HandRailClass {
 //        return tick;
 
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.622;
-        double old_max = 3.218;
+        double old_min = 0.67;
+        double old_max = 3.33;
 
-        double new_min = handRange;
-        double new_max = 0;
+        double new_min = 0;
+        double new_max = handRange;
         return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
     }
 
