@@ -332,9 +332,9 @@ public class DriveClass {
         return goTo(location.x, location.y, power, location.angle, tolerance, timeout);
     }
 
-    public final long maxIdleCount = 250;
+    public final int MAX_IDLE_BREAK = 20;
     public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
-        long goToIdle = 0; //if not moving
+        int goToIdle = 0; //if not moving
         boolean isCheckingIdle = false;
         double lastX = 0;
         double lastY = 0;
@@ -427,14 +427,14 @@ public class DriveClass {
             double timeDelta = ((currentTime - lastTime) / Math.pow(10,9)); // time delta in seconds
             lastTime = currentTime;
             // Idle checker
-            double velocityRange = 0.001;
+            double velocityRange = 0.0001;
             double dx = lastX - currentX;
             double dy = lastY - currentY;
             double velocity = Math.hypot(dx, dy) / timeDelta;
             Log.d("velocity", String.valueOf(velocity));
-            if((currentDist / remainDist) < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
+            if(remainDist < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
             lastX = currentX; lastY = currentY;
-//              if(goToIdle >= (long)(maxIdleCount / 2)) { remainDist = -1; break; }
+            if(goToIdle >= MAX_IDLE_BREAK) { remainDist = -1; break; }
         }
         setPower(0, 0, 0);
         return remainDist;
