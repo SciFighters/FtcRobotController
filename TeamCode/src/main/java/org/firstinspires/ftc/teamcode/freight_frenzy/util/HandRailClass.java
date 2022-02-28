@@ -30,7 +30,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    private int handRange = 5968; // 5885;
+    public int handRange = 5945; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -65,13 +65,18 @@ public class HandRailClass {
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
-        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        potentiometer_offset = getScaledPotentiometerValue();
+        resetPotAndHand();
 
         hand.setTargetPositionTolerance(20);
         rail.setTargetPositionTolerance(20);
         this.searchHome();
+    }
+
+    public void resetPotAndHand() {
+        hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        potentiometer_offset = getScaledPotentiometerValue();
+        hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
     }
 
     private LinearOpMode opMode;
@@ -165,11 +170,11 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(90,78,1);
+            gotoHandRail(90,73,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
             gotoHandRail(65,84,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(65,95,1);
+            gotoHandRail(65,93,1);
         } else if (shLevel == DuckLine.SH_Levels.Collect){
             gotoHandRail(35,16,1);
         }
@@ -231,9 +236,9 @@ public class HandRailClass {
 
     //updates
     public void telemetry_handRail() {
-        opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
         opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
-        opMode.telemetry.addData("potent","V: %3.4fv %d scaled %d", this.getPotentiometerValue(), potentiometer_offset, getScaledPotentiometerValue());
+        opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
+        opMode.telemetry.addData("potent","V: %3.4fv scaled %3.1f - offset %d ", this.getPotentiometerValue(), (double)getScaledPotentiometerValue()/handRange*100, potentiometer_offset);
     }
 
 
@@ -263,7 +268,7 @@ public class HandRailClass {
     }
 
     public void grabberRelease() {
-        setServosPower(-0.6);
+        setServosPower(-1);
     }
 
     public void rail_drive(double power, boolean limitsOverride) {
@@ -324,6 +329,7 @@ public class HandRailClass {
             while(hand.isBusy() && timer.seconds() < 1.75);
         }
 
+        resetPotAndHand();
 
         int lastPos = rail.getCurrentPosition();
         int tempPos = lastPos;
@@ -362,26 +368,16 @@ public class HandRailClass {
 
         // map
         // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        // int tick = (int)(5000.0 * (1- pot_val / 3.33));
+        double old_min = 0.3670;
+        double old_max = 2.7640;
 
-//        double potVoltRange = 3.33;
-//        double potTickRange = 5000.0;
-//        double offset = ((double)handRange - potTickRange)/2;
-//        int tick = (int)(potTickRange * (1- pot_val / potVoltRange) + offset) ;
-//        return tick;
-
-        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.68;
-        double old_max = 3.328;
-
+       // hand ticks
         double new_min = 0;
         double new_max = handRange;
         // convert to percentages:
-        return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
+        //return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
+        return (int)((pot_val - old_min)/ (old_max - old_min) * handRange + new_min);
     }
-
-
-
 
     public void carouselRun(double power) {
         carousel.setPower(power); //TODO: yavneh had constructed the carousel in the opposite direction

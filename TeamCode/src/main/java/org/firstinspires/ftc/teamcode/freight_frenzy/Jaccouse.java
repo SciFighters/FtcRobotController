@@ -68,7 +68,7 @@ public class Jaccouse extends LinearOpMode {
 		drive.init(hardwareMap);
 		handRail.init(hardwareMap);
 
-
+	
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
 
@@ -107,8 +107,8 @@ public class Jaccouse extends LinearOpMode {
 					handRail.searchHome();
 				}
 
-				//if (homingHand.isClicked())
-					//handRail.searchHomeHand();
+				if (homingHand.isClicked())
+					this.handRail.resetPotAndHand();
 				continue;
 			}
 
@@ -133,15 +133,17 @@ public class Jaccouse extends LinearOpMode {
 			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 
-			if (handRail.getHandPercent() > 80 && armPower > 0.4){
-				armPower = 0.2;
-			}
+			// Hand limits, TODO: fix (adjust)
 
-			if (handRail.getHandPercent() < 20 && armPower < -0.4){
-				armPower = -0.2;
-			}
+//			int limitThreshold = 10;
 
-
+//			if (handRail.getHandPercent() > (100 - limitThreshold) && armPower > 0.4){
+//				armPower = 0.2;
+//			}
+//
+//			if (handRail.getHandPercent() < limitThreshold && armPower < -0.4){
+//				armPower = -0.2;
+//			}
 			handRail.rail_drive(railPower, overrideLimits.getState());
 			handRail.hand_drive(armPower, overrideLimits.getState());
 
@@ -187,7 +189,7 @@ public class Jaccouse extends LinearOpMode {
 			if (A.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
 			} else if (B.isClicked()) {
-				//handRail.gotoLevel(DuckLine.SH_Levels.Middle);
+				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
 			} else if (C.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Top);
 			} else if (X.isClicked()) {
@@ -212,7 +214,7 @@ public class Jaccouse extends LinearOpMode {
 				if(spincarousel.isChanged()){
 					carouselAccelTime.reset();
 				}
-				double acc =  1.1 * carouselAccelTime.seconds();
+				double acc =  0.8 * carouselAccelTime.seconds(); // accelration limit equation
 				handRail.carouselRun((0.6 + carouselBoost + acc) * alliance.mul);
 			}
 			else {

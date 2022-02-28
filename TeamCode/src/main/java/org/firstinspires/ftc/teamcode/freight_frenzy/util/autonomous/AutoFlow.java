@@ -68,11 +68,14 @@ public class AutoFlow {
 
 	// Freight locations
 	Location freightLocation_Pre1 = new Location(0.6,0.80, 90); //previously 0.6, 0.92
+
 	Location freightLocation_Pre2 = new Location(-0.60,0.90, 90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
 	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
-	Location freightPickup = new Location(-1.45, 0.3, 90);
+	Location freightPickup = new Location(-1.45, 0.3, 45);
 	Location freightSideLocation = new Location(-1.1, 0.1, 90);
+	private final Location pre_cycle = new Location(0, 0.6, 90);
+
 
 	// Storage locations
 	Location storageLocation_Pre1 = new Location(1.0,0.9, 90); //1.1, 0.92
@@ -274,7 +277,7 @@ public class AutoFlow {
 
 	private void cycle() {
 		// TODO: adjust power, tolerance and locations for cycle
-		drive.goToLocation(freightLocation_Pre1, 1, 0.10, 0);
+		drive.goToLocation(pre_cycle, 1, 0.10, 0); // first location - pre-bumber (barrier)
 		drive.goToLocation(freightSideLocation, 0.5, 0.03, 0);
 		drive.goToLocation(freightPickup, 0.5, 0.025, 0);
 
@@ -288,13 +291,16 @@ public class AutoFlow {
 		double turnMultiplier = 30;
 		while(opMode.opModeIsActive()) {
 			// Turning (side to side)
+			/*
 			turn += turnSpeed * 360 * ((currentTime - lastTime) / Math.pow(10,9));
 			drive.turn(anchorHeadingAngle + Math.sin(turn) * turnMultiplier, 0.3); // sin is better, because it starts at
+			 */
 			//grabbing
 			handrail.grabberGrab();
 			opMode.sleep(1000); // TODO: adjust sleep duration
+			handrail.grabberStop();
 			// Loop break condition
-			if(handrail.grabber_ts() || opMode.opModeIsActive() || loopCounter++ > 30) break;
+			if(handrail.grabber_ts() || opMode.opModeIsActive() || loopCounter++ > 30 || true) break;
 		}
 		// Going back to shipping hub
 
