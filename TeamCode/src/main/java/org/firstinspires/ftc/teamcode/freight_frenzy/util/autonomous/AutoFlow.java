@@ -61,9 +61,9 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.6,-45); //0.6, 0.75
+	Location shippingHubLocation = new Location(0.3, 0.6,-35); //0.6, 0.75
 	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.1, -0.15, 0);
-	Location carouselLocation = new Location(1.32, 0.27,45);
+	Location carouselLocation = new Location(1.29, 0.32,65); // 1.32, 0.27, 45
 	Location barrier = new Location(-1.2, 1.0);
 
 	// Freight locations
@@ -132,7 +132,7 @@ public class AutoFlow {
 			this.freightPickup.flipAngle(); // TODO: adjust it so it turns the right way
 		}
 
-		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation);
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation).useEncoders();
 		this.handrail = new HandRailClass(opMode, this.alliance);
 	}
 
@@ -197,22 +197,22 @@ public class AutoFlow {
 			// retract arm.
 			handrail.gotoRail(50, 0.4);
 			while(opMode.opModeIsActive() && handrail.isBusy());
-			handrail.gotoHandRail(0,90, 1);
+			handrail.gotoHandRail(0,80, 1);
 		}
 
 		if (startPos == StartPos.CAROUSEL && auto != Auto.PARK && auto != Auto.CYCLING) {
 			// Going to carousel
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
 			opMode.telemetry.update();
-			drive.goToLocation(carouselLocation, 1, 0.05, 6); //previous tolerance 0.15
+			drive.goToLocation(carouselLocation, 0.8, 0.05, 6); //previous tolerance 0.15
 			handrail.carouselRun(0.5 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
 			drive.setPower(0, 0, 0.1); //activates carousel motor
 			if(alliance == ALLIANCE.RED)
-				opMode.sleep(280); //sleeps (thread) for 0.2 seconds
+				opMode.sleep(350); //sleeps (thread) for 0.2 seconds
 			else
-				opMode.sleep(200);
+				opMode.sleep(350);
 			drive.setPower(0, 0, 0); // stops strafe
 
 			// Spinning carousel
