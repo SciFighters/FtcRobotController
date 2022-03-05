@@ -30,7 +30,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public int handRange = 5970; // 5968;
+    public int handRange = 5941; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -387,9 +387,9 @@ public class HandRailClass {
         double pot_val = potentiometer.getVoltage();
 
         if (pot_val < (3.33 / 2)) {
-            return (int)map(0.4, 1.39, 0, handRange / 2.0, pot_val);
+            return (int)map(0.41, 1.394, 0, handRange / 2.0, pot_val);
         } else {
-            return (int)map(1.39, 2.836, handRange / 2.0, handRange, pot_val);
+            return (int)map(1.394, 2.843, handRange / 2.0, handRange, pot_val);
         }
     }
 
