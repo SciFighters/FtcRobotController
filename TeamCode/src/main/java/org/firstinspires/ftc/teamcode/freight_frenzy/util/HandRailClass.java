@@ -322,12 +322,14 @@ public class HandRailClass {
 //        }
 //
 //        this.hand_drive(0, true);
-        if(this.getHandPercent() > 85) {
-            this.gotoHand(85, 0.8);
-            //Timeout
-            ElapsedTime timer = new ElapsedTime();
-            while(hand.isBusy() && timer.seconds() < 1.75);
-        }
+
+        // TODO: move hand up when its too low.
+//        if(this.getHandPercent() > 85) {
+//            this.gotoHand(85, 0.8);
+//            //Timeout
+//            ElapsedTime timer = new ElapsedTime();
+//            while(hand.isBusy() && timer.seconds() < 1.75);
+//        }
 
         resetPotAndHand();
 
@@ -387,9 +389,9 @@ public class HandRailClass {
         double pot_val = potentiometer.getVoltage();
 
         if (pot_val < (3.33 / 2)) {
-            return (int)map(0.41, 1.394, 0, handRange / 2.0, pot_val);
+            return (int)map(0.41, 1.392, 0, handRange / 2.0, pot_val);
         } else {
-            return (int)map(1.394, 2.843, handRange / 2.0, handRange, pot_val);
+            return (int)map(1.392, 2.843, handRange / 2.0, handRange, pot_val);
         }
     }
 
