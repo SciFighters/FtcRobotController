@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -41,8 +42,8 @@ public class HandRailClass {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
 
-        rail.setDirection(DcMotorEx.Direction.REVERSE);// Setting directions
-        hand.setDirection(DcMotorEx.Direction.FORWARD);
+        rail.setDirection(DcMotorEx.Direction.FORWARD);// Setting directions
+        hand.setDirection(DcMotorEx.Direction.REVERSE);
 
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -283,9 +284,9 @@ public class HandRailClass {
     public void rail_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setRailState(State.Drive);
-            if (power > 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
+            if (power < 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
                 rail.setPower(power);
-            else if ( power < 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
+            else if ( power > 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
                 rail.setPower(power);
             else
                 rail.setPower(0);
@@ -295,9 +296,9 @@ public class HandRailClass {
     public void hand_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
             setHandState(State.Drive);
-            if(power > 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
+            if(power < 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
                 hand.setPower(power);
-            else if (power < 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
+            else if (power > 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
                 hand.setPower(power);
             else
                 hand.setPower(0);
