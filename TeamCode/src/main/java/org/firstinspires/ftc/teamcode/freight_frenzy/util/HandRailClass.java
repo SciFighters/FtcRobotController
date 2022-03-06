@@ -33,7 +33,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public int handRange = 5945; // 5968;
+    public int handRange = 5941; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -178,11 +178,11 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(90,73,1);
+            gotoHandRail(90,75,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(65,84,1);
+            gotoHandRail(63,81,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(65,93,1);
+            gotoHandRail(65,92,1);
         } else if (shLevel == DuckLine.SH_Levels.Collect){
             gotoHandRail(35,16,1);
         }
@@ -331,12 +331,14 @@ public class HandRailClass {
 //        }
 //
 //        this.hand_drive(0, true);
-        if(this.getHandPercent() > 90) {
-            this.gotoHand(90, 0.8);
-            //Timeout
-            ElapsedTime timer = new ElapsedTime();
-            while(hand.isBusy() && timer.seconds() < 1.75);
-        }
+
+        // TODO: move hand up when its too low.
+//        if(this.getHandPercent() > 85) {
+//            this.gotoHand(85, 0.8);
+//            //Timeout
+//            ElapsedTime timer = new ElapsedTime();
+//            while(hand.isBusy() && timer.seconds() < 1.75);
+//        }
 
         resetPotAndHand();
 
@@ -372,20 +374,34 @@ public class HandRailClass {
 
 
 
+//    public int getScaledPotentiometerValue() {
+//        double pot_val = potentiometer.getVoltage();
+//
+//        // map
+//        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
+//        double old_min = 0.325;
+//        double old_max = 2.68;
+//
+//       // hand ticks
+//        double new_min = 0;
+//        double new_max = handRange;
+//        // convert to percentages:
+//        //return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
+//        return (int)((pot_val - old_min)/ (old_max - old_min) * handRange + new_min);
+//    }
+
+    public double map(double old_min, double old_max, double new_min, double new_max, double val) {
+        return (((val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min;
+    }
+
     public int getScaledPotentiometerValue() {
         double pot_val = potentiometer.getVoltage();
 
-        // map
-        // NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-        double old_min = 0.3670;
-        double old_max = 2.7640;
-
-       // hand ticks
-        double new_min = 0;
-        double new_max = handRange;
-        // convert to percentages:
-        //return (int)((((pot_val - old_min) * (new_max - new_min)) / (old_max - old_min)) + new_min);
-        return (int)((pot_val - old_min)/ (old_max - old_min) * handRange + new_min);
+        if (pot_val < (3.33 / 2)) {
+            return (int)map(0.41, 1.392, 0, handRange / 2.0, pot_val);
+        } else {
+            return (int)map(1.392, 2.843, handRange / 2.0, handRange, pot_val);
+        }
     }
 
     public void carouselRun(double power) {
