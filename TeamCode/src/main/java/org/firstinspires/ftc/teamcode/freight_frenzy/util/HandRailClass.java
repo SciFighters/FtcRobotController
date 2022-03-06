@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
@@ -16,8 +17,10 @@ public class HandRailClass {
     //motors, servos and touch switch
     private DcMotorEx rail = null;
     private DcMotorEx hand = null;
+
     private CRServo grabber_right = null;
     private CRServo grabber_left = null;
+    private Servo capping_servo = null; // Shipping elements servo
     private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
     private DigitalChannel hand_limit_F= null;
@@ -48,9 +51,13 @@ public class HandRailClass {
 
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
+        capping_servo = hw.get(Servo.class, "capping_servo");
 
+        // Setting directions
         grabber_left.setDirection(CRServo.Direction.FORWARD);
         grabber_right.setDirection(CRServo.Direction.REVERSE);
+        capping_servo.setDirection(Servo.Direction.FORWARD);
+        capping_servo.scaleRange(0.0,1.0);
 
         grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
@@ -76,7 +83,6 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         potentiometer_offset = getScaledPotentiometerValue();
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-
     }
 
     private LinearOpMode opMode;
@@ -94,6 +100,8 @@ public class HandRailClass {
     public HandRailClass(LinearOpMode opMode) {
         this.opMode = opMode;
     }
+
+
 
 
     public enum State {
@@ -239,6 +247,7 @@ public class HandRailClass {
         opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
         opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
         opMode.telemetry.addData("potent","V: %3.4fv scaled %3.1f - offset %d ", this.getPotentiometerValue(), (double)getScaledPotentiometerValue()/handRange*100, potentiometer_offset);
+        opMode.telemetry.addData("cappingServo position: ", capping_servo.getPosition());
     }
 
 
@@ -256,10 +265,10 @@ public class HandRailClass {
 
     public void grabberGrab() {
         if (grabber_switch.getState()) {
-            setServosPower(1);
+            this.setServosPower(1);
         }
         else {
-            setServosPower(0);
+            this.setServosPower(0);
         }
     }
 
@@ -383,9 +392,7 @@ public class HandRailClass {
         carousel.setPower(power); //TODO: yavneh had constructed the carousel in the opposite direction
     }
 
-    public void carouselStop() {
-        carousel.setPower(0);
-    }
+    public void carouselStop() { carousel.setPower(0); }
 
     public void switchSides(){
         setState(State.Goto);
@@ -396,6 +403,14 @@ public class HandRailClass {
         else{
             gotoRail(0, 1);
         }
+    }
+
+    public void setCappingPos(double cappingPos) {
+        this.capping_servo.setPosition(cappingPos);
+    }
+
+    public double getCappingPos() {
+        return this.capping_servo.getPosition();
     }
 
     public boolean isBusy(float... timeout) {

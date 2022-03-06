@@ -59,7 +59,6 @@ public class Jaccouse extends LinearOpMode {
 
 	private final double defaultOrientationAngle = 90;
 
-
 	@Override
 	public void runOpMode() {
 		telemetry.addData("Status", "Initialized");
@@ -208,7 +207,7 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 			}
 
-
+			// Carousel control
 			double carouselBoost = gamepad1.left_trigger ;
 			if(spincarousel.getState()) {
 				if(spincarousel.isChanged()){
@@ -221,6 +220,13 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
 			}
+			// capping servo
+			double cappingPos = this.gamepad2.right_stick_y * -0.25;
+			double cappingPower = cappingPos + handRail.getCappingPos();
+			if(cappingPower > 1) cappingPower = 1;
+			if(cappingPower < 0) cappingPower = 0;
+			this.handRail.setCappingPos(cappingPower);
+
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
 
@@ -229,6 +235,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
+			telemetry.addData("cappingPosGiven: ", cappingPos);
 			telemetry.update();
 		}
 	}
