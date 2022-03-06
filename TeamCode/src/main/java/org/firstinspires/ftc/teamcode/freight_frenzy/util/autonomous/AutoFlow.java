@@ -69,7 +69,7 @@ public class AutoFlow {
 	// Freight locations
 	Location freightLocation_Pre1 = new Location(0.6,0.80, 90); //previously 0.6, 0.92
 
-	Location freightLocation_Pre2 = new Location(-0.60,0.90, 90); //previously -0.60, 0.85
+	Location freightLocation_Pre2 = new Location(-0.60,0.9, 90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
 	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
 	Location freightPickup = new Location(-1.45, 0.1, 90);
@@ -166,12 +166,11 @@ public class AutoFlow {
 
 		handrail.searchHome();
 
-		opMode.telemetry.addData("",this.duckline.getDuck());
+		opMode.telemetry.addData("duck position", this.duckline.getDuck());
 		opMode.telemetry.update();
 	}
 
 	public void run() { //Autonomous starts
-
 		if (auto != Auto.PARK && auto != Auto.SHORT) {
 			// Put the cube on the shipping hub
 			DuckLine.SH_Levels shLevel = this.duckline.getDuck();
@@ -233,11 +232,12 @@ public class AutoFlow {
 				handrail.gotoHandRail(0, 70, 1);
 				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.2, 0);
+				drive.turn(180, 0.82);
 				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
 				if (alliance == ALLIANCE.BLUE)
-					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-				else
 					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
+				else
+					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 
 			} else {
 				// go to parking at storage unit
@@ -275,6 +275,7 @@ public class AutoFlow {
 					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
 			}
 		}
+
     }
 
     private void parkStorage() {
