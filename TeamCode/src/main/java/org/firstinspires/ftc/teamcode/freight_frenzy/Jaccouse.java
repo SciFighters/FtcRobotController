@@ -213,19 +213,22 @@ public class Jaccouse extends LinearOpMode {
 				if(spincarousel.isChanged()){
 					carouselAccelTime.reset();
 				}
-				double acc =  0.8 * carouselAccelTime.seconds(); // accelration limit equation
-				handRail.carouselRun((0.6 + carouselBoost + acc) * alliance.mul);
+				// y = mx + b, acc = speed * time * (1 - startOperator)
+				double startOperator = 0.4;
+				double speed = 1.15;
+				double acc =  (1 - startOperator) * carouselAccelTime.seconds() * speed; // accelration limit equation
+				handRail.carouselRun((startOperator + carouselBoost + acc) * alliance.mul);
 			}
 			else {
 				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
 			}
 			// capping servo
-			double cappingPos = this.gamepad2.right_stick_y * -0.25;
-			double cappingPower = cappingPos + handRail.getCappingPos();
-			if(cappingPower > 1) cappingPower = 1;
-			if(cappingPower < 0) cappingPower = 0;
-			this.handRail.setCappingPos(cappingPower);
+			double cappingPower = this.gamepad2.right_stick_y * -0.25;
+			double cappingPos = cappingPower + handRail.getCappingPos();
+			if(cappingPos > 1) cappingPos = 1;
+			if(cappingPos < -1) cappingPos = -1;
+			this.handRail.setCappingPos(cappingPos);
 
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
@@ -235,7 +238,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-			telemetry.addData("cappingPosGiven: ", cappingPos);
+			telemetry.addData("cappingPosGiven: ", cappingPower);
 			telemetry.update();
 		}
 	}

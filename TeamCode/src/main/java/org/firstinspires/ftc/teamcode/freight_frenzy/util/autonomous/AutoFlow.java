@@ -72,9 +72,9 @@ public class AutoFlow {
 	Location freightLocation_Pre2 = new Location(-0.60,0.90, 90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
 	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
-	Location freightPickup = new Location(-1.45, 0.3, 45);
+	Location freightPickup = new Location(-1.45, 0.1, 90);
 	Location freightSideLocation = new Location(-1.1, 0.1, 90);
-	private final Location pre_cycle = new Location(0, 0.6, 90);
+	private final Location pre_cycle = new Location(0, 0.4, 90);
 
 
 	// Storage locations
@@ -247,6 +247,7 @@ public class AutoFlow {
 //				drive.setPower(0,0,0);
 
 			}
+
 		} else {
 			// Barrier (freight)
 			if(startPos == StartPos.BARRIER) {
@@ -254,8 +255,17 @@ public class AutoFlow {
 				drive.goToLocation(freightLocation_Pre2, 1, 0.15, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.05, 0);
 				// TODO: Collect freight item, moreover, place it on the shipping hub
-			}else {
+			} else {
 				parkStorage();
+			}
+			if(auto == Auto.CYCLING) {
+				for(int i = 0; i < 3; i++) {
+					if (i==2){
+						cycle(true);
+					} else {
+						cycle(false);
+					}
+				}
 			}
 				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
 			if(auto != Auto.PARK) {
@@ -275,42 +285,27 @@ public class AutoFlow {
 		opMode.telemetry.addData("now", drive.getHeading());
 	}
 
-	private void cycle() {
+	private void cycle(boolean park) {
 		// TODO: adjust power, tolerance and locations for cycle
-		drive.goToLocation(pre_cycle, 1, 0.10, 0); // first location - pre-bumber (barrier)
+		drive.goToLocation(pre_cycle, 1, 0.10, 0); // first location - pre-barrier
 		drive.goToLocation(freightSideLocation, 0.5, 0.03, 0);
+		handrail.gotoLevel(DuckLine.SH_Levels.Collect);
 		drive.goToLocation(freightPickup, 0.5, 0.025, 0);
-
 		//pickup loop
-		short loopCounter = 0;
-		double turnSpeed = 1; //turns per second
-		double turn = 0;
-		double currentTime = System.nanoTime();
-		double lastTime = currentTime;
-		double anchorHeadingAngle = this.drive.getHeading();
-		double turnMultiplier = 30;
-		while(opMode.opModeIsActive()) {
-			// Turning (side to side)
-			/*
-			turn += turnSpeed * 360 * ((currentTime - lastTime) / Math.pow(10,9));
-			drive.turn(anchorHeadingAngle + Math.sin(turn) * turnMultiplier, 0.3); // sin is better, because it starts at
-			 */
-			//grabbing
-			handrail.grabberGrab();
-			opMode.sleep(1000); // TODO: adjust sleep duration
-			handrail.grabberStop();
-			// Loop break condition
-			if(handrail.grabber_ts() || opMode.opModeIsActive() || loopCounter++ > 30 || true) break;
-		}
+		//grabbing
+		handrail.grabberGrab();
+		opMode.sleep(1600); // TODO: adjust sleep duration
+		handrail.grabberStop();
 		// Going back to shipping hub
-
 		drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
 		drive.goToLocation(freightLocation_Pre2, 0.6, 0.05, 0);
-		drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.Top);
+		drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
 		drive.goToLocation(shippingHubLocation, 0.75, 0.04, 0);
 		handrail.grabberRelease();
-		opMode.sleep(2000);
-
+		opMode.sleep(1250);
+		if(park) {
+			drive.goToLocation(freightLocation, 1, 0.15, 0);
+		}
 	}
 }

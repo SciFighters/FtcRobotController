@@ -184,7 +184,7 @@ public class HandRailClass {
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
             gotoHandRail(65,92,1);
         } else if (shLevel == DuckLine.SH_Levels.Collect){
-            gotoHandRail(35,16,1);
+            gotoHandRail(42,10,1);
         }
     }
 
