@@ -38,7 +38,7 @@ public class DuckLine extends OpenCvPipeline {
 		Middle,
 		Bottom,
 		Collect,
-
+		CollectAuto,
 		TopTeleop,
 	}
 

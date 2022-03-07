@@ -61,25 +61,26 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.6,-35); //0.6, 0.75
-	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.1, -0.15, 0);
+	Location shippingHubLocation = new Location(0.3, 0.6,-30); //0.6, 0.75
+	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, 0, 0, 80);
 	Location carouselLocation = new Location(1.29, 0.32,65); // 1.32, 0.27, 45
 	Location barrier = new Location(-1.2, 1.0);
 
 	// Freight locations
-	Location freightLocation_Pre1 = new Location(0.6,0.80, 90); //previously 0.6, 0.92
+	Location freightLocation_Pre1 = new Location(-0.6,0.75, -90); //previously 0.6, 0.92
 
-	Location freightLocation_Pre2 = new Location(-0.60,0.9, 90); //previously -0.60, 0.85
-	Location freightLocation_Pre3 = new Location(-0.0, 0.6, 90);
-	Location freightLocation = new Location(-1.40,0.90, 90); // -1.5, 0.93
-	Location freightPickup = new Location(-1.45, 0.1, 90);
-	Location freightSideLocation = new Location(-1.1, 0.1, 90);
-	private final Location pre_cycle = new Location(0, 0.4, 90);
+	Location freightLocation_Pre2Cycle = new Location(-0.6,0, -90); //previously -0.60, 0.85
+	Location freightLocation_Pre2 = new Location(-0.60,0.85, -90); //previously -0.60, 0.85
+	Location freightLocation_Pre3 = new Location(-0.0, 0.55, -90);
+	Location freightPickup = new Location(-1.5, 0, -90);
+	Location freightSideLocation = new Location(-0.6, 0.1, -90);
+	private final Location pre_cycle = new Location(-0.4, 0.0, -90);
+	Location freightLocation = new Location(-1.40,0.90, -90); // -1.5, 0.93
 
 
 	// Storage locations
-	Location storageLocation_Pre1 = new Location(1.0,0.9, 90); //1.1, 0.92
-	Location storageLocation = new Location(1.3,0.9, 90); //previously 1.5, 0.9
+	Location storageLocation_Pre1 = new Location(1.0,0.9, -90); //1.1, 0.92
+	Location storageLocation = new Location(1.3,0.9, -90); //previously 1.5, 0.9
 
 	ALLIANCE alliance;
 	StartPos startPos;
@@ -99,6 +100,7 @@ public class AutoFlow {
 		if(startPos == StartPos.BARRIER) {
 			this.startLocation.flipX();
 			this.shippingHubLocation.flipX();
+			this.shippingHubLocation_Pre1.flipX();
 			this.shippingHubLocation.flipAngle();
 		}
 
@@ -121,11 +123,11 @@ public class AutoFlow {
 			this.freightPickup.flipX();
 
 			//flipping angles
-			//this.freightLocation.flipAngle();
-			//this.freightLocation_Pre1.flipAngle();
-			//this.freightLocation_Pre2.flipAngle();
-			//this.storageLocation.flipAngle();
-			//this.storageLocation_Pre1.flipAngle();
+			this.freightLocation.flipAngle();
+			this.freightLocation_Pre1.flipAngle();
+			this.freightLocation_Pre2.flipAngle();
+			this.storageLocation.flipAngle();
+			this.storageLocation_Pre1.flipAngle();
 			this.carouselLocation.angle = 135;
 			this.shippingHubLocation.flipAngle();
 			this.shippingHubLocation_Pre1.flipAngle();
@@ -191,7 +193,7 @@ public class AutoFlow {
 
 			// Put the cube on shipping hub
 			handrail.grabberRelease();
-			opMode.sleep(1950); //wait for drop
+			opMode.sleep(1500); //wait for drop
 			handrail.grabberStop();
 			// retract arm.
 			handrail.gotoRail(50, 0.4);
@@ -207,7 +209,7 @@ public class AutoFlow {
 			handrail.carouselRun(0.5 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
-			drive.setPower(0, 0, 0.1); //activates carousel motor
+			drive.setPower(0, 0, 0.15); //activates carousel motor
 			if(alliance == ALLIANCE.RED)
 				opMode.sleep(350); //sleeps (thread) for 0.2 seconds
 			else
@@ -232,13 +234,7 @@ public class AutoFlow {
 				handrail.gotoHandRail(0, 70, 1);
 				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.2, 0);
-				drive.turn(180, 0.82);
-				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
-				if (alliance == ALLIANCE.BLUE)
-					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
-				else
-					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-
+//				drive.turnTo(-90, 0.82);
 			} else {
 				// go to parking at storage unit
 				parkStorage();
@@ -250,22 +246,34 @@ public class AutoFlow {
 
 		} else {
 			// Barrier (freight)
-			if(startPos == StartPos.BARRIER) {
+			if(startPos == StartPos.BARRIER && auto != Auto.CYCLING) {
 				drive.goToLocation(freightLocation_Pre3, 1, 0.15, 0); //first location
 				drive.goToLocation(freightLocation_Pre2, 1, 0.15, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.05, 0);
 				// TODO: Collect freight item, moreover, place it on the shipping hub
-			} else {
+			} else if(auto != Auto.CYCLING){
 				parkStorage();
 			}
 			if(auto == Auto.CYCLING) {
-				for(int i = 0; i < 3; i++) {
-					if (i==2){
-						cycle(true);
-					} else {
-						cycle(false);
-					}
+				for(int i = 0; i < 2; i++) {
+					cycle();
 				}
+				drive.goTo(-0.4,-0.05,1, -90, 0.03, 0); // first location - pre-barrier
+
+				opMode.telemetry.addLine("cycle");
+				opMode.telemetry.update();
+
+				//opMode.sleep(300);
+				//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
+				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
+				opMode.sleep(100);
+				drive.goToLocation(freightPickup, 0.9, 0.025, 0);
+				//pickup loop
+				//grabbing
+				handrail.grabberGrab();
+				opMode.sleep(1400); // TODO: adjust sleep duration
+				handrail.grabberStop();
+
 			}
 				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
 			if(auto != Auto.PARK) {
@@ -276,6 +284,7 @@ public class AutoFlow {
 			}
 		}
 
+		handrail.gotoRail(0, 1);
     }
 
     private void parkStorage() {
@@ -286,27 +295,34 @@ public class AutoFlow {
 		opMode.telemetry.addData("now", drive.getHeading());
 	}
 
-	private void cycle(boolean park) {
+	private void cycle() {
 		// TODO: adjust power, tolerance and locations for cycle
-		drive.goToLocation(pre_cycle, 1, 0.10, 0); // first location - pre-barrier
-		drive.goToLocation(freightSideLocation, 0.5, 0.03, 0);
-		handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-		drive.goToLocation(freightPickup, 0.5, 0.025, 0);
+		drive.goToLocation(pre_cycle, 1, 0.08, 0); // first location - pre-barrier
+
+		opMode.telemetry.addLine("cycle");
+		opMode.telemetry.update();
+
+		//opMode.sleep(300);
+		//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
+		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
+		opMode.sleep(100);
+		drive.goToLocation(freightPickup, 0.9, 0.025, 0);
 		//pickup loop
 		//grabbing
 		handrail.grabberGrab();
-		opMode.sleep(1600); // TODO: adjust sleep duration
+		opMode.sleep(1400); // TODO: adjust sleep duration
 		handrail.grabberStop();
 		// Going back to shipping hub
-		drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
-		drive.goToLocation(freightLocation_Pre2, 0.6, 0.05, 0);
+		//drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
+		opMode.sleep(100);
+		drive.goToLocation(freightLocation_Pre2Cycle, 0.8, 0.05, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.Top);
-		drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
-		drive.goToLocation(shippingHubLocation, 0.75, 0.04, 0);
+		//drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
+		opMode.sleep(100);
+		drive.goToLocation(shippingHubLocation_Pre1, 1,  0.04, 0);
 		handrail.grabberRelease();
-		opMode.sleep(1250);
-		if(park) {
-			drive.goToLocation(freightLocation, 1, 0.15, 0);
-		}
+		opMode.sleep(1000);
+		handrail.grabberStop();
+
 	}
 }

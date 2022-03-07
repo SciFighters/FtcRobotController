@@ -34,7 +34,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public int handRange = 5941; // 5968;
+    public int handRange = 6000; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -42,8 +42,8 @@ public class HandRailClass {
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
 
-        rail.setDirection(DcMotorEx.Direction.FORWARD);// Setting directions
-        hand.setDirection(DcMotorEx.Direction.REVERSE);
+        rail.setDirection(DcMotorEx.Direction.REVERSE);// Setting directions
+        hand.setDirection(DcMotorEx.Direction.FORWARD);
 
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);// Setting encoders
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -77,7 +77,7 @@ public class HandRailClass {
 
         hand.setTargetPositionTolerance(20);
         rail.setTargetPositionTolerance(20);
-        this.searchHome();
+        searchHome();
     }
 
     public void resetPotAndHand() {
@@ -179,17 +179,39 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(85.99,67.14,1);
+//            gotoHandRail(98.44,70.98,1);
+
+            gotoHand(71, 1);
+            while (hand.isBusy());
+            gotoRail(98.44, 1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(60.41,77.33,1);
+//            gotoHandRail(60.41,77.33,1);
+
+            gotoHand(83.53, 1);
+            while (hand.isBusy());
+            gotoRail(66.19, 1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(64.08,87.75,1);
+//            gotoHandRail(66.73,92.13,1);
+
+            gotoRail(66.73, 1);
+            while (rail.isBusy());
+            gotoHand(92.13, 1);
         } else if (shLevel == DuckLine.SH_Levels.Collect) {
 //            gotoHandRail(100,99,1);
-            gotoRail(100, 1);
+
+            gotoRail(99, 1);
+            while (rail.isBusy());
             gotoHand(99, 1);
         } else if (shLevel == DuckLine.SH_Levels.TopTeleop) {
-            gotoHandRail(37.48,29.89,1);
+//            gotoHandRail(28.23,29.57,1);
+
+            gotoHand(30, 1);
+//            while (hand.isBusy());
+            gotoRail(28, 1);
+        } else if (shLevel == DuckLine.SH_Levels.CollectAuto) {
+            gotoRail(95, 1);
+            while (rail.isBusy());
+            gotoHand(99, 1);
         }
     }
 
@@ -288,9 +310,9 @@ public class HandRailClass {
     public void rail_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || rail.isBusy() == false) {
             setRailState(State.Drive);
-            if (power < 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
+            if (power > 0 && isRailBoundless(true, limitsOverride) &&  rail_limit_F.getState())
                 rail.setPower(power);
-            else if ( power > 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
+            else if ( power < 0 && isRailBoundless(false, limitsOverride) && rail_limit_B.getState())
                 rail.setPower(power);
             else
                 rail.setPower(0);
@@ -300,9 +322,9 @@ public class HandRailClass {
     public void hand_drive(double power, boolean limitsOverride) {
         if(Math.abs(power) > 0.1 || hand.isBusy() == false) {
             setHandState(State.Drive);
-            if(power < 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
+            if(power > 0 && isHandBoundless(true, limitsOverride) && hand_limit_F.getState())
                 hand.setPower(power);
-            else if (power > 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
+            else if (power < 0 && isHandBoundless(false, limitsOverride) && hand_limit_B.getState())
                 hand.setPower(power);
             else
                 hand.setPower(0);
@@ -326,30 +348,18 @@ public class HandRailClass {
 
 
     public void searchHome(){
-        //repositioning hand...
-//         while(this.getScaledPotentiometerValue() > 40) {
-//            this.hand_drive(0.4, true);
-//        }
-//        this.hand_drive(0, true);
-//        while(this.getScaledPotentiometerValue() < 60) {
-//            this.hand_drive(0.3, true);
-//        }
-//
-//        this.hand_drive(0, true);
+        resetPotAndHand();
 
-        // TODO: move hand up when its too low.
-//        if(this.getHandPercent() > 85) {
+//        // TODO: move hand up when its too low.
+//        if (this.getHandPercent() > 85) {
 //            this.gotoHand(85, 0.8);
 //            //Timeout
 //            ElapsedTime timer = new ElapsedTime();
 //            while(hand.isBusy() && timer.seconds() < 1.75);
 //        }
 
-        resetPotAndHand();
-
         int lastPos = rail.getCurrentPosition();
         int tempPos = lastPos;
-        int counter = 0;
 
         //rail limit
         rail.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -361,9 +371,9 @@ public class HandRailClass {
             rail.setPower(-0.8);
 //            opMode.sleep(250);
             int currentPos = rail.getCurrentPosition();
-//            if (currentPos >= 1000){
-//                break;
-//            }
+            if (currentPos >= 1600){
+                break;
+            }
 //            if (lastPos >= currentPos){
 //                break;
 //            }
@@ -403,9 +413,11 @@ public class HandRailClass {
         double pot_val = potentiometer.getVoltage();
 
         if (pot_val < (3.33 / 2)) {
-            return (int)map(0.41, 1.392, 0, handRange / 2.0, pot_val);
+            return (int)map(0.4, 1.392, 0, handRange / 2.0, pot_val);
+        } else if (pot_val < 2.2) {
+            return (int)map(1.392, 2.2, handRange * 0.83, handRange, pot_val);
         } else {
-            return (int)map(1.392, 2.843, handRange / 2.0, handRange, pot_val);
+            return (int)map(2.2, 2.843, handRange * 0.83, handRange, pot_val);
         }
     }
 

@@ -86,11 +86,11 @@ public class Jaccouse extends LinearOpMode {
 			if (gamepad1.start) {
 				if (gamepad1.x) {
 					drive.resetOrientation(defaultOrientationAngle);
-					//this.alliance = AutoFlow.ALLIANCE.BLUE;
+					this.alliance = AutoFlow.ALLIANCE.BLUE;
 				}
 				if (gamepad1.y) {
-					drive.resetOrientation(0);
-					//this.alliance = AutoFlow.ALLIANCE.RED;
+					drive.resetOrientation(-90);
+					this.alliance = AutoFlow.ALLIANCE.RED;
 				}
 				drive.resetPosition();
 				targetHeading = drive.getHeading();
@@ -119,8 +119,6 @@ public class Jaccouse extends LinearOpMode {
 			boolean fieldOriented = !gamepad1.y;
 			final double boostK = 0.5;
 			double boost = gamepad1.right_trigger * boostK + (1 - boostK);
-			boolean blue = gamepad1.x;
-			boolean red = gamepad1.b;
 
 
 			double y = pow(-gamepad1.left_stick_y) * boost;
@@ -173,15 +171,15 @@ public class Jaccouse extends LinearOpMode {
 				targetHeading = drive.getHeading();
 			}
 
-			if(blue) {
-				alliance = AutoFlow.ALLIANCE.BLUE;
-				telemetry.addData("Alliance is: ","Blue");
-			}
-
-			else if(red) {
-				alliance = AutoFlow.ALLIANCE.RED;
-				telemetry.addData("Alliance is: ", "Red");
-			}
+//			boolean blue = gamepad1.x;
+//			boolean red = gamepad1.b;
+//			if (blue) {
+//				alliance = AutoFlow.ALLIANCE.BLUE;
+//				telemetry.addData("Alliance is: ","Blue");
+//			} else if(red) {
+//				alliance = AutoFlow.ALLIANCE.RED;
+//				telemetry.addData("Alliance is: ", "Red");
+//			}
 
 			if (!turningToggle.isPressed() && turningCount < 0) {
 				double delta = drive.getDeltaHeading(targetHeading);
