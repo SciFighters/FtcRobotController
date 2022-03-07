@@ -49,6 +49,8 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle C = new Toggle();
 	private Toggle X = new Toggle();
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
+	private Toggle capping_button = new Toggle();
+	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
 
 
@@ -128,8 +130,10 @@ public class Jaccouse extends LinearOpMode {
 			// Hand rail
 			final double handBoostK = 0.3;
 			double boostHand = gamepad2.right_trigger * handBoostK + (1 - handBoostK);
-			double railPower = pow(gamepad2.left_stick_x * boostHand);// possibly changeable to gamepad2.left_stick_x
-			double armPower  = pow(gamepad2.right_stick_x * boostHand);
+//			double railPower = pow(gamepad2.left_stick_x * boostHand);// possibly changeable to gamepad2.left_stick_x
+//			double armPower  = pow(gamepad2.right_stick_x * boostHand);
+			double railPower = pow(gamepad2.left_stick_y * boostHand);// possibly changeable to gamepad2.left_stick_x
+			double armPower  = pow(gamepad2.right_stick_y * boostHand);
 			overrideLimits.update(gamepad2.right_bumper);
 
 			// Hand limits, TODO: fix (adjust)
@@ -151,9 +155,9 @@ public class Jaccouse extends LinearOpMode {
 
 
 			A.update(gamepad2.a);
-			B.update(gamepad2.b);
+//			B.update(gamepad2.b);
 			C.update(gamepad2.y);
-			X.update(gamepad2.x);
+//			X.update(gamepad2.x);
 
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
@@ -186,14 +190,17 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			if (A.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Bottom);
-			} else if (B.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
-			} else if (C.isClicked()) {
-				handRail.gotoLevel(DuckLine.SH_Levels.Top);
-			} else if (X.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
 			}
+//			else if (B.isClicked()) {
+//				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
+//			}
+			else if (C.isClicked()) {
+				handRail.gotoLevel(DuckLine.SH_Levels.TopTeleop);
+			}
+//			else if (X.isClicked()) {
+//				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
+//			}
 
 			if (!release) {
 				if (collector.getState()) {
@@ -223,12 +230,18 @@ public class Jaccouse extends LinearOpMode {
 				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
 			}
+
 			// capping servo
-			double cappingPower = this.gamepad2.right_stick_y * -0.25;
-			double cappingPos = cappingPower + handRail.getCappingPos();
-			if(cappingPos > 1) cappingPos = 1;
-			if(cappingPos < -1) cappingPos = -1;
-			this.handRail.setCappingPos(cappingPos);
+//			double cappingPower = this.gamepad2.right_stick_y * -0.25;
+//			double cappingPos = cappingPower + handRail.getCappingPos();
+//			if(cappingPos > 1) cappingPos = 1;
+//			if(cappingPos < -1) cappingPos = -1;
+//			this.handRail.setCappingPos(cappingPos);
+			capping_button.update(gamepad2.left_bumper);
+			if (capping_button.isClicked()) {
+				this.handRail.setCappingPos(capping_state ? 1 : 0);
+				capping_state = !capping_state;
+			}
 
 
 			drive.setPowerOriented(y, x, turn, fieldOriented);
@@ -238,7 +251,6 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-			telemetry.addData("cappingPosGiven: ", cappingPower);
 			telemetry.update();
 		}
 	}

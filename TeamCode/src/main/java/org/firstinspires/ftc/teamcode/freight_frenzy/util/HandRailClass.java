@@ -179,13 +179,17 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-            gotoHandRail(90,75,1);
+            gotoHandRail(85.99,67.14,1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-            gotoHandRail(63,81,1);
+            gotoHandRail(60.41,77.33,1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-            gotoHandRail(65,92,1);
-        } else if (shLevel == DuckLine.SH_Levels.Collect){
-            gotoHandRail(42,10,1);
+            gotoHandRail(64.08,87.75,1);
+        } else if (shLevel == DuckLine.SH_Levels.Collect) {
+//            gotoHandRail(100,99,1);
+            gotoRail(100, 1);
+            gotoHand(99, 1);
+        } else if (shLevel == DuckLine.SH_Levels.TopTeleop) {
+            gotoHandRail(37.48,29.89,1);
         }
     }
 
