@@ -186,16 +186,17 @@ public class HandRailClass {
             gotoRail(98.44, 1);
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
 //            gotoHandRail(60.41,77.33,1);
-
             gotoHand(83.53, 1);
             while (hand.isBusy());
             gotoRail(66.19, 1);
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
 //            gotoHandRail(66.73,92.13,1);
-
-            gotoRail(66.73, 1);
+            gotoRail(33, 1);
             while (rail.isBusy());
             gotoHand(92.13, 1);
+//            while (rail.isBusy());
+//            gotoRail(66.73, 1);
+
         } else if (shLevel == DuckLine.SH_Levels.Collect) {
 //            gotoHandRail(100,99,1);
 

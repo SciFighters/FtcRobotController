@@ -61,7 +61,7 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.6,-30); //0.6, 0.75
+	Location shippingHubLocation = new Location(0.3, 0.6,-35); //0.6, 0.75
 	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, 0, 0, 80);
 	Location carouselLocation = new Location(1.29, 0.32,65); // 1.32, 0.27, 45
 	Location barrier = new Location(-1.2, 1.0);
@@ -70,12 +70,12 @@ public class AutoFlow {
 	Location freightLocation_Pre1 = new Location(-0.6,0.75, -90); //previously 0.6, 0.92
 
 	Location freightLocation_Pre2Cycle = new Location(-0.6,0, -90); //previously -0.60, 0.85
-	Location freightLocation_Pre2 = new Location(-0.60,0.85, -90); //previously -0.60, 0.85
+	Location freightLocation_Pre2 = new Location(-0.60,0.7, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.55, -90);
 	Location freightPickup = new Location(-1.5, 0, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
 	private final Location pre_cycle = new Location(-0.4, 0.0, -90);
-	Location freightLocation = new Location(-1.40,0.90, -90); // -1.5, 0.93
+	Location freightLocation = new Location(-1.40,0.7, -90); // -1.5, 0.93
 
 
 	// Storage locations
@@ -182,7 +182,7 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			// Go to Shipping Hub
-			handrail.gotoRail(50, 0.5);
+			handrail.gotoRail(30, 0.5);
 			drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
 
 			// wait for handRail to get into position (both not busy)
