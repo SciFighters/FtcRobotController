@@ -275,13 +275,6 @@ public class AutoFlow {
 				handrail.grabberStop();
 
 			}
-				//TODO: replace if (collect or middle), with collect and implement an if to change collect in HandRailClass
-			if(auto != Auto.PARK) {
-				if (alliance == ALLIANCE.BLUE)
-					handrail.gotoLevel(DuckLine.SH_Levels.Collect);
-				else
-					handrail.gotoLevel(DuckLine.SH_Levels.Middle);
-			}
 		}
 
 		handrail.gotoRail(0, 1);
