@@ -77,7 +77,7 @@ public class AutoFlow {
 	Location freightLocation_Pre3 = new Location(-0.0, 0.55, -90);
 	Location freightPickup = new Location(-1.5, 0.16, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
-	private final Location pre_cycle = new Location(-0.4, 0.16, -90);
+	private final Location pre_cycle = new Location(-0.6, 0.16, -90);
 	Location freightLocation = new Location(-1.40,0.7, -90); // -1.5, 0.93
 	Location pre_fullPickup = new Location(freightLocation, -0.2, 0.2, -45);
 
@@ -287,9 +287,11 @@ public class AutoFlow {
 
 	private void cycle(boolean park) {
 		// TODO: adjust power, tolerance and locations for cycle
-		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first location - pre-barrier
 		opMode.telemetry.addLine("cycle");
 		opMode.telemetry.update();
+
+		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first location - pre-barrier
+		drive.turnTo(pre_cycle.angle, 0.5);
 		//opMode.sleep(300);
 		//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
