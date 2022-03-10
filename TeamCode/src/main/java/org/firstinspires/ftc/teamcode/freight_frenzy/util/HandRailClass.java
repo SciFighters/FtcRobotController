@@ -39,6 +39,7 @@ public class HandRailClass {
     AutoFlow.ALLIANCE alliance;
 
     public void init(HardwareMap hw) {
+        opMode.telemetry.addLine("Head Rail Init");
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
 
@@ -73,10 +74,11 @@ public class HandRailClass {
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
-        resetPotAndHand();
 
-        hand.setTargetPositionTolerance(20);
-        rail.setTargetPositionTolerance(20);
+        hand.setTargetPositionTolerance(50);
+        rail.setTargetPositionTolerance(50);
+
+        // done inside searchHome()  // resetPotAndHand();
         searchHome();
     }
 
@@ -180,15 +182,17 @@ public class HandRailClass {
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
 //            gotoHandRail(98.44,70.98,1);
-
             gotoHand(71, 1);
-            while (hand.isBusy());
+//            while (hand.isBusy());
             gotoRail(98.44, 1);
+
+
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
 //            gotoHandRail(60.41,77.33,1);
-            gotoHand(83.53, 1);
+            gotoHand(83, 1);
             while (hand.isBusy());
             gotoRail(66.19, 1);
+
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
 //            gotoHandRail(66.73,92.13,1);
             gotoRail(33, 1);
@@ -199,19 +203,19 @@ public class HandRailClass {
 
         } else if (shLevel == DuckLine.SH_Levels.Collect) {
 //            gotoHandRail(100,99,1);
-
             gotoRail(99, 1);
             while (rail.isBusy());
             gotoHand(99, 1);
+
         } else if (shLevel == DuckLine.SH_Levels.TopTeleop) {
 //            gotoHandRail(28.23,29.57,1);
-
             gotoHand(30, 1);
 //            while (hand.isBusy());
             gotoRail(28, 1);
+
         } else if (shLevel == DuckLine.SH_Levels.CollectAuto) {
             gotoRail(95, 1);
-            while (rail.isBusy());
+            // while (rail.isBusy());
             gotoHand(99, 1);
         }
     }
@@ -274,7 +278,7 @@ public class HandRailClass {
     public void telemetry_handRail() {
         opMode.telemetry.addData("rail: ","%3.2f%%, \t%d: ", getRailPercent(), this.rail.getCurrentPosition());
         opMode.telemetry.addData("hand:", "%3.2f%%, \t%d: ", getHandPercent(), this.hand.getCurrentPosition());
-        opMode.telemetry.addData("potent","V: %3.4fv scaled %3.1f - offset %d ", this.getPotentiometerValue(), (double)getScaledPotentiometerValue()/handRange*100, potentiometer_offset);
+        opMode.telemetry.addData("potent","%3.2f%%  vol: %3.4fv - offset %d ", (double)getScaledPotentiometerValue()/handRange*100, this.getPotentiometerValue(), potentiometer_offset);
         opMode.telemetry.addData("cappingServo position: ", capping_servo.getPosition());
     }
 
@@ -351,6 +355,7 @@ public class HandRailClass {
     public void searchHome(){
         resetPotAndHand();
 
+
 //        // TODO: move hand up when its too low.
 //        if (this.getHandPercent() > 85) {
 //            this.gotoHand(85, 0.8);
@@ -379,12 +384,14 @@ public class HandRailClass {
 //                break;
 //            }
             opMode.telemetry.addData("[Homming] delta Ticks: ", Math.abs(tempPos - lastPos));
+            opMode.telemetry.addData("precent", getHandPercent());
             opMode.telemetry.update();
             lastPos = currentPos;
         }
         rail.setPower(0);
         rail.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         rail.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        this.telemetry_handRail();
     }
 
 
@@ -414,11 +421,14 @@ public class HandRailClass {
         double pot_val = potentiometer.getVoltage();
 
         if (pot_val < (3.33 / 2)) {
-            return (int)map(0.4, 1.392, 0, handRange / 2.0, pot_val);
+            return (int)map(0.4, 1.392, 0, handRange * 0.5, pot_val);
         } else if (pot_val < 2.2) {
-            return (int)map(1.392, 2.2, handRange * 0.83, handRange, pot_val);
+            return (int)map(1.392, 2.2, handRange * 0.5, handRange* 0.83, pot_val);
         } else {
             return (int)map(2.2, 2.843, handRange * 0.83, handRange, pot_val);
+
+
+
         }
     }
 
@@ -487,6 +497,13 @@ public class HandRailClass {
 //            return true;
     }
 
+    public double getPotOffset(){
+        return (potentiometer_offset);
+    }
+
+    public void resetpot(){
+            potentiometer.resetDeviceConfigurationForOpMode();
+    }
 
 
 

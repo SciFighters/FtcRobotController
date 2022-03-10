@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.freight_frenzy.study.PotTest;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
@@ -61,8 +64,8 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength/2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.6,-35); //0.6, 0.75
-	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, 0, 0, 80);
+	Location shippingHubLocation = new Location(0.3, 0.58,-35); //0.6, 0.75
+	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.2, 0, 70);
 	Location carouselLocation = new Location(1.29, 0.32,65); // 1.32, 0.27, 45
 	Location barrier = new Location(-1.2, 1.0);
 
@@ -72,10 +75,11 @@ public class AutoFlow {
 	Location freightLocation_Pre2Cycle = new Location(-0.6,0, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre2 = new Location(-0.60,0.7, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.55, -90);
-	Location freightPickup = new Location(-1.5, 0, -90);
+	Location freightPickup = new Location(-1.5, 0.16, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
-	private final Location pre_cycle = new Location(-0.4, 0.0, -90);
+	private final Location pre_cycle = new Location(-0.4, 0.16, -90);
 	Location freightLocation = new Location(-1.40,0.7, -90); // -1.5, 0.93
+	Location pre_fullPickup = new Location(freightLocation, -0.2, 0.2, -45);
 
 
 	// Storage locations
@@ -106,8 +110,8 @@ public class AutoFlow {
 
 		if (alliance == ALLIANCE.RED) {
 			//TODO: flip all location on x axis (<location>.flipX())
-			opMode.telemetry.addLine("red");
-			opMode.telemetry.update();
+			opMode.telemetry.addLine("RED");
+
 			this.startLocation.flipX();
 			this.shippingHubLocation_Pre1.flipX();
 			this.shippingHubLocation.flipX();
@@ -121,6 +125,7 @@ public class AutoFlow {
 			this.freightLocation_Pre3.flipX();
 			this.freightSideLocation.flipX();
 			this.freightPickup.flipX();
+			this.pre_fullPickup.flipX();
 
 			//flipping angles
 			this.freightLocation.flipAngle();
@@ -131,6 +136,7 @@ public class AutoFlow {
 			this.carouselLocation.angle = 135;
 			this.shippingHubLocation.flipAngle();
 			this.shippingHubLocation_Pre1.flipAngle();
+			this.pre_fullPickup.flipAngle();
 			this.freightPickup.flipAngle(); // TODO: adjust it so it turns the right way
 		}
 
@@ -156,7 +162,6 @@ public class AutoFlow {
 			@Override
 			public void onError(int errorCode) {
 				opMode.telemetry.addData("camera initialization failed", errorCode);
-				opMode.telemetry.update();
 			}
 		});
 	}
@@ -166,9 +171,10 @@ public class AutoFlow {
 		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
 
-		handrail.searchHome();
 
-		opMode.telemetry.addData("duck position", this.duckline.getDuck());
+		//	done in headrail.init // handrail.searchHome();
+
+		opMode.telemetry.addData("DUCK Position", this.duckline.getDuck());
 		opMode.telemetry.update();
 	}
 
@@ -184,6 +190,7 @@ public class AutoFlow {
 			// Go to Shipping Hub
 			handrail.gotoRail(30, 0.5);
 			drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
+			opMode.telemetry.addData("hand", handrail.getHandPercent());
 
 			// wait for handRail to get into position (both not busy)
 			handrail.gotoLevel(shLevel);
@@ -206,7 +213,7 @@ public class AutoFlow {
 			opMode.telemetry.addData("goTo Carousel Y:", carouselLocation.y);
 			opMode.telemetry.update();
 			drive.goToLocation(carouselLocation, 0.8, 0.05, 6); //previous tolerance 0.15
-			handrail.carouselRun(0.5 * alliance.mul);
+			handrail.carouselRun(0.6 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
 			drive.setPower(0, 0, 0.15); //activates carousel motor
@@ -234,6 +241,13 @@ public class AutoFlow {
 				handrail.gotoHandRail(0, 70, 1);
 				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.2, 0);
+				drive.goToLocation(pre_fullPickup, 1, 0.2, 0);
+				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
+				drive.goToLocation(freightLocation, 1, -135 * alliance.mul, 0.2, 0);
+				handrail.grabberGrab();
+				opMode.sleep(1200);
+				handrail.grabberStop();
+
 //				drive.turnTo(-90, 0.82);
 			} else {
 				// go to parking at storage unit
@@ -255,25 +269,8 @@ public class AutoFlow {
 				parkStorage();
 			}
 			if(auto == Auto.CYCLING) {
-				for(int i = 0; i < 2; i++) {
-					cycle();
-				}
-				drive.goTo(-0.4,-0.05,1, -90, 0.03, 0); // first location - pre-barrier
-
-				opMode.telemetry.addLine("cycle");
-				opMode.telemetry.update();
-
-				//opMode.sleep(300);
-				//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
-				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
-				opMode.sleep(100);
-				drive.goToLocation(freightPickup, 0.9, 0.025, 0);
-				//pickup loop
-				//grabbing
-				handrail.grabberGrab();
-				opMode.sleep(1400); // TODO: adjust sleep duration
-				handrail.grabberStop();
-
+				cycle(false);
+				cycle(true);
 			}
 		}
 
@@ -288,34 +285,35 @@ public class AutoFlow {
 		opMode.telemetry.addData("now", drive.getHeading());
 	}
 
-	private void cycle() {
+	private void cycle(boolean park) {
 		// TODO: adjust power, tolerance and locations for cycle
-		drive.goToLocation(pre_cycle, 1, 0.08, 0); // first location - pre-barrier
-
+		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first location - pre-barrier
 		opMode.telemetry.addLine("cycle");
 		opMode.telemetry.update();
-
 		//opMode.sleep(300);
 		//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
-		opMode.sleep(100);
-		drive.goToLocation(freightPickup, 0.9, 0.025, 0);
+		handrail.grabberGrab();
+		drive.goToLocation(freightPickup, 1, 0.08, 0);
 		//pickup loop
 		//grabbing
-		handrail.grabberGrab();
-		opMode.sleep(1400); // TODO: adjust sleep duration
-		handrail.grabberStop();
+		opMode.sleep(1300); // TODO: adjust sleep duration
 		// Going back to shipping hub
 		//drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
-		opMode.sleep(100);
-		drive.goToLocation(freightLocation_Pre2Cycle, 0.8, 0.05, 0);
-		handrail.gotoLevel(DuckLine.SH_Levels.Top);
-		//drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
-		opMode.sleep(100);
-		drive.goToLocation(shippingHubLocation_Pre1, 1,  0.04, 0);
-		handrail.grabberRelease();
-		opMode.sleep(1000);
-		handrail.grabberStop();
+		if (!park){
+			handrail.gotoRail(100,1);
+			drive.goToLocation(pre_cycle, 1, 0.05, 0);
+			handrail.gotoLevel(DuckLine.SH_Levels.Top);
+			handrail.grabberStop();
+			//drive.goToLocation(shippingHubLocation_Pre1, 0.75, 0.06, 0);
+			opMode.sleep(100);
+			drive.goToLocation(shippingHubLocation_Pre1, 1,  0.04, 0);
+			handrail.grabberRelease();
+			opMode.sleep(1000);
+			handrail.grabberStop();
+		} else {
+			handrail.gotoHandRail(0,80,1);
+		}
 
 	}
 }

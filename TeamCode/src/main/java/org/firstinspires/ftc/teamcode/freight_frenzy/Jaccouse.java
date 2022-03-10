@@ -64,12 +64,13 @@ public class Jaccouse extends LinearOpMode {
 	@Override
 	public void runOpMode() {
 		telemetry.addData("Status", "Initialized");
-		telemetry.update();
 
 		drive.init(hardwareMap);
 		handRail.init(hardwareMap);
 
-	
+
+		telemetry.update();
+
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
 

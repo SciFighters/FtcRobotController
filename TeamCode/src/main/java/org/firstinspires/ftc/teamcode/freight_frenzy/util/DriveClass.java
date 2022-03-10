@@ -141,7 +141,7 @@ public class DriveClass {
         imu.initialize(parameters);
 
         opMode.telemetry.addData("Gyro", "calibrating...");
-        opMode.telemetry.update();
+        // opMode.telemetry.update();
 
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
@@ -156,7 +156,7 @@ public class DriveClass {
 
         imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 2);
 
-        opMode.telemetry.update();
+        // opMode.telemetry.update();
 
         RobotLog.d("IMU status: %s", imu.getSystemStatus().toShortString());
         RobotLog.d("IMU calibration status: %s", imu.getCalibrationStatus().toString());
