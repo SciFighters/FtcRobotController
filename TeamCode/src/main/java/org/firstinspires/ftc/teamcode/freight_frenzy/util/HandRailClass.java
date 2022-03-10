@@ -502,9 +502,12 @@ public class HandRailClass {
     }
 
     public void resetpot(){
-            potentiometer.resetDeviceConfigurationForOpMode();
+        potentiometer.resetDeviceConfigurationForOpMode();
     }
 
+    public boolean getTouchSwitchState (){
+            return grabber_switch.getState();
+    }
 
 
 }
