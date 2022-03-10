@@ -197,9 +197,10 @@ public class Jaccouse extends LinearOpMode {
 			else if (C.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.TopTeleop);
 			}
-//			else if (X.isClicked()) {
-//				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
-//			}
+
+			else if (X.isClicked()) {
+				handRail.gotoLevel(DuckLine.SH_Levels.ReleaseShared);
+			}
 
 			if (!release) {
 				if (collector.getState()) {

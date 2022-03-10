@@ -217,6 +217,11 @@ public class HandRailClass {
             gotoRail(95, 1);
             // while (rail.isBusy());
             gotoHand(99, 1);
+
+        } else if (shLevel == DuckLine.SH_Levels.ReleaseShared){
+            gotoRail(75.71, 1);
+            // while (rail.isBusy());
+            gotoHand(11.65, 1);
         }
     }
 
