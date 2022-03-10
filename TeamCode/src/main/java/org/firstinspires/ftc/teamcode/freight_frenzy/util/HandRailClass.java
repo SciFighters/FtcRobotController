@@ -75,7 +75,7 @@ public class HandRailClass {
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
 
 
-        hand.setTargetPositionTolerance(50);
+        hand.setTargetPositionTolerance(60);
         rail.setTargetPositionTolerance(50);
 
         // done inside searchHome()  // resetPotAndHand();
@@ -160,7 +160,6 @@ public class HandRailClass {
             rail.setPower(power);
             this.setRailState(State.Goto);
         }
-
     }
 
     public void gotoHand(double handPercents, double power) {
@@ -181,42 +180,46 @@ public class HandRailClass {
 
     public void gotoLevel(DuckLine.SH_Levels shLevel){
         if (shLevel == DuckLine.SH_Levels.Top) {
-//            gotoHandRail(98.44,70.98,1);
+            // gotoHandRail(98.44,70.98,1);
             gotoHand(71, 1);
-//            while (hand.isBusy());
+            // while (hand.isBusy());
             gotoRail(98.44, 1);
 
 
         } else if (shLevel == DuckLine.SH_Levels.Middle) {
-//            gotoHandRail(60.41,77.33,1);
+            // gotoHandRail(60.41,77.33,1);
             gotoHand(83, 1);
-            while (hand.isBusy());
+            // while (hand.isBusy());
             gotoRail(66.19, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
-//            gotoHandRail(66.73,92.13,1);
+            // gotoHandRail(66.73,92.13,1);
             gotoRail(33, 1);
-            while (rail.isBusy());
+            // while (rail.isBusy());
             gotoHand(92.13, 1);
-//            while (rail.isBusy());
-//            gotoRail(66.73, 1);
+            // while (rail.isBusy());
+            // gotoRail(66.73, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.Collect) {
-//            gotoHandRail(100,99,1);
+            // gotoHandRail(100,99,1);
             gotoRail(99, 1);
-            while (rail.isBusy());
+            // while (rail.isBusy());
             gotoHand(99, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.TopTeleop) {
-//            gotoHandRail(28.23,29.57,1);
+            // gotoHandRail(28.23,29.57,1);
             gotoHand(30, 1);
-//            while (hand.isBusy());
+            // while (hand.isBusy());
             gotoRail(28, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.CollectAuto) {
             gotoRail(95, 1);
             // while (rail.isBusy());
             gotoHand(99, 1);
+        } else if (shLevel == DuckLine.SH_Levels.ReleaseShared) {
+            gotoRail(76, 1);
+            // while (rail.isBusy());
+            gotoHand(12, 1);
         }
     }
 
@@ -357,12 +360,12 @@ public class HandRailClass {
 
 
 //        // TODO: move hand up when its too low.
-//        if (this.getHandPercent() > 85) {
-//            this.gotoHand(85, 0.8);
-//            //Timeout
-//            ElapsedTime timer = new ElapsedTime();
-//            while(hand.isBusy() && timer.seconds() < 1.75);
-//        }
+        if (this.getHandPercent() > 85) {
+            this.gotoHand(85, 0.8);
+            //Timeout
+            ElapsedTime timer = new ElapsedTime();
+            while(hand.isBusy() && timer.seconds() < 1.75);
+        }
 
         int lastPos = rail.getCurrentPosition();
         int tempPos = lastPos;
@@ -508,7 +511,6 @@ public class HandRailClass {
     public boolean getTouchSwitchState (){
             return grabber_switch.getState();
     }
-
 
 }
 

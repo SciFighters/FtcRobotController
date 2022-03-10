@@ -79,7 +79,7 @@ public class AutoFlow {
 	Location freightLocation_Pre2Cycle = new Location(-0.6, 0, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre2 = new Location(-0.60, 0.7, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(-0.0, 0.55, -90);
-	Location freightPickup = new Location(-1.5, 0.16, -90);
+	Location freightPickup = new Location(-1.3, 0.16, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
 	private final Location pre_cycle = new Location(-0.6, 0.16, -90);
 	Location freightLocation = new Location(-1.40, 0.7, -90); // -1.5, 0.93
@@ -188,22 +188,19 @@ public class AutoFlow {
 			DuckLine.SH_Levels shLevel = this.duckline.getDuck();
 			opMode.telemetry.addData("SH Level:", shLevel);
 
-			opMode.telemetry.addData("goTo ShippingHub x:", shippingHubLocation.x);
-			opMode.telemetry.update();
-
 			// Go to Shipping Hub
 			handrail.gotoRail(30, 0.5);
 			drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
-			opMode.telemetry.addData("hand", handrail.getHandPercent());
 
 			// wait for handRail to get into position (both not busy)
 			handrail.gotoLevel(shLevel);
 			while (opMode.opModeIsActive() && handrail.isBusy()) ;
-			if (shLevel != DuckLine.SH_Levels.Top) handrail.gotoRail(75, 0.5);
-			while (opMode.opModeIsActive() && handrail.isBusy()) ;
-
-			// Put the cube on shipping hub
 			handrail.grabberRelease();
+			if (shLevel != DuckLine.SH_Levels.Top) {
+				handrail.gotoRail(75, 1);
+				while (opMode.opModeIsActive() && handrail.isBusy()) ;
+			}
+			// Put the cube on shipping hub
 			opMode.sleep(1500); //wait for drop
 			handrail.grabberStop();
 			// retract arm.
@@ -300,31 +297,19 @@ public class AutoFlow {
 		handrail.gotoRail(100, 1);
 		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first location - pre-barrier
 		drive.turnTo(pre_cycle.angle, 0.5);
-		//opMode.sleep(300);
-		//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 		handrail.grabberGrab();
 		//TOUCH SWITCH CHECKER FAZE
 		drive.goToLocation(freightPickup, 1, 0.08, 0);
-		drive.drive(0.3, 0, 1, freightPickup.angle, false);
+		opMode.sleep(1000);
+		drive.drive(0.05, 0, 0.2, this.freightLocation.angle, false);
 		double timer = opMode.time;
-		while(opMode.opModeIsActive() && !handrail.getTouchSwitchState()) {
+		while(opMode.opModeIsActive() && handrail.getTouchSwitchState()) {
 			if (opMode.time > timer + 2.0) {
 				return false;
 			}
 		}
-		drive.stopPower();
-		//opMode.sleep(1300); // TODO: adjust sleep duration
-
-		//	}
-		//TOUCH SWITCH CHECKER FAZE
-
-		//pickup loop
-		//grabbing
-		//if (handrail.get)
-		//opMode.sleep(1300); // TODO: adjust sleep duration
 		// Going back to shipping hub
-		//drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
 		if (!park) {
 			handrail.gotoRail(100, 1);
 			drive.goToLocation(pre_cycle, 1, 0.05, 0);

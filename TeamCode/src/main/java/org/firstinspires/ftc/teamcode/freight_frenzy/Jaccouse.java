@@ -156,7 +156,7 @@ public class Jaccouse extends LinearOpMode {
 			A.update(gamepad2.a);
 //			B.update(gamepad2.b);
 			C.update(gamepad2.y);
-//			X.update(gamepad2.x);
+			X.update(gamepad2.x);
 
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
 			release = gamepad2.dpad_up;
@@ -197,9 +197,9 @@ public class Jaccouse extends LinearOpMode {
 			else if (C.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.TopTeleop);
 			}
-//			else if (X.isClicked()) {
-//				handRail.gotoLevel(DuckLine.SH_Levels.Collect);
-//			}
+			else if (X.isClicked()) {
+				handRail.gotoLevel(DuckLine.SH_Levels.ReleaseShared);
+			}
 
 			if (!release) {
 				if (collector.getState()) {
