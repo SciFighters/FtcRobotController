@@ -506,6 +506,9 @@ public class HandRailClass {
     }
 
 
+    public boolean getTouchSwitchState (){
+        return grabber_switch.getState();
+    }
 
 }
 

@@ -25,7 +25,6 @@ public class AutoFlow {
 
 	final double tile = 0.6;
 
-
 	public enum ALLIANCE {
 		BLUE(1),
 		RED(-1);
@@ -294,10 +293,13 @@ public class AutoFlow {
 		//drive.goToLocation(freightSideLocation, 0.65, 0.03, 0);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 		handrail.grabberGrab();
+
 		drive.goToLocation(freightPickup, 1, 0.08, 0);
 		//pickup loop
+		if (handrail.getTouchSwitchState()==true) opMode.sleep(1300); // TODO: adjust sleep duration
+
 		//grabbing
-		opMode.sleep(1300); // TODO: adjust sleep duration
+		//opMode.sleep(1300); // TODO: adjust sleep duration
 		// Going back to shipping hub
 		//drive.goToLocation(freightSideLocation, 0.6, 0.2, 0);
 		if (!park){
