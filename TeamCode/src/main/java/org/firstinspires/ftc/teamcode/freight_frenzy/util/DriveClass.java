@@ -393,7 +393,7 @@ public class DriveClass {
             double breakGain = 0.5;
             double breakPower = remainDist * breakGain + minPower;
 
-            if (breakPower < power) { //&& tolerance > 0.05
+            if ((breakPower < power) && (tolerance > 0.05)) { //&& tolerance > 0.05
                 power = breakPower;
             }
 

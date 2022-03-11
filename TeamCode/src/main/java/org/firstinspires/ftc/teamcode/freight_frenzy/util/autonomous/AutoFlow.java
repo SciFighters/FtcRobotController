@@ -130,6 +130,7 @@ public class AutoFlow {
 			this.freightSideLocation.flipX();
 			this.freightPickup.flipX();
 			this.pre_fullPickup.flipX();
+			this.pre_cycle.flipX();
 
 			//flipping angles
 			this.freightLocation.flipAngle();
@@ -142,6 +143,7 @@ public class AutoFlow {
 			this.shippingHubLocation_Pre1.flipAngle();
 			this.pre_fullPickup.flipAngle();
 			this.freightPickup.flipAngle(); // TODO: adjust it so it turns the right way
+			this.pre_cycle.flipAngle();
 		}
 
 		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation).useEncoders();
@@ -190,7 +192,7 @@ public class AutoFlow {
 
 			// Go to Shipping Hub
 			handrail.gotoRail(30, 0.5);
-			drive.goToLocation(shippingHubLocation, 1, 0.05, 0);
+			drive.goToLocation(shippingHubLocation, 1, 0.06, 0);
 
 			// wait for handRail to get into position (both not busy)
 			handrail.gotoLevel(shLevel);
@@ -198,10 +200,10 @@ public class AutoFlow {
 			handrail.grabberRelease();
 			if (shLevel != DuckLine.SH_Levels.Top) {
 				handrail.gotoRail(75, 1);
-				while (opMode.opModeIsActive() && handrail.isBusy()) ;
+				//while (opMode.opModeIsActive() && handrail.isBusy()) ;
 			}
 			// Put the cube on shipping hub
-			opMode.sleep(1500); //wait for drop
+			opMode.sleep(1000); //wait for drop
 			handrail.grabberStop();
 			// retract arm.
 			handrail.gotoRail(50, 0.4);
@@ -273,7 +275,9 @@ public class AutoFlow {
 				boolean check = true;
 				check = cycle(false, check);
 				check = cycle(false, check);
+				check = cycle(false, check);
 				check = cycle(true, check);
+
 			}
 		}
 
@@ -289,7 +293,6 @@ public class AutoFlow {
 	}
 
 	private boolean cycle(boolean park, boolean check) {
-		// TODO: adjust power, tolerance and locations for cycle
 		if (!check) return false;
 
 		opMode.telemetry.addLine("cycle");
@@ -301,12 +304,15 @@ public class AutoFlow {
 		handrail.grabberGrab();
 		//TOUCH SWITCH CHECKER FAZE
 		drive.goToLocation(freightPickup, 1, 0.08, 0);
-		opMode.sleep(1000);
-		drive.drive(0.05, 0, 0.2, this.freightLocation.angle, false);
+		// opMode.sleep(1000);
 		double timer = opMode.time;
-		while(opMode.opModeIsActive() && handrail.getTouchSwitchState()) {
-			if (opMode.time > timer + 2.0) {
-				return false;
+		while(opMode.opModeIsActive() && !handrail.freightIn() && (opMode.time > timer + 1));
+		if (!handrail.freightIn()) {
+			drive.drive(0.05, 0, 0.2, this.freightLocation.angle, false, 0.03);
+			while (opMode.opModeIsActive() && !handrail.freightIn()) {
+				if (opMode.time > timer + 3) {
+					return false;
+				}
 			}
 		}
 		// Going back to shipping hub
