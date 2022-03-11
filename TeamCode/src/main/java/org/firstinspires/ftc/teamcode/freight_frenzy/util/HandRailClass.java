@@ -32,6 +32,7 @@ public class HandRailClass {
     private int potentiometer_offset;
 
     private DcMotorEx carousel = null;
+    private DcMotorEx carousel2 = null;
 
     private int railRange = 1470;
     public int handRange = 6000; // 5968;
