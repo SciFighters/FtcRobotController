@@ -74,6 +74,8 @@ public class Jaccouse extends LinearOpMode {
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
 
+		handRail.searchHome();
+
 		drive.resetOrientation(defaultOrientationAngle); //default blue
 
 		runtime.reset();

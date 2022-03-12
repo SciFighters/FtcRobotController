@@ -80,7 +80,7 @@ public class HandRailClass {
         rail.setTargetPositionTolerance(50);
 
         // done inside searchHome()  // resetPotAndHand();
-        searchHome();
+        //searchHome();
     }
 
     public void resetPotAndHand() {
@@ -191,7 +191,7 @@ public class HandRailClass {
             // gotoHandRail(60.41,77.33,1);
             gotoHand(83, 1);
             // while (hand.isBusy());
-            gotoRail(66.19, 1);
+            gotoRail(70, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
             // gotoHandRail(66.73,92.13,1);
