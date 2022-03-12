@@ -50,6 +50,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle X = new Toggle();
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 	private Toggle capping_button = new Toggle();
+	private Toggle freightIn = new Toggle();
 	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
 
@@ -174,6 +175,15 @@ public class Jaccouse extends LinearOpMode {
 				targetHeading = drive.getHeading();
 			}
 
+			freightIn.update(handRail.freightIn());
+			if (freightIn.isChanged()){
+				if(freightIn.isPressed()) {
+					handRail.carouselRun(1);
+				}else {
+					handRail.carouselRun(0);
+				}
+			}
+
 //			boolean blue = gamepad1.x;
 //			boolean red = gamepad1.b;
 //			if (blue) {
@@ -201,6 +211,10 @@ public class Jaccouse extends LinearOpMode {
 			}
 			else if (X.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.ReleaseShared);
+			}
+
+			else if (gamepad2.left_trigger > 0.5) {
+				handRail.gotoLevel(DuckLine.SH_Levels.EndGamePark);
 			}
 
 			if (!release) {

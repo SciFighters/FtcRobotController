@@ -189,7 +189,7 @@ public class AutoFlow {
 			// wait for handRail to get into position (both not busy)
 			handrail.gotoLevel(shLevel);
 			double time2= opMode.time;
-			while (opMode.opModeIsActive() && handrail.isBusy()&&opMode.time>time2+0.5) ;
+			while (opMode.opModeIsActive() && handrail.isBusy() && (opMode.time>time2+0.5)) ;
 			handrail.grabberRelease();
 
 			if (shLevel != DuckLine.SH_Levels.Top) {
@@ -213,7 +213,7 @@ public class AutoFlow {
 			handrail.carouselRun(0.6 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
-			drive.setPower(0, 0, 0.1); //activates carousel motor
+			drive.setPower(0, 0, 0.14 * alliance.mul); //activates carousel motor
 			if (alliance == ALLIANCE.RED)
 				opMode.sleep(450); //sleeps (thread) for 0.2 seconds
 			else
@@ -239,14 +239,8 @@ public class AutoFlow {
 				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
 				drive.goToLocation(freightLocation, 1, 0.2, 0);
 				drive.goToLocation(pre_fullPickup, 1, 0.2, 0);
-				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 				drive.goToLocation(freightLocation, 1, this.freightLocation.angle, 0.2, 0);
-//				drive.goToLocation(freightPickup,1, this.freightPickup.angle, 0.05, 0);
-//				handrail.grabberGrab();
-//				opMode.sleep(1200);
-//				handrail.grabberStop();
-
-//				drive.turnTo(-90, 0.82);
+				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 			} else {
 				// go to parking at storage unit
 				parkStorage();
@@ -299,13 +293,12 @@ public class AutoFlow {
 		double firstRoundX = -1.3;
 		double reachTheFreightCalc = (firstRoundX - round * 0.05) * alliance.mul;
 		drive.goTo(reachTheFreightCalc, 0.16, 1, this.freightLocation.angle, 0.05, 0);
-
 		double timer = opMode.time;
-		while(opMode.opModeIsActive() && !handrail.freightIn() && (opMode.time < timer + 1)); // opMode.sleep(1000);
+		while(opMode.opModeIsActive() && !handrail.freightIn() && (opMode.time < timer + 1.5));
 		if (!handrail.freightIn()) {
 			drive.drive(0.05, 0, 1, this.freightLocation.angle, false);
 			while (opMode.opModeIsActive() && !handrail.freightIn()) {
-				if (opMode.time > timer + 3) {
+				if (opMode.time > timer + 4) {
 					return false;
 				}
 			}

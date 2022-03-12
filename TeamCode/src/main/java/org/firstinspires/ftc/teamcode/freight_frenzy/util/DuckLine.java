@@ -40,7 +40,8 @@ public class DuckLine extends OpenCvPipeline {
 		Collect,
 		CollectAuto,
 		TopTeleop,
-		ReleaseShared
+		ReleaseShared,
+		EndGamePark
 	}
 
 //	public ABC getDuck(int screenWidth) {

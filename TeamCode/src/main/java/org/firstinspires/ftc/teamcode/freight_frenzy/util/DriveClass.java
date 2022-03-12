@@ -363,7 +363,7 @@ public class DriveClass {
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
 
-        while (opMode.opModeIsActive() && (currentDist < totalDist - tolerance)) { // TODO: there a NaN here somewhere (the attack of the NaNs)
+        while (opMode.opModeIsActive() && (currentDist < (totalDist - tolerance))) {
 
             double power = targetPower;
 
@@ -392,12 +392,12 @@ public class DriveClass {
             double breakGain = 0.5;
             double breakPower = remainDist * breakGain + minPower;
 
-            if ((breakPower < power) ) { //&& tolerance > 0.05
+            if ((breakPower < power ) && (tolerance <= 0.05)) { //
                 power = breakPower;
             }
 
             double headingErr = getDeltaHeading(targetHeading) / 180;
-            double headingGain =  Math.max(0.6, -0.3 * totalDist + 0.95) ; // y = -0.25x + 0.95
+            double headingGain =  Math.max(0.6, -0.25 * totalDist + 0.95) ; // y = -0.25x + 0.95
             double correction = headingGain * headingErr;
             double Vy = RVy * power;
             double Vx = RVx * power;

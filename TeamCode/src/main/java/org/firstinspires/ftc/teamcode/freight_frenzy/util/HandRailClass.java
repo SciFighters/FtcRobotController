@@ -214,13 +214,16 @@ public class HandRailClass {
             gotoRail(28, 1);
 
         } else if (shLevel == DuckLine.SH_Levels.CollectAuto) {
-            gotoRail(95, 1);
+            gotoRail(100, 1);
             // while (rail.isBusy());
             gotoHand(99, 1);
         } else if (shLevel == DuckLine.SH_Levels.ReleaseShared) {
             gotoRail(76, 1);
             // while (rail.isBusy());
             gotoHand(12, 1);
+        } else if (shLevel == DuckLine.SH_Levels.EndGamePark){
+            gotoRail(0,1);
+            gotoHand(15,1);
         }
     }
 
