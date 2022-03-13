@@ -214,8 +214,8 @@ public class AutoFlow {
 			handrail.carouselRun(0.6 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
-			opMode.sleep(1000);
-			drive.setPower(0, 0, 0.17 * alliance.mul); //activates carousel motor
+			opMode.sleep(100);
+			drive.setPower(0, 0, 0.17); //activates carousel motor
 			if (alliance == ALLIANCE.RED)
 				opMode.sleep(450); //sleeps (thread) for 0.2 seconds
 			else
