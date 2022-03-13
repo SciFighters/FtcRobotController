@@ -82,7 +82,7 @@ public class AutoFlow {
 	Location freightPickup = new Location(-1.3, 0.16, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
 	private final Location pre_cycle = new Location(-0.5, 0.16, -90);
-	Location pre_fullPickup = new Location(freightLocation, -0.2, 0.2, -45);
+	Location pre_fullPickup = new Location(freightLocation, 0.2, 0.2, -90);
 
 	// Storage locations
 	Location storageLocation_Pre1 = new Location(1.2, 0.75, -90); //1.1, 0.92
@@ -170,6 +170,7 @@ public class AutoFlow {
 		initWebcam();
 		drive.init(opMode.hardwareMap);
 		handrail.init(opMode.hardwareMap);
+		handrail.setCappingPos(0);
 		handrail.searchHome();
 
 		opMode.telemetry.addData("DUCK Position", this.duckline.getDuck());
@@ -213,7 +214,8 @@ public class AutoFlow {
 			handrail.carouselRun(0.6 * alliance.mul);
 			opMode.telemetry.addLine("running carousel");
 			opMode.telemetry.update();
-			drive.setPower(0, 0, 0.14 * alliance.mul); //activates carousel motor
+			opMode.sleep(1000);
+			drive.setPower(0, 0, 0.17 * alliance.mul); //activates carousel motor
 			if (alliance == ALLIANCE.RED)
 				opMode.sleep(450); //sleeps (thread) for 0.2 seconds
 			else
@@ -234,13 +236,10 @@ public class AutoFlow {
 			opMode.telemetry.update();
 
 			if (auto == Auto.FULL) {
-				//drive.goToLocation(freightLocation_Pre1, 1, 0.2, 0);
-				handrail.gotoHandRail(0, 70, 1);
+				drive.goToLocation(freightLocation_Pre1, 1, 0.2, 0);
 				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
-				drive.goToLocation(freightLocation, 1, 0.2, 0);
-				drive.goToLocation(pre_fullPickup, 1, 0.2, 0);
-				drive.goToLocation(freightLocation, 1, this.freightLocation.angle, 0.2, 0);
-				handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
+				drive.goToLocation(freightLocation, 1, 0.05, 0);
+
 			} else {
 				// go to parking at storage unit
 				parkStorage();
@@ -269,7 +268,7 @@ public class AutoFlow {
 			}
 		}
 
-		handrail.gotoRail(0, 1);
+		//handrail.gotoRail(0, 1);
 	}
 
 	private void parkStorage() {

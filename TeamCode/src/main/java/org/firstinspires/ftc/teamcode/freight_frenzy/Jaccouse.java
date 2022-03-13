@@ -175,14 +175,16 @@ public class Jaccouse extends LinearOpMode {
 				targetHeading = drive.getHeading();
 			}
 
-			freightIn.update(handRail.freightIn());
-			if (freightIn.isChanged()){
-				if(freightIn.isPressed()) {
-					handRail.carouselRun(1);
-				}else {
-					handRail.carouselRun(0);
-				}
-			}
+//			freightIn.update(handRail.freightIn());
+//			if (freightIn.isPressed()) {
+//				if (freightIn.isPressed()) {
+//					spincarousel.update(handRail.freightIn());
+//				} else {
+//					spincarousel.update(handRail.freightIn());
+//				}
+//			}
+
+
 
 //			boolean blue = gamepad1.x;
 //			boolean red = gamepad1.b;
@@ -208,12 +210,9 @@ public class Jaccouse extends LinearOpMode {
 //			}
 			else if (C.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.TopTeleop);
-			}
-			else if (X.isClicked()) {
+			} else if (X.isClicked()) {
 				handRail.gotoLevel(DuckLine.SH_Levels.ReleaseShared);
-			}
-
-			else if (gamepad2.left_trigger > 0.5) {
+			} else if (gamepad2.left_trigger > 0.5) {
 				handRail.gotoLevel(DuckLine.SH_Levels.EndGamePark);
 			}
 
@@ -230,7 +229,9 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 			// Carousel control
-			double carouselBoost = gamepad1.left_trigger ;
+			double carouselBoost = gamepad1.left_trigger == 0 ?
+					handRail.freightIn() ? 1 : 0
+					: gamepad1.left_trigger;
 			if(spincarousel.getState()) {
 				if(spincarousel.isChanged()){
 					carouselAccelTime.reset();
@@ -240,8 +241,7 @@ public class Jaccouse extends LinearOpMode {
 				double speed = 1.15;
 				double acc =  (1 - startOperator) * carouselAccelTime.seconds() * speed; // accelration limit equation
 				handRail.carouselRun((startOperator + carouselBoost + acc) * alliance.mul);
-			}
-			else {
+			} else {
 				handRail.carouselRun(carouselBoost * alliance.mul);
 				//handRail.carouselStop();
 			}
@@ -265,6 +265,7 @@ public class Jaccouse extends LinearOpMode {
             telemetry.addData("Pos", "X: %2.2f, \t Y: %2.2f", drive.getPosX(), drive.getPosY());
 			telemetry.addData("Heading", drive.getHeading());
 			telemetry.addData("Target", targetHeading);
+			telemetry.addData("pressed", freightIn.isPressed());
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.update();
 		}
