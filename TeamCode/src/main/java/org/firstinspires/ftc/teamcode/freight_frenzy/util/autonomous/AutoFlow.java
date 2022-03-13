@@ -78,7 +78,7 @@ public class AutoFlow {
 	Location freightLocation_Pre1 = new Location(0.6, 0.75, -90); //previously 0.6, 0.92
 	Location freightLocation_Pre2 = new Location(-0.60, 0.65, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(0.15, 0.55, -90);
-	Location freightLocation = new Location(-1.40, 0.65, -90); // -1.5, 0.93
+	Location freightLocation = new Location(-1.40, 0.61, -90); // -1.5, 0.93
 	Location freightPickup = new Location(-1.3, 0.16, -90);
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
 	private final Location pre_cycle = new Location(-0.5, 0.16, -90);
