@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.ultimate_goal;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -10,7 +11,7 @@ import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
 import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp(group = "Cobalt")
-//@Disabled
+@Disabled
 public class Cobalt extends LinearOpMode {
 	final double tile = 0.6;
 

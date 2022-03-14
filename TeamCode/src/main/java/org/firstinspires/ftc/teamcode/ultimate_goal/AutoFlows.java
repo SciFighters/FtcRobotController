@@ -42,6 +42,7 @@ public class AutoFlows {
 		} else {
 			mul = red;
 		}
+		// -1.4, 1.2
 		startingPosition = new Location(0.6 * mul, 0);
 		firstPos = new Location(0.27 * mul, 0.73); // -0.25,0.73
 		shootPos = new Location(0.25 * mul, 1.13);

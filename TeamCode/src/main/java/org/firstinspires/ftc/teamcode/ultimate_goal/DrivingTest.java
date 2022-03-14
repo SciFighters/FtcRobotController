@@ -21,12 +21,12 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
-@TeleOp(group = "Linear Opmode")
+@TeleOp(group = "Cobalt")
 @Disabled
 public class DrivingTest extends LinearOpMode {
 	//    BananaPipeline pipeline;
 //    OpenCvInternalCamera phoneCam;
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.SCORPION, new Location(0, 0)).useEncoders();
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, new Location(0, 0)).useEncoders();
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
 
@@ -105,17 +105,20 @@ public class DrivingTest extends LinearOpMode {
 				drive.resetPosition();
 			}
 
+			if (gamepad1.a) {
+				drive.goTo(0 * tile, 0 * tile, 0.8, 0, 0.01);
+			}
 			if (gamepad1.b) {
-				drive.goTo(-2 * tile, 5 * tile, 0.8, drive.getHeading(), 0.05);
+				drive.goTo(2 * tile, 2 * tile, 0.8, 90, 0.01);
 			}
 
 
-			telemetry.addData("X: ", drive.getAbsolutesPosX());
-			telemetry.addData("Y:", drive.getAbsolutesPosY());
+			telemetry.addData("X: ", drive.getPosX() * 100);
+			telemetry.addData("Y:", drive.getPosY() * 100);
 
 
-			telemetry.addData("Dx: ", drive.getStrafeDistance());
-			telemetry.addData("Dy:", drive.getForwardDistance());
+			telemetry.addData("Dx: ", drive.getStrafeDistance() * 100);
+			telemetry.addData("Dy:", drive.getForwardDistance() * 100);
 
 //            telemetry.addData("target", targetX);
 //            telemetry.addData("turn", turn);

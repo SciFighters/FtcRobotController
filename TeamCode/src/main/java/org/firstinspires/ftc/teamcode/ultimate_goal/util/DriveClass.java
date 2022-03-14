@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 public class DriveClass {
-	//region DON'T TOUH
+    //region DON'T TOUCH
 	final double tile = 0.6;
 	private boolean useEncoders = false;
 	private boolean useBrake = false;
@@ -29,8 +29,6 @@ public class DriveClass {
 		this.useBrake = true;
 		return this;
 	}
-
-	//POGCHAMP! :)
 
 	//endregion DON'T TOUCH
 
@@ -54,8 +52,8 @@ public class DriveClass {
 
 	public enum ROBOT {
 		SCORPION,
-		COBALT
-	};
+		COBALT,
+	}
 
 	private ROBOT robot;
 
@@ -324,8 +322,6 @@ public class DriveClass {
 	}
 
 	public void  goToLocation(Location location, double power, double targetHeading, double tolerance){
-
-
 		goTo(location.x, location.y, power, targetHeading, tolerance);
 	}
 
@@ -415,5 +411,4 @@ public class DriveClass {
 		}
 		stopPower();
 	}
-
 }
