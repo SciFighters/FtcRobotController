@@ -457,6 +457,8 @@ public class HandRailClass {
 
     public void setCappingPos(double cappingPos) {
         this.capping_servo.setPosition(cappingPos);
+        opMode.telemetry.addData( "CAPPOS: ", cappingPos);
+
     }
 
     public double getCappingPos() {
