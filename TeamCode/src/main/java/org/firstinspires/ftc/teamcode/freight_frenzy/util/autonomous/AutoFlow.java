@@ -80,8 +80,8 @@ public class AutoFlow {
 	Location freightLocation_Pre3 = new Location(0.15, 0.55, -90);
 	Location freightLocation = new Location(-1.40, 0.61, -90); // -1.5, 0.93
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
-	Location freightPickup = new Location(-1.2, 0.12, -90);
-	Location pre_cycle = new Location(-0.5, 0.12, -90);
+	Location freightPickup = new Location(-1.2, 0.10, -90);
+	Location pre_cycle = new Location(-0.5, 0.08, -90);
 	Location pre_fullPickup = new Location(freightLocation, 0.2, 0.2, -90);
 
 	// Storage locations
@@ -284,14 +284,18 @@ public class AutoFlow {
 		opMode.telemetry.addLine("cycle");
 		opMode.telemetry.update();
 		handrail.gotoRail(100, 1);
-		drive.goToLocation(pre_cycle, 1, 0.04, 0); // first location - pre-barrier
+		drive.goToLocation(pre_cycle, 1, 0.02, 0); // first location - pre-barrier
+	//	opMode.sleep(100);
+	//	drive.drive(0,-0.05* alliance.mul,0.15,pre_cycle.angle);
+	//	drive.setPower(0,0,-0.15* alliance.mul);
+	//	opMode.sleep(250);
 		//drive.turnTo(pre_cycle.angle, 0.5);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 		handrail.grabberGrab();
 		//TOUCH SWITCH CHECKER FAZE
 		double firstRoundX = -1.1;
 		double reachTheFreightCalc = (firstRoundX - round * 0.05) * alliance.mul;
-		drive.goTo(reachTheFreightCalc, 0.12, 1, this.freightLocation.angle, 0.05, 0);
+		drive.goTo(reachTheFreightCalc, 0.08, 1, this.freightLocation.angle, 0.05, 0);
 		double timer = opMode.time;
 		while(opMode.opModeIsActive() && !handrail.freightIn() && (opMode.time < timer + 1.5));
 		if (!handrail.freightIn()) {
