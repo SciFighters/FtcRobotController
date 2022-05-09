@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
+import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
 
 @TeleOp
 @Disabled
