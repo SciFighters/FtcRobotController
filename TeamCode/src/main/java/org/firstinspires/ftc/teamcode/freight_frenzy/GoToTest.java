@@ -5,19 +5,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.DriveClass;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Location;
-import org.firstinspires.ftc.teamcode.ultimate_goal.util.Toggle;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 @TeleOp(group = "Jacouj")
-@Disabled
+//@Disabled
 public class GoToTest extends LinearOpMode {
 	final double tile = 0.6;
 
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition).useEncoders().useBrake();
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE);
 	private Toggle turningToggle = new Toggle();
 	private int direction = 1;
 	private double targetHeading = 0;
@@ -97,13 +97,13 @@ public class GoToTest extends LinearOpMode {
 			x_toggle.update(gamepad1.x);
 
 			if (a_toggle.isClicked())
-				drive.goTo(0.0,0.0,0.7,0.0,0.05);
+				drive.goTo(0.0,0.0,0.7,0.0,0.05, 0);
 			if (b_toggle.isClicked())
-				drive.goTo(0.0,1.2,0.7,0.0,0.05);
+				drive.goTo(0.0,1.2,0.7,0.0,0.05, 0);
 			if (y_toggle.isClicked())
-				drive.goTo(1.2,30.0,0.7,0.0,0.05);
+				drive.goTo(1.2,30.0,0.7,0.0,0.05, 0);
 			if (x_toggle.isClicked())
-				drive.goTo(-1.2,30,0.7,0.0,0.05);
+				drive.goTo(-1.2,30,0.7,0.0,0.05, 0);
 			drive.setPowerOriented(y, x, turn, fieldOriented);
 
 			telemetry.addData("X Pos", drive.getPosX());
