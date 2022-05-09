@@ -4,9 +4,6 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import android.util.Log;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,22 +16,23 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-import java.util.ArrayList;
-
 public class DriveClass {
+    //region DON'T TOUCH
     final double tile = 0.6;
+    private boolean useEncoders = false;
+    private boolean useBrake = false;
 
-    public static final int USE_ENCODERS = 1 << 0;
-    public static final int USE_BRAKE = 1 << 1;
-    public static final int USE_DASHBOARD_FIELD = 1 << 2;
+    public DriveClass useEncoders() {
+        this.useEncoders = true;
+        return this;
+    }
 
-    private boolean useEncoders;
-    private boolean useBrake;
-    private boolean useDashboardField;
+    public DriveClass useBrake() {
+        this.useBrake = true;
+        return this;
+    }
 
-    final double meters_to_inches = 39.37008;
-    private ArrayList<Double> robot_pathx;
-    private ArrayList<Double> robot_pathy;
+    //endregion DON'T TOUCH
 
     private LinearOpMode opMode; // First I declared it as OpMode now its LinearOpMode
 
@@ -69,7 +67,7 @@ public class DriveClass {
 
     ElapsedTime timer = new ElapsedTime();
 
-    public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags) {
+    public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition) {
         this.opMode = opMode;
         this.robot = robot;
         this.startingPosition = startingPosition;
@@ -84,18 +82,6 @@ public class DriveClass {
         } else if (robot == ROBOT.COBALT) {
             this.forwardTicksPerMeter = 1753;
             this.strafeTicksPerMeter = 2006;
-        }
-
-        this.useEncoders = (flags & USE_ENCODERS) != 0;
-        this.useBrake = (flags & USE_BRAKE) != 0;
-        this.useDashboardField = (flags & USE_DASHBOARD_FIELD) != 0;
-
-        if (this.useDashboardField) {
-            this.robot_pathx = new ArrayList<>();
-            this.robot_pathy = new ArrayList<>();
-
-            this.robot_pathx.add(startingPosition.x * meters_to_inches);
-            this.robot_pathy.add(startingPosition.y * meters_to_inches);
         }
     }
 
@@ -141,11 +127,6 @@ public class DriveClass {
             br.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         }
         //endregion setZeroPowerBehavior
-
-        opMode.telemetry.addData("use encoders", this.useEncoders);
-        opMode.telemetry.addData("use brake", this.useBrake);
-        opMode.telemetry.addData("use dash", this.useDashboardField);
-
 
         initIMU(hw);
     }
@@ -540,35 +521,5 @@ public class DriveClass {
             opMode.telemetry.update();
         }
         stopPower();
-    }
-
-    public void update_dashboard_field() {
-//        final double field_width = 5.75 * tile;
-        double x_ = this.getPosX() * meters_to_inches;
-        double y_ = this.getPosY() * meters_to_inches;
-
-        double lastx = robot_pathx.get(robot_pathx.size() - 1);
-        double lasty = robot_pathy.get(robot_pathy.size() - 1);
-        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-            robot_pathx.add(x_);
-            robot_pathy.add(y_);
-
-            TelemetryPacket packet = new TelemetryPacket();
-            Canvas canvas = packet.fieldOverlay();
-
-            canvas.setStroke("tomato");
-            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
-
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }
-    }
-
-    private double[] to_d_katan(ArrayList<Double> arr) {
-        double[] a = new double[arr.size()];
-        for (int i = 0; i < arr.size(); i++) {
-            a[i] = arr.get(i);
-        }
-
-        return a;
     }
 }
