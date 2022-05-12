@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,6 +14,8 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
+
+import java.util.ArrayList;
 
 // TODO: clean code
 // TODO: hand rail boost
@@ -28,8 +33,8 @@ public class Jaccouse extends LinearOpMode {
 	private ElapsedTime runtime = new ElapsedTime();
 	private AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
-	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useBrake(); // TODO: useEncoders().
+	Location startingPosition = new Location(-1.5 * tile, 2.75 * tile); //last x = -1.75*tile, y = 0*tile
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD); // TODO: useEncoders().
 	private HandRailClass handRail = new HandRailClass(this);
 
 	private Toggle turningToggle = new Toggle();
@@ -54,7 +59,6 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle shippingE = new Toggle();
 	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
-
 
 
 	public double pow(double x){
@@ -121,8 +125,6 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 
-
-
 			boolean stopAll = gamepad1.y;
 			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
 			boolean fieldOriented = !gamepad1.y;
@@ -141,7 +143,7 @@ public class Jaccouse extends LinearOpMode {
 //			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			double railPower = pow(gamepad2.left_stick_y * boostHand);// possibly changeable to gamepad2.left_stick_x
 			double armPower  = pow(gamepad2.right_stick_y * boostHand);
-
+			overrideLimits.update(gamepad2.right_bumper);
 
 			// Hand limits, TODO: fix (adjust)
 
@@ -191,7 +193,6 @@ public class Jaccouse extends LinearOpMode {
 
 
 
-
 //			boolean blue = gamepad1.x;
 //			boolean red = gamepad1.b;
 //			if (blue) {
@@ -233,8 +234,6 @@ public class Jaccouse extends LinearOpMode {
 				handRail.grabberRelease();
 				collector.set(false);
 			}
-
-
 
 			// Carousel control
 			double carouselBoost = gamepad1.left_trigger == 0 ?
@@ -290,6 +289,8 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("pressed", freightIn.isPressed());
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.update();
+
+			drive.update_dashboard_field();
 		}
 	}
 }

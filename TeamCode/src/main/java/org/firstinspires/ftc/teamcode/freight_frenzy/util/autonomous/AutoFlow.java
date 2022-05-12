@@ -140,7 +140,7 @@ public class AutoFlow {
 			this.pre_cycle.flipAngle();
 		}
 
-		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation).useEncoders();
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation, DriveClass.USE_ENCODERS);
 		this.handrail = new HandRailClass(opMode, this.alliance);
 	}
 
