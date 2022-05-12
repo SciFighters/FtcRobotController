@@ -1,17 +1,19 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
-//import com.qualcomm.hardware.bosch.BNO055IMU.AccelerationIntegrator;
-//import com.qualcomm.hardware.bosch.BNO055IMU.Parameters;
-//import com.qualcomm.robotcore.util.RobotLog;
+import java.util.ArrayList;
 
 
 public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
@@ -29,8 +31,13 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	private double forwardTicksPerMeter;
 	private double strafeTicksPerMeter;
 
-	private double xPos = 0;
-	private double yPos = 0;
+
+	private boolean useDashBoard;
+    final double meters_to_inches = 39.37008;
+    private ArrayList<Double> pathx;
+    private ArrayList<Double> pathy;
+	private long lastTimestamp = 0;
+
 
 	private BNO055IMU imu = null;
 	BNO055IMU.Parameters parameters = null;
@@ -58,10 +65,10 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		}
 	}
 
-	public  double getX() { return xPos; }
-	public  double getY() { return yPos; }
+	public  double getX() { return position.x; }
+	public  double getY() { return position.y; }
 
-	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter) {
+	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter, boolean useDahsboard) {
 		this.imu = imu;
 		// Constructor
 		fl = hw.get(DcMotorEx.class, "fl");
@@ -71,6 +78,12 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 		this.forwardTicksPerMeter = forwardTicksPerMeter;
 		this.strafeTicksPerMeter = strafeTicksPerMeter;
+		this.useDashBoard = useDahsboard;
+
+		if (this.useDashBoard) {
+			this.pathx = new ArrayList<>();
+			this.pathy = new ArrayList<>();
+		}
 	}
 
 	public FS getDeltaDistance() {
@@ -97,6 +110,8 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	}
 
 	public void resetPosition() {
+		position.x = 0;
+		position.y = 0;
 	}
 
 	public void initialize(BNO055IMU.Parameters parameters, Position initialPosition, Velocity initialVelocity) {
@@ -105,10 +120,10 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		this.velocity = initialVelocity != null ? initialVelocity : this.velocity;
 		this.acceleration = null;
 
-		resetPosition();
+		this.pathx.add(this.position.x * meters_to_inches);
+		this.pathy.add(this.position.y * meters_to_inches);
 
-		xPos = initialPosition.x;
-		yPos = initialPosition.y;
+		resetPosition();
 	}
 
 	public double getHeading() {
@@ -122,11 +137,37 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		FS delta = getDeltaDistance();
 
 		double a = -getHeading() / 180.0 * Math.PI;
-		xPos += delta.s * Math.cos(a) - delta.f * Math.sin(a);
-		yPos += delta.f * Math.cos(a) + delta.s * Math.sin(a);
 
-		position.x = xPos;
-		position.y = yPos;
+		position.x += delta.s * Math.cos(a) - delta.f * Math.sin(a);
+		position.y += delta.f * Math.cos(a) + delta.s * Math.sin(a);
+
+		// 100000000000 ps = 100 ms = 0.1 s
+		if (this.useDashBoard && linearAcceleration.acquisitionTime - this.lastTimestamp >= 5000000L) {
+	        double x_ = this.position.x * meters_to_inches;
+	        double y_ = this.position.y * meters_to_inches;
+
+	        double lastx = pathx.get(pathx.size() - 1);
+	        double lasty = pathy.get(pathy.size() - 1);
+	        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
+	            pathx.add(x_);
+	            pathy.add(y_);
+
+	            TelemetryPacket packet = new TelemetryPacket();
+	            Canvas canvas = packet.fieldOverlay();
+
+	            canvas.setStroke("tomato");
+	            canvas.strokePolyline(to_d_katan(pathx), to_d_katan(pathy));
+	            canvas.fillCircle(0, 0, 4);
+
+	            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+	        }
+
+			this.lastTimestamp = linearAcceleration.acquisitionTime;
+		}
+
+//		FtcDashboard.getInstance().getTelemetry().addData("pox", this.position.x);
+//		FtcDashboard.getInstance().getTelemetry().addData("poy", this.position.y);
+//		FtcDashboard.getInstance().getTelemetry().update();
 
 //		if (linearAcceleration.acquisitionTime != 0L) {
 //			if (this.acceleration != null) {
@@ -151,5 +192,14 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 //			}
 //		}
 
+	}
+
+	private double[] to_d_katan(ArrayList<Double> arr) {
+		double[] a = new double[arr.size()];
+		for (int i = 0; i < arr.size(); i++) {
+			a[i] = arr.get(i);
+		}
+
+		return a;
 	}
 }
