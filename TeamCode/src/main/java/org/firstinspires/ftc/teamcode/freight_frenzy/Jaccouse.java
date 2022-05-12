@@ -51,6 +51,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle overrideLimits = new Toggle(); //key: , description: overrides handRail movement limitations
 	private Toggle capping_button = new Toggle();
 	private Toggle freightIn = new Toggle();
+	private Toggle shippingE = new Toggle();
 	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
 
@@ -68,12 +69,14 @@ public class Jaccouse extends LinearOpMode {
 
 		drive.init(hardwareMap);
 		handRail.init(hardwareMap);
+		handRail.setCappingPos(0);
 
 
 		telemetry.update();
 
 		// Wait for the game to start (driver presses PLAY)
 		waitForStart();
+		handRail.setCappingPos(0);
 
 		handRail.searchHome();
 
@@ -118,6 +121,8 @@ public class Jaccouse extends LinearOpMode {
 			}
 
 
+
+
 			boolean stopAll = gamepad1.y;
 			//boolean intake = gamepad1.dpad_right || gamepad2.dpad_right; //
 			boolean fieldOriented = !gamepad1.y;
@@ -136,7 +141,7 @@ public class Jaccouse extends LinearOpMode {
 //			double armPower  = pow(gamepad2.right_stick_x * boostHand);
 			double railPower = pow(gamepad2.left_stick_y * boostHand);// possibly changeable to gamepad2.left_stick_x
 			double armPower  = pow(gamepad2.right_stick_y * boostHand);
-			overrideLimits.update(gamepad2.right_bumper);
+
 
 			// Hand limits, TODO: fix (adjust)
 
@@ -186,6 +191,7 @@ public class Jaccouse extends LinearOpMode {
 
 
 
+
 //			boolean blue = gamepad1.x;
 //			boolean red = gamepad1.b;
 //			if (blue) {
@@ -228,6 +234,8 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 			}
 
+
+
 			// Carousel control
 			double carouselBoost = gamepad1.left_trigger == 0 ?
 					handRail.freightIn() ? 1 : 0
@@ -253,9 +261,23 @@ public class Jaccouse extends LinearOpMode {
 //			if(cappingPos < -1) cappingPos = -1;
 //			this.handRail.setCappingPos(cappingPos);
 			capping_button.update(gamepad2.left_bumper);
-			if (capping_button.isClicked()) {
-				this.handRail.setCappingPos(capping_state ? 1 : 0);
-				capping_state = !capping_state;
+			shippingE.update(gamepad2.right_bumper);
+
+//			if (capping_button.isClicked()) {
+//				this.handRail.setCappingPos(capping_state ? 1 : 0);
+//				capping_state = !capping_state;
+//			}
+
+			if (capping_button.isClicked() || shippingE.isClicked()) {
+				if(capping_button.getState()){
+					if (shippingE.getState()){
+						handRail.setCappingPos(1);
+					} else{
+						handRail.setCappingPos(0.74);
+					}
+				} else{
+					handRail.setCappingPos(0);
+				}
 			}
 
 

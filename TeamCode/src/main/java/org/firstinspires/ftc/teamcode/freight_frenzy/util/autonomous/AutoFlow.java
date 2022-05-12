@@ -81,7 +81,7 @@ public class AutoFlow {
 	Location freightLocation = new Location(-1.40, 0.61, -90); // -1.5, 0.93
 	Location freightSideLocation = new Location(-0.6, 0.1, -90);
 	Location freightPickup = new Location(-1.2, 0.10, -90);
-	Location pre_cycle = new Location(-0.5, 0.08, -90);
+	Location pre_cycle = new Location(-0.5, 0.14, -90);
 	Location pre_fullPickup = new Location(freightLocation, 0.2, 0.2, -90);
 
 	// Storage locations
@@ -179,6 +179,7 @@ public class AutoFlow {
 	}
 
 	public void run() { //Autonomous starts
+		handrail.setCappingPos(0);
 		if (auto != Auto.PARK && auto != Auto.SHORT) {
 			// Put the cube on the shipping hub
 			DuckLine.SH_Levels shLevel = this.duckline.getDuck();
@@ -268,7 +269,10 @@ public class AutoFlow {
 			}
 		}
 
-		//handrail.gotoRail(0, 1);
+		handrail.gotoHand(85, 1);
+		handrail.gotoRail(0, 0.8);
+		while (opMode.opModeIsActive());
+
 	}
 
 	private void parkStorage() {
@@ -284,7 +288,8 @@ public class AutoFlow {
 		opMode.telemetry.addLine("cycle");
 		opMode.telemetry.update();
 		handrail.gotoRail(100, 1);
-		drive.goToLocation(pre_cycle, 1, 0.02, 0); // first location - pre-barrier
+		Location pre = pre_cycle.offsetY(-round*0.03);
+		drive.goToLocation(pre, 1, 0.02, 0); // first location - pre-barrier
 	//	opMode.sleep(100);
 	//	drive.drive(0,-0.05* alliance.mul,0.15,pre_cycle.angle);
 	//	drive.setPower(0,0,-0.15* alliance.mul);
@@ -295,7 +300,7 @@ public class AutoFlow {
 		//TOUCH SWITCH CHECKER FAZE
 		double firstRoundX = -1.1;
 		double reachTheFreightCalc = (firstRoundX - round * 0.05) * alliance.mul;
-		drive.goTo(reachTheFreightCalc, 0.08, 1, this.freightLocation.angle, 0.05, 0);
+		drive.goTo(reachTheFreightCalc, pre.y, 1, this.freightLocation.angle, 0.05, 0);
 		double timer = opMode.time;
 		while(opMode.opModeIsActive() && !handrail.freightIn() && (opMode.time < timer + 1.5));
 		if (!handrail.freightIn()) {

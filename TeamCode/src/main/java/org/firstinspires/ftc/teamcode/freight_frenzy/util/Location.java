@@ -36,7 +36,7 @@ public class Location {
 	public void flipAngle() {this.angle *= -1;}
 
 	public Location offsetY(double offset) {
-		return new Location(this.x, this.y + offset);
+		return new Location(this.x, this.y + offset, this.angle);
 	}
-	public Location offsetX(double offset) { return new Location(this.x + offset, this.y ); }
+	public Location offsetX(double offset) { return new Location(this.x + offset, this.y, this.angle); }
 }

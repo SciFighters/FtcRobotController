@@ -379,7 +379,7 @@ public class HandRailClass {
 
         lastPos = rail.getCurrentPosition();
 
-        while (rail_limit_F.getState() && rail_limit_B.getState()){
+        while (rail_limit_B.getState()){
             rail.setPower(-0.8);
 //            opMode.sleep(250);
             int currentPos = rail.getCurrentPosition();
