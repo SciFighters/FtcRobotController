@@ -273,7 +273,7 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.update();
 
-			drive.update_dashboard_field();
+//			drive.update_dashboard_field();
 		}
 	}
 }
