@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -19,10 +17,11 @@ public class HandRailClass {
     private DcMotorEx rail = null;
     private DcMotorEx hand = null;
 
-    private CRServo grabber_right = null;
-    private CRServo grabber_left = null;
+    //private CRServo grabber_right = null;
+    //private CRServo grabber_left = null;
+    private DcMotor grabbers = null;
     private Servo capping_servo = null; // Shipping elements servo
-    private DigitalChannel grabber_switch = null;
+    //private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
     private DigitalChannel hand_limit_F= null;
     private DigitalChannel rail_limit_B = null;
@@ -51,17 +50,18 @@ public class HandRailClass {
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        grabber_right = hw.get(CRServo.class, "grabber_right");
-        grabber_left = hw.get(CRServo.class, "grabber_left");
+//        grabber_right = hw.get(CRServo.class, "grabber_right");
+//        grabber_left = hw.get(CRServo.class, "grabber_left");
+        grabbers = hw.get(DcMotor.class, "grabbers");
         capping_servo = hw.get(Servo.class, "capping_servo");
 
         // Setting directions
-        grabber_left.setDirection(CRServo.Direction.FORWARD);
-        grabber_right.setDirection(CRServo.Direction.REVERSE);
+//        grabber_left.setDirection(CRServo.Direction.FORWARD);
+//        grabber_right.setDirection(CRServo.Direction.REVERSE);
         capping_servo.setDirection(Servo.Direction.FORWARD);
         capping_servo.scaleRange(0.0,1.0);
 
-        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
+//        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
@@ -289,9 +289,10 @@ public class HandRailClass {
     }
 
 
-    public void setServosPower(double power) {
-        grabber_left.setPower(power);
-        grabber_right.setPower(power);
+    public void setGrabberPower(double power) {
+//        grabber_left.setPower(power);
+//        grabber_right.setPower(power);
+        grabbers.setPower(power);
     }
 
 
@@ -302,20 +303,21 @@ public class HandRailClass {
     }
 
     public void grabberGrab() {
-        if (grabber_switch.getState()) {
-            this.setServosPower(1);
+        /*if (grabber_switch.getState()) {
+            this.setGrabberPower(1);
         }
         else {
-            this.setServosPower(0);
-        }
+            this.setGrabberPower(0);
+        }*/
+        setGrabberPower(0.8);
     }
 
     public void grabberStop() {
-        setServosPower(0.0);
+        setGrabberPower(0.0);
     }
 
     public void grabberRelease() {
-        setServosPower(-1);
+        setGrabberPower(-0.8);
     }
 
     public void rail_drive(double power, boolean limitsOverride) {
@@ -354,7 +356,8 @@ public class HandRailClass {
             stop(); // if touch switch is pressed then stop
 
         }*/
-        return !grabber_switch.getState();
+//        return !grabber_switch.getState();
+        return false;
     }
 
 
@@ -514,7 +517,8 @@ public class HandRailClass {
     }
 
     public boolean freightIn(){
-            return !grabber_switch.getState();
+//            return !grabber_switch.getState();
+    return false;
     }
 
 }

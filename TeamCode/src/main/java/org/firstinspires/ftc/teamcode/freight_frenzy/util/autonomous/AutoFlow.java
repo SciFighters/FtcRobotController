@@ -263,7 +263,8 @@ public class AutoFlow {
 				boolean check = true;
 				check = cycle(false, check, 0);
 				check = cycle(false, check, 1);
-				check = cycle(true, check, 2);
+				check = cycle(false, check, 2);
+				check = cycle(true, check, 3);
 
 			}
 		}
@@ -297,7 +298,7 @@ public class AutoFlow {
 		if (!handrail.freightIn()) {
 			drive.drive(0.05, 0, 1, this.freightLocation.angle, false);
 			while (opMode.opModeIsActive() && !handrail.freightIn()) {
-				if (opMode.time > timer + 4) {
+				if (opMode.time > timer + 3) {
 					return false;
 				}
 			}
