@@ -49,6 +49,7 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        grabbers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 //        grabber_right = hw.get(CRServo.class, "grabber_right");
 //        grabber_left = hw.get(CRServo.class, "grabber_left");

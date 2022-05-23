@@ -122,8 +122,6 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 		this.pathx.add(this.position.x * meters_to_inches);
 		this.pathy.add(this.position.y * meters_to_inches);
-
-		resetPosition();
 	}
 
 	public double getHeading() {
@@ -138,8 +136,8 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 		double a = -getHeading() / 180.0 * Math.PI;
 
-		position.x += delta.s * Math.cos(a) - delta.f * Math.sin(a);
-		position.y += delta.f * Math.cos(a) + delta.s * Math.sin(a);
+		this.position.x += delta.s * Math.cos(a) - delta.f * Math.sin(a);
+		this.position.y += delta.f * Math.cos(a) + delta.s * Math.sin(a);
 
 		// 100000000000 ps = 100 ms = 0.1 s
 		if (this.useDashBoard && linearAcceleration.acquisitionTime - this.lastTimestamp >= 5000000L) {
