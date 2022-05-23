@@ -32,10 +32,6 @@ public class DriveClass {
     private boolean useBrake;
     private boolean useDashboardField;
 
-    final double meters_to_inches = 39.37008;
-    private ArrayList<Double> robot_pathx;
-    private ArrayList<Double> robot_pathy;
-
     private LinearOpMode opMode; // First I declared it as OpMode now its LinearOpMode
 
     volatile private DcMotorEx fl = null;
@@ -90,13 +86,13 @@ public class DriveClass {
         this.useBrake = (flags & USE_BRAKE) != 0;
         this.useDashboardField = (flags & USE_DASHBOARD_FIELD) != 0;
 
-        if (this.useDashboardField) {
-            this.robot_pathx = new ArrayList<>();
-            this.robot_pathy = new ArrayList<>();
-
-            this.robot_pathx.add(startingPosition.x * meters_to_inches);
-            this.robot_pathy.add(startingPosition.y * meters_to_inches);
-        }
+//        if (this.useDashboardField) {
+//            this.robot_pathx = new ArrayList<>();
+//            this.robot_pathy = new ArrayList<>();
+//
+//            this.robot_pathx.add(startingPosition.x * meters_to_inches);
+//            this.robot_pathy.add(startingPosition.y * meters_to_inches);
+//        }
     }
 
     public void init(HardwareMap hw) {
@@ -155,11 +151,12 @@ public class DriveClass {
 
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter);
+        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField);
 
         imu.initialize(parameters);
 
         opMode.telemetry.addData("Gyro", "calibrating...");
+        opMode.telemetry.addData("Integrator dashboard", this.useDashboardField);
         // opMode.telemetry.update();
 
         ElapsedTime timer = new ElapsedTime();
@@ -542,33 +539,33 @@ public class DriveClass {
         stopPower();
     }
 
-    public void update_dashboard_field() {
-//        final double field_width = 5.75 * tile;
-        double x_ = this.getPosX() * meters_to_inches;
-        double y_ = this.getPosY() * meters_to_inches;
-
-        double lastx = robot_pathx.get(robot_pathx.size() - 1);
-        double lasty = robot_pathy.get(robot_pathy.size() - 1);
-        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-            robot_pathx.add(x_);
-            robot_pathy.add(y_);
-
-            TelemetryPacket packet = new TelemetryPacket();
-            Canvas canvas = packet.fieldOverlay();
-
-            canvas.setStroke("tomato");
-            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
-
-            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        }
-    }
-
-    private double[] to_d_katan(ArrayList<Double> arr) {
-        double[] a = new double[arr.size()];
-        for (int i = 0; i < arr.size(); i++) {
-            a[i] = arr.get(i);
-        }
-
-        return a;
-    }
+//    public void update_dashboard_field() {
+////        final double field_width = 5.75 * tile;
+//        double x_ = this.getPosX() * meters_to_inches;
+//        double y_ = this.getPosY() * meters_to_inches;
+//
+//        double lastx = robot_pathx.get(robot_pathx.size() - 1);
+//        double lasty = robot_pathy.get(robot_pathy.size() - 1);
+//        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
+//            robot_pathx.add(x_);
+//            robot_pathy.add(y_);
+//
+//            TelemetryPacket packet = new TelemetryPacket();
+//            Canvas canvas = packet.fieldOverlay();
+//
+//            canvas.setStroke("tomato");
+//            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
+//
+//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//        }
+//    }
+//
+//    private double[] to_d_katan(ArrayList<Double> arr) {
+//        double[] a = new double[arr.size()];
+//        for (int i = 0; i < arr.size(); i++) {
+//            a[i] = arr.get(i);
+//        }
+//
+//        return a;
+//    }
 }
