@@ -120,8 +120,8 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		this.velocity = initialVelocity != null ? initialVelocity : this.velocity;
 		this.acceleration = null;
 
-		this.pathx.add(this.position.x * meters_to_inches);
-		this.pathy.add(this.position.y * meters_to_inches);
+//		this.pathx.add(this.position.x * meters_to_inches);
+//		this.pathy.add(this.position.y * meters_to_inches);
 
 		resetPosition();
 	}
@@ -142,28 +142,28 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		position.y += delta.f * Math.cos(a) + delta.s * Math.sin(a);
 
 		// 100000000000 ps = 100 ms = 0.1 s
-		if (this.useDashBoard && linearAcceleration.acquisitionTime - this.lastTimestamp >= 5000000L) {
-	        double x_ = this.position.x * meters_to_inches;
-	        double y_ = this.position.y * meters_to_inches;
-
-	        double lastx = pathx.get(pathx.size() - 1);
-	        double lasty = pathy.get(pathy.size() - 1);
-	        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-	            pathx.add(x_);
-	            pathy.add(y_);
-
-	            TelemetryPacket packet = new TelemetryPacket();
-	            Canvas canvas = packet.fieldOverlay();
-
-	            canvas.setStroke("tomato");
-	            canvas.strokePolyline(to_d_katan(pathx), to_d_katan(pathy));
-	            canvas.fillCircle(0, 0, 4);
-
-	            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-	        }
-
-			this.lastTimestamp = linearAcceleration.acquisitionTime;
-		}
+//		if (this.useDashBoard && linearAcceleration.acquisitionTime - this.lastTimestamp >= 5000000L) {
+//	        double x_ = this.position.x * meters_to_inches;
+//	        double y_ = this.position.y * meters_to_inches;
+//
+//	        double lastx = pathx.get(pathx.size() - 1);
+//	        double lasty = pathy.get(pathy.size() - 1);
+//	        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
+//	            pathx.add(x_);
+//	            pathy.add(y_);
+//
+//	            TelemetryPacket packet = new TelemetryPacket();
+//	            Canvas canvas = packet.fieldOverlay();
+//
+//	            canvas.setStroke("tomato");
+//	            canvas.strokePolyline(to_d_katan(pathx), to_d_katan(pathy));
+//	            canvas.fillCircle(0, 0, 4);
+//
+//	            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//	        }
+//
+//			this.lastTimestamp = linearAcceleration.acquisitionTime;
+//		}
 
 //		FtcDashboard.getInstance().getTelemetry().addData("pox", this.position.x);
 //		FtcDashboard.getInstance().getTelemetry().addData("poy", this.position.y);
