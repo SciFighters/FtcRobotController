@@ -33,7 +33,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public int handRange = 6000; // 5968;
+    public int handRange = 3935; // 6000; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -309,7 +309,7 @@ public class HandRailClass {
         else {
             this.setGrabberPower(0);
         }*/
-        setGrabberPower(0.75);
+        setGrabberPower(1);
     }
 
     public void grabberStop() {
@@ -317,7 +317,7 @@ public class HandRailClass {
     }
 
     public void grabberRelease() {
-        setGrabberPower(-0.425);
+        setGrabberPower(-0.45);
     }
 
     public void rail_drive(double power, boolean limitsOverride) {
