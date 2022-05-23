@@ -309,7 +309,7 @@ public class HandRailClass {
         else {
             this.setGrabberPower(0);
         }*/
-        setGrabberPower(0.8);
+        setGrabberPower(0.75);
     }
 
     public void grabberStop() {
@@ -317,7 +317,7 @@ public class HandRailClass {
     }
 
     public void grabberRelease() {
-        setGrabberPower(-0.8);
+        setGrabberPower(-0.425);
     }
 
     public void rail_drive(double power, boolean limitsOverride) {
