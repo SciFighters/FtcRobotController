@@ -147,7 +147,7 @@ public class HandRailClass {
         }
     }
 
-    public void setState (State state){
+    public void setState(State state){
         setHandState(state);
         setRailState(state);
     }
@@ -178,10 +178,10 @@ public class HandRailClass {
         gotoRail(railPos, power/3);
     }
 
-    public void gotoLevel(DuckLine.SH_Levels shLevel){
+    public void gotoLevel(DuckLine.SH_Levels shLevel)  {
         if (shLevel == DuckLine.SH_Levels.Top) {
             // gotoHandRail(98.44,70.98,1);
-            gotoHand(71, 1);
+            gotoHand(74, 1); // previously 71%
             // while (hand.isBusy());
             gotoRail(98.44, 1);
 
@@ -194,9 +194,9 @@ public class HandRailClass {
 
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
             // gotoHandRail(66.73,92.13,1);
-            gotoRail(33, 1);
+            gotoRail(32, 1); // previously 33%
             // while (rail.isBusy());
-            gotoHand(92.13, 1);
+            gotoHand(90.13, 1); // previously 92.13%
             // while (rail.isBusy());
             // gotoRail(66.73, 1);
 

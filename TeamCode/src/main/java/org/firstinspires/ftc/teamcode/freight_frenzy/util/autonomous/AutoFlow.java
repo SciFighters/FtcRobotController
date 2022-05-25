@@ -68,7 +68,7 @@ public class AutoFlow {
 	Auto auto;
 	// Declaring locations
 	Location startLocation = new Location(0.6, robotLength / 2); //1.1, 0.0
-	Location shippingHubLocation = new Location(0.3, 0.58, -30); //0.6, 0.75
+	Location shippingHubLocation = new Location(0.304, 0.601, -25); //0.3, 0.58, -30
 	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.2, 0, 70);
 	Location carouselLocation = new Location(1.2, 0.27, 65); // 1.32, 0.27, 45
 	Location barrier = new Location(-1.2, 1.0);
@@ -79,9 +79,9 @@ public class AutoFlow {
 	Location freightLocation_Pre2 = new Location(-0.60, 0.65, -90); //previously -0.60, 0.85
 	Location freightLocation_Pre3 = new Location(0.15, 0.55, -90);
 	Location freightLocation = new Location(-1.40, 0.61, -90); // -1.5, 0.93
-	Location freightSideLocation = new Location(-0.6, 0.1, -90);
-	Location freightPickup = new Location(-1.2, 0.10, -90);
-	Location pre_cycle = new Location(-0.5, 0.14, -90);
+	Location freightSideLocation = new Location(-0.6, 0.15, -90);
+	Location freightPickup = new Location(-1.2, 0.15, -90);
+	Location pre_cycle = new Location(-0.5, 0.16, -90);
 	Location pre_fullPickup = new Location(freightLocation, 0.2, 0.2, -90);
 
 	// Storage locations
