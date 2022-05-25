@@ -40,8 +40,7 @@ public class Jaccouse extends LinearOpMode {
 
 	// HandRail variables
 	private Toggle collector = new Toggle(); //  Collection toggle (A button)
-//	boolean release; // releasing object (B button)
-	private Toggle release = new Toggle();
+	boolean release; // releasing object (B button)
 	private Toggle homing = new Toggle();
 	private Toggle spincarousel = new Toggle();
 	private Toggle homingHand = new Toggle();
@@ -54,7 +53,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle freightIn = new Toggle();
 	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
-	private ElapsedTime releaseCounter = new ElapsedTime();
+
 
 	public double pow(double x){
 		return Math.pow(x, 2) * Math.signum(x);
@@ -162,8 +161,7 @@ public class Jaccouse extends LinearOpMode {
 			X.update(gamepad2.x);
 
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
-//			release = gamepad2.dpad_up;
-			release.update(gamepad2.dpad_up);
+			release = gamepad2.dpad_up;
 
 			if (turningToggle.isReleased()) {
 				turningCount = 8;
@@ -217,22 +215,17 @@ public class Jaccouse extends LinearOpMode {
 				handRail.gotoLevel(DuckLine.SH_Levels.EndGamePark);
 			}
 
-			if (!release.isPressed()) {
+			if (!release) {
 				if (collector.getState()) {
 					handRail.grabberGrab();
+				} else {
+					handRail.grabberStop();
 				}
 			}
-			else if(release.isClicked()) {
+			else {
 				handRail.grabberRelease();
 				collector.set(false);
-				releaseCounter.reset();
 			}
-			if(!collector.getState() && releaseCounter.milliseconds() > 225)
-				handRail.grabberStop();
-
-
-
-
 
 			// Carousel control
 			double carouselBoost = gamepad1.left_trigger == 0 ?

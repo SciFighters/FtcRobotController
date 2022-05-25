@@ -22,7 +22,7 @@ public class HandRailClass {
     private CRServo grabber_left = null;
     //private DcMotor grabbers = null;
     private Servo capping_servo = null; // Shipping elements servo
-    //private DigitalChannel grabber_switch = null;
+    private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
     private DigitalChannel hand_limit_F= null;
     private DigitalChannel rail_limit_B = null;
@@ -63,7 +63,7 @@ public class HandRailClass {
         capping_servo.setDirection(Servo.Direction.FORWARD);
         capping_servo.scaleRange(0.0,1.0);
 
-//        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
+        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
@@ -305,13 +305,13 @@ public class HandRailClass {
     }
 
     public void grabberGrab() {
-        /*if (grabber_switch.getState()) {
+        if (grabber_switch.getState()) {
             this.setGrabberPower(1);
         }
         else {
             this.setGrabberPower(0);
-        }*/
-        setGrabberPower(1);
+        }
+//        setGrabberPower(1);
     }
 
     public void grabberStop() {
@@ -358,8 +358,8 @@ public class HandRailClass {
             stop(); // if touch switch is pressed then stop
 
         }*/
-//        return !grabber_switch.getState();
-        return false;
+        return !grabber_switch.getState();
+//        return false;
     }
 
 
@@ -519,8 +519,7 @@ public class HandRailClass {
     }
 
     public boolean freightIn(){
-//            return !grabber_switch.getState();
-    return false;
+        return !grabber_switch.getState();
     }
 
 }

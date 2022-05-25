@@ -120,8 +120,10 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		this.velocity = initialVelocity != null ? initialVelocity : this.velocity;
 		this.acceleration = null;
 
-		this.pathx.add(this.position.x * meters_to_inches);
-		this.pathy.add(this.position.y * meters_to_inches);
+		if (this.useDashBoard) {
+			this.pathx.add(this.position.x * meters_to_inches);
+			this.pathy.add(this.position.y * meters_to_inches);
+		}
 	}
 
 	public double getHeading() {
