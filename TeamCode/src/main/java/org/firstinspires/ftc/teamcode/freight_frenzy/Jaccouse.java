@@ -230,7 +230,7 @@ public class Jaccouse extends LinearOpMode {
 				collector.set(false);
 				releaseCounter.reset();
 			}
-			if(!collector.getState() && releaseCounter.milliseconds() > 200)
+			if(!collector.getState() && releaseCounter.milliseconds() > 225)
 				handRail.grabberStop();
 
 
