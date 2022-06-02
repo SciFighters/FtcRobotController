@@ -17,9 +17,11 @@ public class HandRailClass {
     private DcMotorEx rail = null;
     private DcMotorEx hand = null;
 
-    //private CRServo grabber_right = null;
-    //private CRServo grabber_left = null;
-    private DcMotor grabbers = null;
+
+    private CRServo grabber_right = null;
+    private CRServo grabber_left = null;
+    //private DcMotor grabbers = null;
+
     private Servo capping_servo = null; // Shipping elements servo
     //private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
@@ -33,7 +35,7 @@ public class HandRailClass {
     private DcMotorEx carousel = null;
 
     private int railRange = 1470;
-    public int handRange = 6000; // 5968;
+    public int handRange = 3935; // 6000; // 5968;
 
     AutoFlow.ALLIANCE alliance;
 
@@ -49,11 +51,13 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        grabbers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-//        grabber_right = hw.get(CRServo.class, "grabber_right");
-//        grabber_left = hw.get(CRServo.class, "grabber_left");
-        grabbers = hw.get(DcMotor.class, "grabbers");
+//        grabbers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        grabber_right = hw.get(CRServo.class, "grabber_right");
+        grabber_left = hw.get(CRServo.class, "grabber_left");
+//        grabbers = hw.get(DcMotor.class, "grabbers");
+
         capping_servo = hw.get(Servo.class, "capping_servo");
 
         // Setting directions
@@ -148,7 +152,7 @@ public class HandRailClass {
         }
     }
 
-    public void setState (State state){
+    public void setState(State state){
         setHandState(state);
         setRailState(state);
     }
@@ -179,10 +183,10 @@ public class HandRailClass {
         gotoRail(railPos, power/3);
     }
 
-    public void gotoLevel(DuckLine.SH_Levels shLevel){
+    public void gotoLevel(DuckLine.SH_Levels shLevel)  {
         if (shLevel == DuckLine.SH_Levels.Top) {
             // gotoHandRail(98.44,70.98,1);
-            gotoHand(71, 1);
+            gotoHand(74, 1); // previously 71%
             // while (hand.isBusy());
             gotoRail(98.44, 1);
 
@@ -195,9 +199,9 @@ public class HandRailClass {
 
         } else if (shLevel == DuckLine.SH_Levels.Bottom) {
             // gotoHandRail(66.73,92.13,1);
-            gotoRail(33, 1);
+            gotoRail(32, 1); // previously 33%
             // while (rail.isBusy());
-            gotoHand(92.13, 1);
+            gotoHand(90.13, 1); // previously 92.13%
             // while (rail.isBusy());
             // gotoRail(66.73, 1);
 
@@ -291,9 +295,9 @@ public class HandRailClass {
 
 
     public void setGrabberPower(double power) {
-//        grabber_left.setPower(power);
-//        grabber_right.setPower(power);
-        grabbers.setPower(power);
+        grabber_left.setPower(power);
+        grabber_right.setPower(power);
+//        grabbers.setPower(power);
     }
 
 
@@ -304,13 +308,13 @@ public class HandRailClass {
     }
 
     public void grabberGrab() {
-        /*if (grabber_switch.getState()) {
+        if (grabber_switch.getState()) {
             this.setGrabberPower(1);
         }
         else {
             this.setGrabberPower(0);
-        }*/
-        setGrabberPower(0.75);
+        }
+//        setGrabberPower(1);
     }
 
     public void grabberStop() {
@@ -318,7 +322,7 @@ public class HandRailClass {
     }
 
     public void grabberRelease() {
-        setGrabberPower(-0.425);
+        setGrabberPower(-0.45);
     }
 
     public void rail_drive(double power, boolean limitsOverride) {
@@ -357,8 +361,8 @@ public class HandRailClass {
             stop(); // if touch switch is pressed then stop
 
         }*/
-//        return !grabber_switch.getState();
-        return false;
+        return !grabber_switch.getState();
+//        return false;
     }
 
 
@@ -518,8 +522,7 @@ public class HandRailClass {
     }
 
     public boolean freightIn(){
-//            return !grabber_switch.getState();
-    return false;
+        return !grabber_switch.getState();
     }
 
 }
