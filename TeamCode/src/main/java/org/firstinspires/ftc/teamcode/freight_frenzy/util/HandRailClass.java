@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -18,11 +17,13 @@ public class HandRailClass {
     private DcMotorEx rail = null;
     private DcMotorEx hand = null;
 
+
     private CRServo grabber_right = null;
     private CRServo grabber_left = null;
     //private DcMotor grabbers = null;
+
     private Servo capping_servo = null; // Shipping elements servo
-    private DigitalChannel grabber_switch = null;
+    //private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
     private DigitalChannel hand_limit_F= null;
     private DigitalChannel rail_limit_B = null;
@@ -50,20 +51,22 @@ public class HandRailClass {
         hand.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         hand.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 //        grabbers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
 //        grabbers = hw.get(DcMotor.class, "grabbers");
+
         capping_servo = hw.get(Servo.class, "capping_servo");
 
         // Setting directions
-        grabber_left.setDirection(CRServo.Direction.FORWARD);
-        grabber_right.setDirection(CRServo.Direction.REVERSE);
+//        grabber_left.setDirection(CRServo.Direction.FORWARD);
+//        grabber_right.setDirection(CRServo.Direction.REVERSE);
         capping_servo.setDirection(Servo.Direction.FORWARD);
         capping_servo.scaleRange(0.0,1.0);
 
-        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
+//        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
