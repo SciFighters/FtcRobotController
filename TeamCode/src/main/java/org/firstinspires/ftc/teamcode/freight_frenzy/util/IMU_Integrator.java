@@ -6,18 +6,19 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
 
 public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
+	final double tile = 0.6;
 	volatile private DcMotorEx fl = null;
 	volatile private DcMotorEx fr = null;
 	volatile private DcMotorEx bl = null;
@@ -31,12 +32,14 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	private double forwardTicksPerMeter;
 	private double strafeTicksPerMeter;
 
-
 	private boolean useDashBoard;
     final double meters_to_inches = 39.37008;
     private ArrayList<Double> pathx;
     private ArrayList<Double> pathy;
 	private long lastTimestamp = 0;
+
+	private Point origin; // origin point of action
+	private Point direction; // x,y direction for dashboard
 
 
 	private BNO055IMU imu = null;
@@ -68,14 +71,15 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	public  double getX() { return position.x; }
 	public  double getY() { return position.y; }
 
-	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter, boolean useDahsboard) {
+	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter, boolean useDahsboard, Point origin, Point direction) {
 		this.imu = imu;
 		// Constructor
 		fl = hw.get(DcMotorEx.class, "fl");
 		fr = hw.get(DcMotorEx.class, "fr");
 		bl = hw.get(DcMotorEx.class, "bl");
 		br = hw.get(DcMotorEx.class, "br");
-
+		this.origin = origin;
+		this.direction = direction;
 		this.forwardTicksPerMeter = forwardTicksPerMeter;
 		this.strafeTicksPerMeter = strafeTicksPerMeter;
 		this.useDashBoard = useDahsboard;
@@ -117,13 +121,22 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	public void initialize(BNO055IMU.Parameters parameters, Position initialPosition, Velocity initialVelocity) {
 		this.parameters = parameters;
 		this.position = initialPosition != null ? initialPosition : this.position;
+
 		this.velocity = initialVelocity != null ? initialVelocity : this.velocity;
 		this.acceleration = null;
 
 		if (this.useDashBoard) {
-			this.pathx.add(this.position.x * meters_to_inches);
-			this.pathy.add(this.position.y * meters_to_inches);
+			Point p = transformDashboard(this.position);
+			this.pathx.add(p.x);
+			this.pathy.add(p.y);
 		}
+	}
+
+	public Point transformDashboard(Position pos) {
+		double x = Math.signum(direction.x) * (pos.x + origin.x) * meters_to_inches;
+		double y = Math.signum(direction.y) * (pos.y + origin.y) * meters_to_inches;
+//		double z = (pos.z + origin_offset.z) * meters_to_inches;
+		return new Point(x,y);
 	}
 
 	public double getHeading() {
@@ -143,21 +156,20 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 		// 100000000000 ps = 100 ms = 0.1 s
 		if (this.useDashBoard && linearAcceleration.acquisitionTime - this.lastTimestamp >= 5000000L) {
-	        double x_ = this.position.x * meters_to_inches;
-	        double y_ = this.position.y * meters_to_inches;
-
-	        double lastx = pathx.get(pathx.size() - 1);
-	        double lasty = pathy.get(pathy.size() - 1);
-	        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-	            pathx.add(x_);
-	            pathy.add(y_);
+			Point p = transformDashboard(this.position); // transform
+			double lastx = pathx.get(pathx.size() - 1); // last path x
+	        double lasty = pathy.get(pathy.size() - 1); // last path y
+			if (Math.abs(lastx - p.x) > 1 || Math.abs(lasty - p.y) > 1) {
+	        	pathx.add(p.x);
+	            pathy.add(p.y);
 
 	            TelemetryPacket packet = new TelemetryPacket();
 	            Canvas canvas = packet.fieldOverlay();
 
 	            canvas.setStroke("tomato");
 	            canvas.strokePolyline(to_d_katan(pathx), to_d_katan(pathy));
-	            canvas.fillCircle(0, 0, 4);
+	            Point o = transformDashboard(new Position()); // transform 0,0
+	            canvas.fillCircle(o.x, o.y, 3);
 
 	            FtcDashboard.getInstance().sendTelemetryPacket(packet);
 	        }
@@ -202,4 +214,5 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 		return a;
 	}
+
 }

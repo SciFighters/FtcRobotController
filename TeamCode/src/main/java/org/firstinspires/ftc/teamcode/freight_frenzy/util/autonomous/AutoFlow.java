@@ -67,7 +67,7 @@ public class AutoFlow {
 	final int screenHeight = 360;
 	Auto auto;
 	// Declaring locations
-	Location startLocation = new Location(0.6, robotLength / 2); //1.1, 0.0
+		Location startLocation = new Location(0.6, robotLength / 2); //1.1, 0.0
 	Location shippingHubLocation = new Location(0.3, 0.58, -30); //0.6, 0.75
 	Location shippingHubLocation_Pre1 = new Location(shippingHubLocation, -0.2, 0, 70);
 	Location carouselLocation = new Location(1.2, 0.27, 65); // 1.32, 0.27, 45
@@ -140,7 +140,7 @@ public class AutoFlow {
 			this.pre_cycle.flipAngle();
 		}
 
-		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation, DriveClass.USE_ENCODERS);
+		this.drive = new DriveClass(opMode, DriveClass.ROBOT.JACCOUSE, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_DASHBOARD_FIELD);
 		this.handrail = new HandRailClass(opMode, this.alliance);
 	}
 

@@ -18,6 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
+import org.opencv.core.Point;
 
 import java.util.ArrayList;
 
@@ -151,7 +153,8 @@ public class DriveClass {
 
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField);
+
+        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, new Point(0.5 * tile,-3 * tile), new Point(-1,-1));
 
         imu.initialize(parameters);
 
