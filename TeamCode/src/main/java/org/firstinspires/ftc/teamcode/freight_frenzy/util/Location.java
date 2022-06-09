@@ -6,7 +6,6 @@ public class Location {
 	public double y;
 	public double angle;
 
-
 	public Location(double x, double y) {
 		this.x = x;
 		this.y = y;
