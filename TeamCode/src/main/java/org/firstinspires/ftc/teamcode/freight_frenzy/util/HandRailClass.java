@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.freight_frenzy.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -23,7 +24,7 @@ public class HandRailClass {
     //private DcMotor grabbers = null;
 
     private Servo capping_servo = null; // Shipping elements servo
-    //private DigitalChannel grabber_switch = null;
+    private DigitalChannel grabber_switch = null;
     private DigitalChannel hand_limit_B= null;
     private DigitalChannel hand_limit_F= null;
     private DigitalChannel rail_limit_B = null;
@@ -66,7 +67,7 @@ public class HandRailClass {
         capping_servo.setDirection(Servo.Direction.FORWARD);
         capping_servo.scaleRange(0.0,1.0);
 
-//        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
+        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
 //       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
