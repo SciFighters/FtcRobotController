@@ -17,7 +17,7 @@ public class GoToTest extends LinearOpMode {
 	// Declare OpMode members.
 	private ElapsedTime runtime = new ElapsedTime();
 	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE);
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, startingPosition, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 	private Toggle turningToggle = new Toggle();
 	private int direction = 1;
 	private double targetHeading = 0;

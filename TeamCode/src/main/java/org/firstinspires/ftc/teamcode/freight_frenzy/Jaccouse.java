@@ -29,7 +29,7 @@ public class Jaccouse extends LinearOpMode {
 	private AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
 	Location startingPosition = new Location(-1.5 * tile, 2.75 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD); // TODO: useEncoders().
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, alliance == AutoFlow.ALLIANCE.BLUE ? DriveClass.DriveMode.BLUE : DriveClass.DriveMode.RED); // TODO: useEncoders().
 	private HandRailClass handRail = new HandRailClass(this);
 
 	private Toggle turningToggle = new Toggle();

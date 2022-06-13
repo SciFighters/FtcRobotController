@@ -62,8 +62,8 @@ public class HandRailClass {
         capping_servo = hw.get(Servo.class, "capping_servo");
 
         // Setting directions
-//        grabber_left.setDirection(CRServo.Direction.FORWARD);
-//        grabber_right.setDirection(CRServo.Direction.REVERSE);
+        grabber_left.setDirection(CRServo.Direction.FORWARD);
+        grabber_right.setDirection(CRServo.Direction.REVERSE);
         capping_servo.setDirection(Servo.Direction.FORWARD);
         capping_servo.scaleRange(0.0,1.0);
 

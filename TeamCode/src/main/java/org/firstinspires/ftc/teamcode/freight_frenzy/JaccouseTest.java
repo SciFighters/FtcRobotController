@@ -28,7 +28,7 @@ public class JaccouseTest extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     Location startingPosition = new Location(-0.6, 0.225); //last x = -1.75*tile, y = 0*tile
-    private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE);
+    private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
     private HandRailClass handRail = new HandRailClass(this);
 
     private Toggle turningToggle = new Toggle();

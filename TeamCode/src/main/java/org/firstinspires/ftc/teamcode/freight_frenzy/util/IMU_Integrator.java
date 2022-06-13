@@ -7,6 +7,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.opencv.core.Point;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
@@ -146,6 +148,13 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 	@Override
 	public void update(Acceleration linearAcceleration) {
+
+		if (this.useDashBoard && FtcDashboard.getInstance() != null && pathx.size() > 2) {
+			Telemetry t = FtcDashboard.getInstance().getTelemetry();
+			t.addData("[-2]", Arrays.toString(new double[]{pathx.get(pathx.size() - 2), pathy.get(pathy.size() - 2)}));
+			t.addData("[-1]", Arrays.toString(new double[]{pathx.get(pathx.size() - 1), pathy.get(pathy.size() - 1)}));
+		}
+
 
 		FS delta = getDeltaDistance();
 

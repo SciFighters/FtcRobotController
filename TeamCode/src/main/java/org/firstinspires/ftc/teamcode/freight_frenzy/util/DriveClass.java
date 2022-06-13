@@ -64,13 +64,30 @@ public class DriveClass {
 
     private double forwardTicksPerMeter;
     private double strafeTicksPerMeter;
+    // DriveMode - (direction & origin of IMU_Integrator)
+    public enum DriveMode {
+        BLUE(1,new Point(0.5 * 0.6,-3 * 0.6), new Point(-1,-1)),
+        RED(2, new Point(-0.5 * 0.6, -3 * 0.6), new Point(1,1));
+
+//        public static double tile = 0.6;
+        public int index;
+        public Point origin;
+        public Point direciton;
+        DriveMode(int index, Point origin, Point direction) {
+            this.index = index;
+            this.origin = origin;
+            this.direciton = direction;
+        }
+    }
+    DriveMode mode;
 
     ElapsedTime timer = new ElapsedTime();
 
-    public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags) {
+    public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags, DriveMode mode) {
         this.opMode = opMode;
         this.robot = robot;
         this.startingPosition = startingPosition;
+        this.mode = mode;
 
 
         if (robot == ROBOT.JACCOUSE) {
@@ -154,7 +171,7 @@ public class DriveClass {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
 
-        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, new Point(0.5 * tile,-3 * tile), new Point(-1,-1));
+        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, this.mode.origin, this.mode.direciton);
 
         imu.initialize(parameters);
 
