@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 @TeleOp
 @Disabled
 public class CarouselSpeedTest extends LinearOpMode {
-	DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, new Location(0, 0)).useEncoders().useBrake();
+	DriveClass drive = new DriveClass(this, DriveClass.ROBOT.COBALT, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 	HandRailClass handRail = new HandRailClass(this);
 
 	private double tmp_power = 0.2;

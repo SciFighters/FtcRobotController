@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,6 +14,8 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
+
+import java.util.ArrayList;
 
 // TODO: clean code
 // TODO: hand rail boost
@@ -28,8 +33,8 @@ public class Jaccouse extends LinearOpMode {
 	private ElapsedTime runtime = new ElapsedTime();
 	private AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
 
-	Location startingPosition = new Location(0 * tile, 0 * tile); //last x = -1.75*tile, y = 0*tile
-	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition).useBrake(); // TODO: useEncoders().
+	Location startingPosition = new Location(-1.5 * tile, 2.75 * tile); //last x = -1.75*tile, y = 0*tile
+	private DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, startingPosition, DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, alliance == AutoFlow.ALLIANCE.BLUE ? DriveClass.DriveMode.BLUE : DriveClass.DriveMode.RED); // TODO: useEncoders().
 	private HandRailClass handRail = new HandRailClass(this);
 
 	private Toggle turningToggle = new Toggle();
@@ -40,7 +45,8 @@ public class Jaccouse extends LinearOpMode {
 
 	// HandRail variables
 	private Toggle collector = new Toggle(); //  Collection toggle (A button)
-	boolean release; // releasing object (B button)
+//	boolean release; // releasing object (B button)
+	private Toggle release = new Toggle();
 	private Toggle homing = new Toggle();
 	private Toggle spincarousel = new Toggle();
 	private Toggle homingHand = new Toggle();
@@ -53,8 +59,7 @@ public class Jaccouse extends LinearOpMode {
 	private Toggle freightIn = new Toggle();
 	private boolean capping_state = false;
 	private ElapsedTime carouselAccelTime = new ElapsedTime();
-
-
+	private ElapsedTime releaseCounter = new ElapsedTime();
 
 	public double pow(double x){
 		return Math.pow(x, 2) * Math.signum(x);
@@ -162,7 +167,8 @@ public class Jaccouse extends LinearOpMode {
 			X.update(gamepad2.x);
 
 			collector.update(gamepad2.dpad_down); // update toggle (A button)
-			release = gamepad2.dpad_up;
+//			release = gamepad2.dpad_up;
+			release.update(gamepad2.dpad_up);
 
 			if (turningToggle.isReleased()) {
 				turningCount = 8;
@@ -216,17 +222,22 @@ public class Jaccouse extends LinearOpMode {
 				handRail.gotoLevel(DuckLine.SH_Levels.EndGamePark);
 			}
 
-			if (!release) {
+			if (!release.isPressed()) {
 				if (collector.getState()) {
 					handRail.grabberGrab();
-				} else {
-					handRail.grabberStop();
 				}
 			}
-			else {
+			else if(release.isClicked()) {
 				handRail.grabberRelease();
 				collector.set(false);
+				releaseCounter.reset();
 			}
+			if(!collector.getState() && releaseCounter.milliseconds() > 200)
+				handRail.grabberStop();
+
+
+
+
 
 			// Carousel control
 			double carouselBoost = gamepad1.left_trigger == 0 ?
@@ -268,6 +279,8 @@ public class Jaccouse extends LinearOpMode {
 			telemetry.addData("pressed", freightIn.isPressed());
 			telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
 			telemetry.update();
+
+//			drive.update_dashboard_field();
 		}
 	}
 }
