@@ -20,7 +20,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
 import org.opencv.core.Point;
-
 import java.util.ArrayList;
 
 public class DriveClass {
@@ -71,7 +70,7 @@ public class DriveClass {
 
 //        public static double tile = 0.6;
         public int index;
-        public Point origin;
+        public Point origin;    
         public Point direciton;
         DriveMode(int index, Point origin, Point direction) {
             this.index = index;

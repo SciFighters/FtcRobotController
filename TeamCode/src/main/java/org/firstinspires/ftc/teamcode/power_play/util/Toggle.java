@@ -2,10 +2,7 @@ package org.firstinspires.ftc.teamcode.power_play.util;
 
 public class Toggle {
 
-    private boolean lastInput = false;
-    private boolean pressed = false;
-    private boolean changed = false;
-    private boolean state = false;
+    private boolean lastInput = false, pressed = false, changed = false, state = false;
 
     public Toggle( ) { }
     public Toggle(boolean initialState ) { this.state = initialState; }
