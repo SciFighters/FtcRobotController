@@ -96,6 +96,23 @@ public class DriveClass {
             this.forwardTicksPerMeter = 1753;
             this.strafeTicksPerMeter = 2006;
         }
+        switch(robot) {
+            case JACCOUSE:
+                this.forwardTicksPerMeter = 1562.5;
+                this.strafeTicksPerMeter = 1645.83;
+                break;
+//            case COBALT:
+//                this.forwardTicksPerMeter = 1753;
+//                this.strafeTicksPerMeter = 2006;
+//                break;
+            case SCORPION:
+                this.forwardTicksPerMeter = 2455;
+                this.strafeTicksPerMeter = 2587;
+                break;
+            default:
+                this.forwardTicksPerMeter = 1753;
+                this.strafeTicksPerMeter = 2006;
+        }
 
         this.useEncoders = (flags & USE_ENCODERS) != 0;
         this.useBrake = (flags & USE_BRAKE) != 0;
