@@ -36,6 +36,6 @@ public class Constantin extends LinearOpMode {
 	}
 
 	public double pow(double x){
-		return Math.pow(x, 2) * Math.signum(x);
+		return Math.pow(x, 2) * Math.signum(x); // x^2
 	}
 }

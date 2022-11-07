@@ -227,7 +227,7 @@ public class DriveClass {
     }
 
     public void setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
-        if (fieldOriented != true) {
+        if (!fieldOriented) {
             setPower(y, turn, x);  // No field oriented
         } else {
             double phiRad = (-getHeading() + angleOffset) / 180 * Math.PI;

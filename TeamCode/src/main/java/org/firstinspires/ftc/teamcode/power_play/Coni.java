@@ -25,11 +25,8 @@ public class Coni extends LinearOpMode {
         telemetry.addData("Mode", "Ready for start!");
 
         waitForStart();
-        this.timer.reset();
 
-        if(this.timer.milliseconds() / 1000 <= 0.2)
-            this.lift.setPower(0.4);
-        else
-            this.lift.setPower(0);
+        lift.setPower(gamepad1.left_stick_y * 0.4 + 0.4);
+
     }
 }
