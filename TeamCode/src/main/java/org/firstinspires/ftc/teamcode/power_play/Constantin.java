@@ -2,40 +2,84 @@ package org.firstinspires.ftc.teamcode.power_play;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 
 @TeleOp
 public class Constantin extends LinearOpMode {
-	DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
+    private DcMotorEx fl = null;
+    private DcMotorEx fr = null;
+    private DcMotorEx bl = null;
+    private DcMotorEx br = null;
+    String state = "WITHOUT ENCODER";
+    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 
-	@Override
-	public void runOpMode() {
-		telemetry.addLine("Starting Initializing");
-		telemetry.update();
+    @Override
+    public void runOpMode() {
+        fl = hardwareMap.get(DcMotorEx.class, "fl");
+        fr = hardwareMap.get(DcMotorEx.class, "fr");
+        bl = hardwareMap.get(DcMotorEx.class, "bl");
+        br = hardwareMap.get(DcMotorEx.class, "br");
 
-		drive.init(hardwareMap);
+        fl.setDirection(DcMotorEx.Direction.REVERSE);
+        fr.setDirection(DcMotorEx.Direction.FORWARD);
+        bl.setDirection(DcMotorEx.Direction.REVERSE);
+        br.setDirection(DcMotorEx.Direction.FORWARD);
 
-		telemetry.addLine("Finished Initializing");
-		telemetry.update();
+        fl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        fr.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        bl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        br.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
-		waitForStart();
+        fl.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        fr.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        bl.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        br.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        telemetry.addLine("Starting Initializing");
+        telemetry.update();
 
-		drive.resetOrientation(90);
-		while (opModeIsActive()) {
-			final double boostK = 0.5;
-			double boost = gamepad1.right_trigger * boostK + (1 - boostK);
+        drive.init(hardwareMap);
 
-			double y = pow(-gamepad1.left_stick_y) * boost;
-			double x = pow(gamepad1.left_stick_x) * boost;
-			double turn = pow(gamepad1.right_stick_x * boost);
+        telemetry.addLine("Finished Initializing");
+        telemetry.update();
 
-			drive.setPowerOriented(y, x, turn, true);
-		}
-	}
+        waitForStart();
 
-	public double pow(double x){
-		return Math.pow(x, 2) * Math.signum(x);
-	}
+        drive.resetOrientation(90);
+
+        fl.setPower(gamepad1.left_stick_x);
+        fr.setPower(gamepad1.right_stick_x);
+
+        bl.setPower(-gamepad1.left_stick_y);
+        br.setPower(-gamepad1.right_stick_y);
+        if (gamepad1.a) {
+            fl.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            fr.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            bl.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            br.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+            state = "USING ENCODER";
+        }
+        if (gamepad1.b) {
+            fl.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            fr.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            bl.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            br.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            state = "WITHOUT ENCODER";
+        }
+
+        telemetry.addData("front left:", fl.getCurrentPosition());
+        telemetry.addData("front right:", fr.getCurrentPosition());
+        telemetry.addData("back left:", bl.getCurrentPosition());
+        telemetry.addData("back right:", br.getCurrentPosition());
+        telemetry.addData("state: ", state);
+        telemetry.update();
+    }
+
+
+
+    public double pow(double x) {
+        return Math.pow(x, 2) * Math.signum(x); // x^2
+    }
 }

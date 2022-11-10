@@ -35,10 +35,7 @@ public class Lift {
     public void goToEdge(double maxPower, boolean resetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling
         lastMovePos = resetLastPos ? getRelativePos() : lastMovePos;
         this.setPower(direction.directionMul * 0.05 +
-                (direction.directionMul * 0.95 * maxPower) *
-                (Math.abs(this.getRelativePos() - this.lastMovePos) /
-                (direction.targetValue - direction.directionMul * this.lastMovePos)) * (
-                1 - (Math.abs(this.getRelativePos() - this.lastMovePos) /
+                (direction.directionMul * 0.95 * maxPower) * ((Math.abs(this.getRelativePos() - this.lastMovePos) /
                 (direction.targetValue - direction.directionMul * this.lastMovePos))));
     }
 
