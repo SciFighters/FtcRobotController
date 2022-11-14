@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
+import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 
 @TeleOp
@@ -13,6 +14,9 @@ public class Constantin extends LinearOpMode {
     private DcMotorEx fr = null;
     private DcMotorEx bl = null;
     private DcMotorEx br = null;
+
+    private Lift lift = new Lift();
+
     String state = "WITHOUT ENCODER";
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 
@@ -68,6 +72,15 @@ public class Constantin extends LinearOpMode {
             br.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
             state = "WITHOUT ENCODER";
         }
+        if (gamepad1.right_stick_y * 100 >= 10 || gamepad1.right_stick_y * 100 <= -10) {
+            double power = gamepad1.right_stick_y;
+            this.lift.setPower(power);
+            telemetry.addData("Lift Power", power);
+        } else {
+            this.lift.setPower(0);
+            telemetry.addData("Lift Power", 0);
+        }
+
 
         telemetry.addData("front left:", fl.getCurrentPosition());
         telemetry.addData("front right:", fr.getCurrentPosition());
@@ -76,6 +89,8 @@ public class Constantin extends LinearOpMode {
         telemetry.addData("state: ", state);
         telemetry.update();
     }
+
+
 
 
 
