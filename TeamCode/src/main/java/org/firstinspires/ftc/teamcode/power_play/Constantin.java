@@ -24,7 +24,7 @@ public class Constantin extends LinearOpMode {
 
         waitForStart();
 
-        drive.resetOrientation(90);
+        drive.resetOrientation(0);
         while (opModeIsActive()) {
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
@@ -46,6 +46,9 @@ public class Constantin extends LinearOpMode {
             } else {
                 this.lift.setPower(0);
                 telemetry.addData("Lift Power", 0);
+            }
+            if (gamepad1.x && gamepad1.start){
+                drive.resetOrientation(0);
             }
             telemetry.addData("lift pos : ", lift.getPos());
             telemetry.update();

@@ -1,17 +1,17 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Lift {
     // Declaring variables
 //    private OpMode opMode;
-    public final int LiftRange = 1000, LiftMin = 10; // max amount of ticks in the lift..
+    public final int LiftRange = 2500, LiftMin = 10; // max amount of ticks in the lift..
     //  public DcMotor RE, LE;
     public DcMotorEx RE;
     public double startGoToX = 0; // use the relative position
-
+    private Thread liftFixThread;
+    volatile int tickFixTarget = 0;
 
     public enum LiftDirection {
         TOP(1, 1),
@@ -34,6 +34,28 @@ public class Lift {
 
     public int getPos() {
         return (this.RE.getCurrentPosition());
+    }
+
+    public void fixPos(int target, Lift lift) {
+            this.tickFixTarget = target;
+            if(this.liftFixThread.isAlive())
+                return;
+            this.liftFixThread = new Thread() {
+                @Override
+                public void run() {
+                    while(inRange(lift.getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
+                            lift.setPower((lift.getRelativePos(tickFixTarget) - lift.getRelativePos()));
+                    }
+                    try {
+                        this.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            this.liftFixThread.run();
+
+
     }
 
     public void init(HardwareMap hw) {
@@ -73,6 +95,7 @@ public class Lift {
     }
 
 
+
 //    private boolean approximately(double value, double valuedAt, double approximation) {
 //        return this.inRange(value, valuedAt - approximation, valuedAt + approximation);
 //    }
@@ -94,8 +117,9 @@ public class Lift {
             RE.setPower(0);
         }
     }
-    public void breakMotor (){
-       RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+    public void breakMotor() {
+        RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     }
 
     public double[] getPower() {
