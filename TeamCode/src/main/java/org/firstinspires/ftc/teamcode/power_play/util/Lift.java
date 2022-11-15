@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Lift {
     // Declaring variables
 //    private OpMode opMode;
-    public final int LiftRange = 2500, LiftMin = 10; // max amount of ticks in the lift..
+    public final int LIFT_RANGE = 2500, LIFT_MIN = 10; // max amount of ticks in the lift..
     //  public DcMotor RE, LE;
     public DcMotorEx RE;
     public double startGoToX = 0; // use the relative position
@@ -25,7 +26,7 @@ public class Lift {
     }
 
     public double getRelativePos(int ticks) {
-        return (double) ticks / (double) LiftRange;
+        return (double) ticks / (double) LIFT_RANGE;
     }
 
     public double getRelativePos() {
@@ -33,27 +34,27 @@ public class Lift {
     }
 
     public int getPos() {
-        return (this.RE.getCurrentPosition());
+        return (-this.RE.getCurrentPosition());
     }
 
     public void fixPos(int target, Lift lift) {
-            this.tickFixTarget = target;
-            if(this.liftFixThread.isAlive())
-                return;
-            this.liftFixThread = new Thread() {
-                @Override
-                public void run() {
-                    while(inRange(lift.getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
-                            lift.setPower((lift.getRelativePos(tickFixTarget) - lift.getRelativePos()));
-                    }
-                    try {
-                        this.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        this.tickFixTarget = target;
+        if (this.liftFixThread.isAlive())
+            return;
+        this.liftFixThread = new Thread() {
+            @Override
+            public void run() {
+                while (inRange(lift.getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
+                    lift.setPower((lift.getRelativePos(tickFixTarget) - lift.getRelativePos()));
                 }
-            };
-            this.liftFixThread.run();
+                try {
+                    this.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        this.liftFixThread.run();
 
 
     }
@@ -95,7 +96,6 @@ public class Lift {
     }
 
 
-
 //    private boolean approximately(double value, double valuedAt, double approximation) {
 //        return this.inRange(value, valuedAt - approximation, valuedAt + approximation);
 //    }
@@ -105,7 +105,8 @@ public class Lift {
     }
 
     public void setPower(double... power) {
-        if (inRange(this.LiftMin, this.getPos(), this.LiftRange)) {
+        if ((!(this.getPos() < this.LIFT_MIN && getAveragePower(power) < 0)) ||
+                (!(this.getPos() > this.LIFT_RANGE && getAveragePower(power) > 0))) {
             RE.setPower(power[0]);
             if (power.length == 2) {
 //            LL.setPower(power[1]);
@@ -118,8 +119,24 @@ public class Lift {
         }
     }
 
+    public double getAveragePower(double[] power) {
+        double avg = 0;
+        for (int i = 0; i < power.length; i++) {
+            avg += power[i];
+        }
+        return avg / power.length;
+    }
+    public double getAveragePower() {
+        return this.getAveragePower(this.getPower());
+    }
+
     public void breakMotor() {
         RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void reset() {
+        RE.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public double[] getPower() {
