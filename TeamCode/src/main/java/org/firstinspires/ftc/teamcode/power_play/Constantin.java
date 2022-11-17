@@ -36,9 +36,13 @@ public class Constantin extends LinearOpMode {
             drive.setPowerOriented(y, x, turn, true);
             if (gamepad1.right_stick_y * 100 >= 10 || gamepad1.right_stick_y * 100 <= -10) {
                 power = gamepad1.right_stick_y;
+                if (lift.getPos() < 2000) {
+                    lift.fixPos((int) power, lift);
+                    telemetry.addData("Lift Power", power);
+                } else {
+                    power = 0;
+                }
                 this.lift.setPower(power);
-                telemetry.addData("Lift Power", power);
-
             } else {
                 this.lift.setPower(0);
                 telemetry.addData("Lift Power", 0);
