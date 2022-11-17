@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+
 public class Lift {
     // Declaring variables
 //    private OpMode opMode;
@@ -12,6 +14,8 @@ public class Lift {
     //  public DcMotor RE, LE;
     public DcMotorEx RE;
     public double startGoToX = 0; // use the relative position
+    public double currentTarget = 0; // use to fix / goto position.
+
     private Thread liftFixThread;
     volatile double tickFixTarget = 0;
 
@@ -39,6 +43,10 @@ public class Lift {
         }
     }
 
+    public void setTargetPos(int target) {
+        this.currentTarget = getRelativePos(target);
+    }
+
     public double getRelativePos(int ticks) {
         return (double) ticks / (double) LIFT_RANGE;
     }
@@ -58,7 +66,7 @@ public class Lift {
         this.liftFixThread = new Thread() {
             @Override
             public void run() {
-                while (!inRange(getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
+                while (!MathUtil.inRange(getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
                     setPower((tickFixTarget - getRelativePos()));
                 }
                 try {
@@ -100,15 +108,22 @@ public class Lift {
 //
 //    public void goToEdge(double maxPower, LiftDirection direction) { this.goToEdge(maxPower, false, direction); }
 
-    public void goTo(double maxPower, boolean resetPos, double targetX) {
-        if (inRange(targetX, this.getRelativePos() - 0.03, this.getRelativePos() + 0.03)) {
-            startGoToX = resetPos ? getRelativePos() : startGoToX;
-            this.setPower(0.1 + (maxPower * (0.9 - 0.001)) *
-                    (((getRelativePos() - startGoToX) / (targetX - startGoToX)) >= (0.5 - 0.01) ?
-                            (((getRelativePos() - startGoToX) / (targetX - startGoToX)) * 2) :
-                            (1 + 1 - 2 * ((getRelativePos() - startGoToX) / (targetX - startGoToX))))
-            );
-        } else this.setPower(0);
+//    public void goTo(double maxPower, boolean resetPos, double targetX) {
+//        if (inRange(targetX, this.getRelativePos() - 0.03, this.getRelativePos() + 0.03)) {
+//            startGoToX = resetPos ? getRelativePos() : startGoToX;
+//            this.setPower(0.1 + (maxPower * (0.9 - 0.001)) *
+//                    (((getRelativePos() - startGoToX) / (targetX - startGoToX)) >= (0.5 - 0.01) ?
+//                            (((getRelativePos() - startGoToX) / (targetX - startGoToX)) * 2) :
+//                            (1 + 1 - 2 * ((getRelativePos() - startGoToX) / (targetX - startGoToX))))
+//            );
+//        } else this.setPower(0);
+//    }
+
+    public void goTo(double maxPower, boolean resetPos) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
+        if(!inRange(this.currentTarget, this.getRelativePos() - 0.004, this.getRelativePos() + 0.004)) {
+//            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
+            this.setPower(MathUtil.clamp(maxPower, -1, 1) * Math.signum(getRelativePos() - this.currentTarget));
+        }
     }
 
     private boolean inRange(double value, double min, double max) {
@@ -125,8 +140,8 @@ public class Lift {
 //        return this.inRange(value, valuedAt - approximation, valuedAt + approximation);
 //    }
 
-    public void goTo(boolean resetPos, double targetX) {
-        this.goTo(0.99, resetPos, targetX);
+    public void goTo(boolean resetPos) {
+        this.goTo(0.99, resetPos);
     }
 
     public void setPower(double... power) {

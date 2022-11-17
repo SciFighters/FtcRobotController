@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.power_play;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
@@ -9,8 +10,12 @@ import org.firstinspires.ftc.teamcode.power_play.util.Location;
 
 @TeleOp
 public class Constantin extends LinearOpMode {
-    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
+    private DcMotorEx fl = null, fr = null, bl = null, br = null;
+
     private Lift lift = new Lift();
+
+    String state = "WITHOUT ENCODER";
+    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 
     @Override
     public void runOpMode() {
@@ -40,8 +45,10 @@ public class Constantin extends LinearOpMode {
                 else power = 0;
                 this.lift.setPower(power);
                 this.lift.fixPos(lift.getPos());
+                this.lift.currentTarget = this.lift.getRelativePos();
             } else {
-                lift.fixPos(lift.getPos());
+//                lift.fixPos(lift.getPos());
+                lift.goTo(false);
                 telemetry.addData("Lift Power", 0);
             }
             if (gamepad1.x && gamepad1.start) {
