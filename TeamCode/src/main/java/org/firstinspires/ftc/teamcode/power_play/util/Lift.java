@@ -7,12 +7,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class Lift {
     // Declaring variables
 //    private OpMode opMode;
-    public final int LIFT_RANGE = 2500, LIFT_MIN = 10; // max amount of ticks in the lift..
+    public final int LIFT_RANGE = 3297, LIFT_MIN = 10; // max amount of ticks in the lift..
     //  public DcMotor RE, LE;
     public DcMotorEx RE;
     public double startGoToX = 0; // use the relative position
     private Thread liftFixThread;
-    volatile int tickFixTarget = 0;
+    volatile double tickFixTarget = 0;
 
     public enum LiftDirection {
         TOP(1, 1),
@@ -22,6 +22,16 @@ public class Lift {
         LiftDirection(double directionMul, double targetValue) {
             this.directionMul = directionMul;
             this.targetValue = targetValue;
+        }
+    }
+
+    enum Levels {
+        lvl1(0),
+        lvl2(500);
+        int ticks;
+
+        Levels(int ticks) {
+            this.ticks = ticks;
         }
     }
 
@@ -37,15 +47,15 @@ public class Lift {
         return (-this.RE.getCurrentPosition());
     }
 
-    public void fixPos(int target, Lift lift) {
-        this.tickFixTarget = target;
+    public void fixPos(int target) { // Target has to be provided as ticks, and is transferred to a relativePos
+        this.tickFixTarget = getRelativePos(target);
         if (this.liftFixThread.isAlive())
-            return;
+            return; // Exits out of function
         this.liftFixThread = new Thread() {
             @Override
             public void run() {
-                while (inRange(lift.getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
-                    lift.setPower((lift.getRelativePos(tickFixTarget) - lift.getRelativePos()));
+                while (!inRange(getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
+                    setPower((tickFixTarget - getRelativePos()));
                 }
                 try {
                     this.join();
@@ -126,6 +136,7 @@ public class Lift {
         }
         return avg / power.length;
     }
+
     public double getAveragePower() {
         return this.getAveragePower(this.getPower());
     }

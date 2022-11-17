@@ -12,6 +12,8 @@ public class Constantin extends LinearOpMode {
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
     private Lift lift = new Lift();
 
+
+
     @Override
     public void runOpMode() {
         telemetry.addLine("Starting Initializing");
@@ -34,15 +36,12 @@ public class Constantin extends LinearOpMode {
             double turn = pow(gamepad1.right_stick_x * boost);
             double power = 0;
             drive.setPowerOriented(y, x, turn, true);
-            if (gamepad1.right_stick_y * 100 >= 10 || gamepad1.right_stick_y * 100 <= -10) {
-                power = gamepad1.right_stick_y;
-                if (lift.getPos() < 2000) {
-                    lift.fixPos((int) power, lift);
-                    telemetry.addData("Lift Power", power);
-                } else {
-                    power = 0;
-                }
+            if (gamepad2.right_stick_y * 100 >= 10 || gamepad2.right_stick_y * 100 <= -10) { // Checks if the gamepad2 (right stick y axis)
+                power = gamepad2.right_stick_y;
+                if (lift.getPos() < 3000) telemetry.addData("Lift Power", power);
+                else power = 0;
                 this.lift.setPower(power);
+                this.lift.fixPos(lift.getPos());
             } else {
                 this.lift.setPower(0);
                 telemetry.addData("Lift Power", 0);
