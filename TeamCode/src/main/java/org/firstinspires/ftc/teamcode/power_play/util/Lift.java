@@ -61,7 +61,7 @@ public class Lift {
 
     public void fixPos(int target) { // Target has to be provided as ticks, and is transferred to a relativePos
         this.tickFixTarget = getRelativePos(target);
-        if (this.liftFixThread.isAlive())
+        if (this.liftFixThread == null || this.liftFixThread.isAlive())
             return; // Exits out of function
         this.liftFixThread = new Thread() {
             @Override
@@ -86,6 +86,8 @@ public class Lift {
 //        LL = hw.get(DcMotor.class, "LL");
         RE.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         RE.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
@@ -144,19 +146,22 @@ public class Lift {
         this.goTo(0.99, resetPos);
     }
 
-    public void setPower(double... power) {
-        if ((!(this.getPos() < this.LIFT_MIN && getAveragePower(power) < 0)) ||
-                (!(this.getPos() > this.LIFT_RANGE && getAveragePower(power) > 0))) {
-            RE.setPower(power[0]);
-            if (power.length == 2) {
-//            LL.setPower(power[1]);
-                return;
-            }
-//        LL.setPower(power[0]);
-            doNothing();
-        } else {
-            RE.setPower(0);
-        }
+//    public void setPower(double... power) {
+//        if ((!(this.getPos() < this.LIFT_MIN && getAveragePower(power) < 0)) ||
+//                (!(this.getPos() > this.LIFT_RANGE && getAveragePower(power) > 0))) {
+//            RE.setPower(power[0]);
+//            if (power.length == 2) {
+////            LL.setPower(power[1]);
+//                return;
+//            }
+////        LL.setPower(power[0]);
+//            doNothing();
+//        } else {
+//            RE.setPower(0);
+//        }
+//    }
+    public void setPower(double pow) {
+        RE.setPower(pow);
     }
 
     public double getAveragePower(double[] power) {
