@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,6 +14,9 @@ public class Lift {
     public double startGoToX = 0; // use the relative position
     private Thread liftFixThread;
     volatile double tickFixTarget = 0;
+
+    private CRServo grabber_right = null;
+    private CRServo grabber_left = null;
 
     public enum LiftDirection {
         TOP(1, 1),
@@ -74,6 +78,17 @@ public class Lift {
 //        LL = hw.get(DcMotor.class, "LL");
         RE.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         RE.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        grabber_right = hw.get(CRServo.class, "grabber_right");
+        grabber_left = hw.get(CRServo.class, "grabber_left");
+
+        grabber_left.setDirection(CRServo.Direction.FORWARD);
+        grabber_right.setDirection(CRServo.Direction.REVERSE);
+    }
+
+    public void setGrabbers(double pow) {
+        grabber_left.setPower(pow);
+        grabber_right.setPower(pow);
     }
 
 //    public void goToEdge(double maxPower, boolean resetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling

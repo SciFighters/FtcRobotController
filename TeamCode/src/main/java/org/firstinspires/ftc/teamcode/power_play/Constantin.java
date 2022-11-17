@@ -12,8 +12,6 @@ public class Constantin extends LinearOpMode {
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
     private Lift lift = new Lift();
 
-
-
     @Override
     public void runOpMode() {
         telemetry.addLine("Starting Initializing");
@@ -43,12 +41,19 @@ public class Constantin extends LinearOpMode {
                 this.lift.setPower(power);
                 this.lift.fixPos(lift.getPos());
             } else {
-                this.lift.setPower(0);
+                lift.fixPos(lift.getPos());
                 telemetry.addData("Lift Power", 0);
             }
             if (gamepad1.x && gamepad1.start) {
                 drive.resetOrientation(0);
             }
+
+
+            if (gamepad2.dpad_up) lift.setGrabbers(0.8);
+            else if (gamepad2.dpad_down) lift.setGrabbers(-0.8);
+            else lift.setGrabbers(0);
+
+
             telemetry.addData("lift pos : ", lift.getPos());
             telemetry.update();
         }
