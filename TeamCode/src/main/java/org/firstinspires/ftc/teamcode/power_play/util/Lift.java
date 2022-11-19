@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -33,13 +34,48 @@ public class Lift {
         }
     }
 
-    enum Levels {
-        lvl1(0),
-        lvl2(500);
-        int ticks;
+    public enum Levels {
+        lvl1(0, 'a'),
+        lvl2(666, 'b'),
+        lvl3(1333, 'x'),
+        lvl4(2000, 'y');
+        // Declaring attributes
+        public int ticks;
+        public Toggle toggle;
+        public char button;
 
-        Levels(int ticks) {
+        Levels(int ticks, char button) { // Constructor
             this.ticks = ticks;
+            this.button = button;
+            this.toggle = new Toggle();
+        }
+
+        public void update(OpMode opMode) {
+            switch(this.button) {
+                case 'a':
+                    this.toggle.update(opMode.gamepad1.a);
+                    break;
+                case 'b':
+                    this.toggle.update(opMode.gamepad1.b);
+                    break;
+                case 'x':
+                    this.toggle.update(opMode.gamepad1.x);
+                    break;
+                case 'y':
+                    this.toggle.update(opMode.gamepad1.y);
+                    break;
+                default:
+                    this.toggle.update(false);
+                    break;
+            }
+        }
+
+        public boolean isPressed() {
+            return this.toggle.isPressed();
+        }
+
+        public boolean isClicked() {
+            return this.toggle.isClicked();
         }
     }
 
@@ -59,27 +95,25 @@ public class Lift {
         return (-this.RE.getCurrentPosition());
     }
 
-    public void fixPos(int target) { // Target has to be provided as ticks, and is transferred to a relativePos
-        this.tickFixTarget = getRelativePos(target);
-        if (this.liftFixThread == null || this.liftFixThread.isAlive())
-            return; // Exits out of function
-        this.liftFixThread = new Thread() {
-            @Override
-            public void run() {
-                while (!MathUtil.inRange(getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
-                    setPower((tickFixTarget - getRelativePos()));
-                }
-                try {
-                    this.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        this.liftFixThread.run();
-
-
-    }
+//    public void fixPos(int target) { // Target has to be provided as ticks, and is transferred to a relativePos
+//        this.tickFixTarget = getRelativePos(target);
+//        if (this.liftFixThread == null || this.liftFixThread.isAlive())
+//            return; // Exits out of function
+//        this.liftFixThread = new Thread() {
+//            @Override
+//            public void run() {
+//                while (!MathUtil.inRange(getRelativePos(), tickFixTarget - 0.004, tickFixTarget + 0.004)) {
+//                    setPower((tickFixTarget - getRelativePos()));
+//                }
+//                try {
+//                    this.join();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        };
+//        this.liftFixThread.start();
+//    }
 
     public void init(HardwareMap hw) {
         RE = hw.get(DcMotorEx.class, "RE");
@@ -111,7 +145,7 @@ public class Lift {
 //    public void goToEdge(double maxPower, LiftDirection direction) { this.goToEdge(maxPower, false, direction); }
 
 //    public void goTo(double maxPower, boolean resetPos, double targetX) {
-//        if (inRange(targetX, this.getRelativePos() - 0.03, this.getRelativePos() + 0.03)) {
+//        if (MathUtil.inRange(targetX, this.getRelativePos() - 0.03, this.getRelativePos() + 0.03)) {
 //            startGoToX = resetPos ? getRelativePos() : startGoToX;
 //            this.setPower(0.1 + (maxPower * (0.9 - 0.001)) *
 //                    (((getRelativePos() - startGoToX) / (targetX - startGoToX)) >= (0.5 - 0.01) ?
@@ -121,29 +155,31 @@ public class Lift {
 //        } else this.setPower(0);
 //    }
 
-    public void goTo(double maxPower, boolean resetPos) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
-        if(!inRange(this.currentTarget, this.getRelativePos() - 0.004, this.getRelativePos() + 0.004)) {
+    public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
+        if(MathUtil.inRange(this.currentTarget, this.getRelativePos() - 0.003, this.getRelativePos() + 0.003)) {
 //            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
-            this.setPower(MathUtil.clamp(maxPower, -1, 1) * Math.signum(getRelativePos() - this.currentTarget));
-        }
+            this.setPower(0);
+            return;
+        } // if not... v
+        this.setPower(Math.min(Math.abs(maxPower), 1) * Math.signum(this.currentTarget - this.getRelativePos()));
     }
 
-    private boolean inRange(double value, double min, double max) {
-        if (min > max) {
-            double tempMin = min;
-            min = max;
-            max = tempMin;
-        }
-        return value > min && value < max;
-    }
+//    private boolean inRange(double value, double min, double max) {
+//        if (min > max) {
+//            double tempMin = min;
+//            min = max;
+//            max = tempMin;
+//        }
+//        return value > min && value < max;
+//    }
 
 
 //    private boolean approximately(double value, double valuedAt, double approximation) {
 //        return this.inRange(value, valuedAt - approximation, valuedAt + approximation);
 //    }
 
-    public void goTo(boolean resetPos) {
-        this.goTo(0.99, resetPos);
+    public void goTo() {
+        this.goTo(0.99);
     }
 
 //    public void setPower(double... power) {
@@ -166,8 +202,8 @@ public class Lift {
 
     public double getAveragePower(double[] power) {
         double avg = 0;
-        for (int i = 0; i < power.length; i++) {
-            avg += power[i];
+        for (double v : power) {
+            avg += v;
         }
         return avg / power.length;
     }

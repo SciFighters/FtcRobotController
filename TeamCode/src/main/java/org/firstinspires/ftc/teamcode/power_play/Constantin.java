@@ -4,9 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+import org.firstinspires.ftc.teamcode.power_play.util.Lift.Levels;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 
 @TeleOp
 public class Constantin extends LinearOpMode {
@@ -16,6 +19,8 @@ public class Constantin extends LinearOpMode {
 
     String state = "WITHOUT ENCODER";
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
+    // Levels 1, 2, 3, 4 of button: a, b, x, y.
+    Levels[] levels = {Levels.lvl1, Levels.lvl2, Levels.lvl3, Levels.lvl4};
 
     @Override
     public void runOpMode() {
@@ -40,19 +45,23 @@ public class Constantin extends LinearOpMode {
             double power = 0;
             drive.setPowerOriented(y, x, turn, true);
 
-            if (gamepad2.right_stick_y * 100 >= 10 || gamepad2.right_stick_y * 100 <= -10) { // Checks if the gamepad2 (right stick y axis)
+            for (Levels level : levels) {
+                level.update(this);
+                if(level.isPressed())
+                    this.lift.currentTarget = this.lift.getRelativePos(level.ticks);
+            }
+
+            if (MathUtil.outOfRange(gamepad2.right_stick_y * 100, -9.5, 9.5)) { // Checks if the gamepad2 (right stick y axis)
                 power = gamepad2.right_stick_y;
-                if (lift.getPos() < 3000) telemetry.addData("Lift Power", power);
-                else power = 0;
+                if (lift.getPos() < (this.lift.LIFT_RANGE - 120)) telemetry.addData("Lift Power", power);
+                else power = -0.1;
                 this.lift.setPower(power);
-//                this.lift.fixPos(lift.getPos());
-                this.lift.currentTarget = this.lift.getRelativePos();
+                this.lift.currentTarget = this.lift.getRelativePos(); // Setting target for goto...
             } else {
-//                lift.fixPos(lift.getPos());
-//                lift.goTo(false);
-                lift.setPower(0);
+                lift.goTo();
                 telemetry.addData("Lift Power", 0);
             }
+
             if (gamepad1.x && gamepad1.start) {
                 drive.resetOrientation(0);
             }

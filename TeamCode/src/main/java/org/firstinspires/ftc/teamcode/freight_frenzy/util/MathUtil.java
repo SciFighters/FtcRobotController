@@ -23,4 +23,13 @@ public class MathUtil {
         return value > min && value < max;
     }
 
+    public static boolean outOfRange(double value, double min, double max) {
+        if(min > max) {
+            double tempMin = min;
+            min = max;
+            max = tempMin;
+        }
+        return value <= min || value >= max;
+    }
+
 }

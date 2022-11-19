@@ -8,22 +8,18 @@ public class Toggle {
     public Toggle(boolean initialState ) { this.state = initialState; }
 
     public void update(boolean input) {
-        if (lastInput != input) {
-            changed = true;
+        if (lastInput != input) { // if the input has changed,
+            changed = true; // (it has changed)
             pressed = input;
-            if (pressed) state = !state;
+            if (pressed) state = !state; // The toggle changes only when it's pressed and not when it's released
             lastInput = input;
         } else {
-            changed = false;
+            changed = false; // otherwise it didn't
         }
     }
 
     public void set(boolean input) {
-        if (lastInput != input) {
-            changed = true;
-        } else {
-            changed = false;
-        }
+        changed = lastInput != input; // simplified
         state = input;
         lastInput = input;
     }
@@ -49,6 +45,5 @@ public class Toggle {
     }
 
     public boolean isReleased() { return changed && !pressed; }
-
     //THIS CODE IS NICE DON'T LAUGH :(
 }
