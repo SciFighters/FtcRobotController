@@ -190,6 +190,7 @@ public class Lift {
     }
 
     public void breakMotor() {
+
         RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     }
 
