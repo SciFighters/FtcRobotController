@@ -18,7 +18,7 @@ public class Lift {
     public double currentTarget = 0.001; // use to fix / goto position.
     final double defaultLiftPower = 0.7;
 
-//    private Thread liftFixThread;
+    //    private Thread liftFixThread;
     volatile double tickFixTarget = 0;
 
     private CRServo grabberRight = null, grabberLeft = null;
@@ -145,10 +145,13 @@ public class Lift {
 //    }
 
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DON'T CHANGE OR REMOVE)
-        if (MathUtil.inRange(this.getRelativePos(),     this.currentTarget - 0.01, this.currentTarget + 0.01)) {
-//            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
+        if (MathUtil.inRange(this.getRelativePos(),
+                this.currentTarget - 0.01,
+                this.currentTarget + 0.01)) {
             this.setPower(0);
-        } else if(MathUtil.outOfRange(this.getRelativePos(),  this.currentTarget - 0.018, this.currentTarget + 0.018)) {
+        } else if (MathUtil.outOfRange(this.getRelativePos(),
+                this.currentTarget - 10,
+                this.currentTarget + 10)) {
             this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
         } else {
             this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));
