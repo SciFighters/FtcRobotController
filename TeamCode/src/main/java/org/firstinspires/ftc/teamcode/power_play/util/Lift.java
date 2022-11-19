@@ -146,12 +146,12 @@ public class Lift {
 
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DON'T CHANGE OR REMOVE)
         if (MathUtil.inRange(this.getRelativePos(),
-                this.currentTarget - 0.01,
-                this.currentTarget + 0.01)) {
-            this.setPower(0);
-        } else if (MathUtil.outOfRange(this.getRelativePos(),
                 this.currentTarget - 10,
                 this.currentTarget + 10)) {
+            this.setPower(0);
+        } else if (MathUtil.outOfRange(this.getRelativePos(),
+                this.currentTarget - 7,
+                this.currentTarget + 7)) {
             this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
         } else {
             this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));

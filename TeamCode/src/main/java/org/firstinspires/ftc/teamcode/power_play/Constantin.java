@@ -46,6 +46,7 @@ public class Constantin extends LinearOpMode {
 
             for (Levels level : levels) {
                 level.update(this);
+
                 if (level.isPressed())
                     this.lift.setTargetPos(level.ticks);
             }
