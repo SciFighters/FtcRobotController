@@ -51,7 +51,7 @@ public class Lift {
         }
 
         public void update(OpMode opMode) {
-            switch(this.button) {
+            switch (this.button) {
                 case 'a':
                     this.toggle.update(opMode.gamepad1.a);
                     break;
@@ -156,7 +156,7 @@ public class Lift {
 //    }
 
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
-        if(MathUtil.inRange(this.currentTarget, this.getRelativePos() - 0.003, this.getRelativePos() + 0.003)) {
+        if (MathUtil.inRange(this.currentTarget, this.getRelativePos() - 0.003, this.getRelativePos() + 0.003)) {
 //            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
             this.setPower(0);
             return;
@@ -182,7 +182,7 @@ public class Lift {
         this.goTo(0.99);
     }
 
-//    public void setPower(double... power) {
+    //    public void setPower(double... power) {
 //        if ((!(this.getPos() < this.LIFT_MIN && getAveragePower(power) < 0)) ||
 //                (!(this.getPos() > this.LIFT_RANGE && getAveragePower(power) > 0))) {
 //            RE.setPower(power[0]);
