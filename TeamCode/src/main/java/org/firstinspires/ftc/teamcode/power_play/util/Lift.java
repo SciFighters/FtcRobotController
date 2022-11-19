@@ -145,10 +145,10 @@ public class Lift {
 //    }
 
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
-        if (MathUtil.inRange(this.getRelativePos(),     this.currentTarget - 0.003, this.currentTarget + 0.003)) {
+        if (MathUtil.inRange(this.getRelativePos(),     this.currentTarget - 0.01, this.currentTarget + 0.01)) {
 //            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
             this.setPower(0);
-        } else if(MathUtil.outOfRange(this.getRelativePos(),  this.currentTarget - 0.007, this.currentTarget + 0.007)) {
+        } else if(MathUtil.outOfRange(this.getRelativePos(),  this.currentTarget - 0.018, this.currentTarget + 0.018)) {
             this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
         } else {
             this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));
