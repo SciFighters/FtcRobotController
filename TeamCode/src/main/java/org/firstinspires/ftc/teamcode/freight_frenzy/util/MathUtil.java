@@ -8,10 +8,7 @@ public class MathUtil {
             min = max;
             max = tempMin;
         }
-        if (value < min) {
-            return min;
-        }
-        return Math.min(value, max);
+        return Math.max(Math.min(value, max), min);
     }
 
     public static boolean inRange(double value, double min, double max) {
@@ -32,4 +29,7 @@ public class MathUtil {
         return value <= min || value >= max;
     }
 
+    public boolean approximately(double value, double valuedAt, double approximation) {
+        return value > (valuedAt - approximation) && value < (valuedAt + approximation);
+    }
 }

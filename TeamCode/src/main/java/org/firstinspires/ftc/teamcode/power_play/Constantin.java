@@ -5,11 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
-import org.firstinspires.ftc.teamcode.power_play.util.Lift.Levels;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
+import org.firstinspires.ftc.teamcode.power_play.util.Lift.Levels;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
-import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 
 @TeleOp
 public class Constantin extends LinearOpMode {
@@ -47,29 +46,33 @@ public class Constantin extends LinearOpMode {
 
             for (Levels level : levels) {
                 level.update(this);
-                if(level.isPressed())
-                    this.lift.currentTarget = this.lift.getRelativePos(level.ticks);
+                if (level.isPressed())
+                    this.lift.setTargetPos(level.ticks);
             }
 
-            if (MathUtil.outOfRange(gamepad2.right_stick_y * 100, -9.5, 9.5)) { // Checks if the gamepad2 (right stick y axis)
+            if (MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10)) { // Checks if the gamepad2 (right stick y axis)
                 power = gamepad2.right_stick_y;
-                if (lift.getPos() < (this.lift.LIFT_RANGE - 120)) telemetry.addData("Lift Power", power);
-                else power = -0.1;
+//                if (lift.getPos() < (this.lift.LIFT_RANGE - 120) && gamepad2.left_stick_y != 0)
+//                    telemetry.addData("Lift Power", power);
+//                else power = -0.1;
                 this.lift.setPower(power);
-                this.lift.currentTarget = this.lift.getRelativePos(); // Setting target for goto...
+                this.lift.setTargetPos(lift.getPos());
             } else {
+                this.lift.setPower(0);
                 lift.goTo();
-                telemetry.addData("Lift Power", 0);
             }
-
+            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
+            telemetry.addData("Lift Power", 0);
+            telemetry.addData("current target", this.lift.currentTarget);
+            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
             if (gamepad1.x && gamepad1.start) {
                 drive.resetOrientation(0);
             }
 
 
-            if (gamepad2.dpad_up) lift.setGrabbers(0.8);
-            else if (gamepad2.dpad_down) lift.setGrabbers(-0.8);
-            else lift.setGrabbers(0);
+            if (gamepad2.dpad_up) lift.setGrabbersPower(0.8);
+            else if (gamepad2.dpad_down) lift.setGrabbersPower(-0.8);
+            else lift.setGrabbersPower(0);
 
 
             telemetry.addData("lift pos : ", lift.getPos());

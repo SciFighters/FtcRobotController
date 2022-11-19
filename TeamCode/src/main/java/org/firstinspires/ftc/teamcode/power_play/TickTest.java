@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.power_play;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
-
-public class Coni extends LinearOpMode {
+@TeleOp
+public class TickTest extends LinearOpMode {
 
     Lift lift = new Lift();
     ElapsedTime timer = new ElapsedTime();
@@ -17,16 +18,16 @@ public class Coni extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry.addData("Mode", "Initiating");
+        telemetry.addData("Initializing", "...");
         telemetry.update();
-
-        this.initiate();
-
-        telemetry.addData("Mode", "Ready for start!");
+        initiate();
 
         waitForStart();
+            while (opModeIsActive()) {
 
-        lift.setPower(gamepad1.left_stick_y * 0.4 + 0.4);
-
+                telemetry.addData("Ticks Position", lift.getPos());
+                telemetry.addData("Relative Position", lift.getRelativePos());
+                telemetry.update();
+        }
     }
 }

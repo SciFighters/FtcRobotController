@@ -11,34 +11,23 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 public class Lift {
     // Declaring variables
 //    private OpMode opMode;
-    public final int LIFT_RANGE = 3297, LIFT_MIN = 10; // max amount of ticks in the lift..
+    public final int LIFT_RANGE = 3227, LIFT_MIN = 10; // max amount of ticks in the lift..
     //  public DcMotor RE, LE;
     public DcMotorEx RE;
     public double startGoToX = 0; // use the relative position
-    public double currentTarget = 0; // use to fix / goto position.
+    public double currentTarget = 0.001; // use to fix / goto position.
+    final double defaultLiftPower = 0.7;
 
-    private Thread liftFixThread;
+//    private Thread liftFixThread;
     volatile double tickFixTarget = 0;
 
-    private CRServo grabber_right = null;
-    private CRServo grabber_left = null;
-
-    public enum LiftDirection {
-        TOP(1, 1),
-        BOTTOM(-1, 0);
-        double directionMul, targetValue;
-
-        LiftDirection(double directionMul, double targetValue) {
-            this.directionMul = directionMul;
-            this.targetValue = targetValue;
-        }
-    }
+    private CRServo grabberRight = null, grabberLeft = null;
 
     public enum Levels {
-        lvl1(0, 'a'),
-        lvl2(666, 'b'),
-        lvl3(1333, 'x'),
-        lvl4(2000, 'y');
+        lvl1(297, 'a'),
+        lvl2(1264, 'b'),
+        lvl3(2066, 'x'),
+        lvl4(2845, 'y');
         // Declaring attributes
         public int ticks;
         public Toggle toggle;
@@ -80,7 +69,7 @@ public class Lift {
     }
 
     public void setTargetPos(int target) {
-        this.currentTarget = getRelativePos(target);
+        this.currentTarget = MathUtil.clamp(getRelativePos(target), 0, 1);
     }
 
     public double getRelativePos(int ticks) {
@@ -123,19 +112,19 @@ public class Lift {
 
         RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        grabber_right = hw.get(CRServo.class, "grabber_right");
-        grabber_left = hw.get(CRServo.class, "grabber_left");
+        grabberRight = hw.get(CRServo.class, "grabber_right");
+        grabberLeft = hw.get(CRServo.class, "grabber_left");
 
-        grabber_left.setDirection(CRServo.Direction.FORWARD);
-        grabber_right.setDirection(CRServo.Direction.REVERSE);
+        grabberLeft.setDirection(CRServo.Direction.FORWARD);
+        grabberRight.setDirection(CRServo.Direction.REVERSE);
     }
 
-    public void setGrabbers(double pow) {
-        grabber_left.setPower(pow);
-        grabber_right.setPower(pow);
+    public void setGrabbersPower(double pow) {
+        grabberLeft.setPower(pow);
+        grabberRight.setPower(pow);
     }
 
-//    public void goToEdge(double maxPower, boolean resetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling
+//    public void goToEdge(double maxPower, boolean restartGoToXsetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling
 //        lastMovePos = resetLastPos ? getRelativePos() : lastMovePos;
 //        this.setPower(direction.directionMul * 0.05 +
 //                (direction.directionMul * 0.95 * maxPower) * ((Math.abs(this.getRelativePos() - this.lastMovePos) /
@@ -149,37 +138,25 @@ public class Lift {
 //            startGoToX = resetPos ? getRelativePos() : startGoToX;
 //            this.setPower(0.1 + (maxPower * (0.9 - 0.001)) *
 //                    (((getRelativePos() - startGoToX) / (targetX - startGoToX)) >= (0.5 - 0.01) ?
-//                            (((getRelativePos() - startGoToX) / (targetX - startGoToX)) * 2) :
+//                            (((getRelativePos() - ) / (targetX - startGoToX)) * 2) :
 //                            (1 + 1 - 2 * ((getRelativePos() - startGoToX) / (targetX - startGoToX))))
 //            );
 //        } else this.setPower(0);
 //    }
 
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DONT CHANGE OR REMOVE)
-        if (MathUtil.inRange(this.currentTarget, this.getRelativePos() - 0.003, this.getRelativePos() + 0.003)) {
+        if (MathUtil.inRange(this.getRelativePos(),     this.currentTarget - 0.003, this.currentTarget + 0.003)) {
 //            this.startGoToX = resetPos ? getRelativePos() : startGoToX;
             this.setPower(0);
-            return;
-        } // if not... v
-        this.setPower(Math.min(Math.abs(maxPower), 1) * Math.signum(this.currentTarget - this.getRelativePos()));
+        } else if(MathUtil.outOfRange(this.getRelativePos(),  this.currentTarget - 0.007, this.currentTarget + 0.007)) {
+            this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
+        } else {
+            this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));
+        }
     }
 
-//    private boolean inRange(double value, double min, double max) {
-//        if (min > max) {
-//            double tempMin = min;
-//            min = max;
-//            max = tempMin;
-//        }
-//        return value > min && value < max;
-//    }
-
-
-//    private boolean approximately(double value, double valuedAt, double approximation) {
-//        return this.inRange(value, valuedAt - approximation, valuedAt + approximation);
-//    }
-
     public void goTo() {
-        this.goTo(0.99);
+        this.goTo(this.defaultLiftPower);
     }
 
     //    public void setPower(double... power) {
@@ -197,7 +174,7 @@ public class Lift {
 //        }
 //    }
     public void setPower(double pow) {
-        RE.setPower(pow);
+        RE.setPower(this.getPos() >= this.LIFT_RANGE - 90 ? -0.1 : pow);
     }
 
     public double getAveragePower(double[] power) {
