@@ -1,75 +1,39 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Lift {
-    // Declaring variables
-//    private OpMode opMode;
     public final int LIFT_RANGE = 3227, LIFT_MIN = 10; // max amount of ticks in the lift..
-    //  public DcMotor RE, LE;
-    public DcMotorEx RE;
+    public DcMotorEx right_elevator = null;
+    public DigitalChannel touchDown = null;
     public double startGoToX = 0; // use the relative position
     public double currentTarget = 0.001; // use to fix / goto position.
     final double defaultLiftPower = 0.7;
 
-    //    private Thread liftFixThread;
-    volatile double tickFixTarget = 0;
-
     private CRServo grabberRight = null, grabberLeft = null;
 
-    public enum Levels {
-        lvl1(297, 'a'),
-        lvl2(1264, 'b'),
-        lvl3(2066, 'x'),
-        lvl4(2845, 'y');
-        // Declaring attributes
-        public int ticks;
-        public Toggle toggle;
-        public char button;
+    boolean elevatorTouchSwitch() { return !this.touchDown.getState(); }
 
-        Levels(int ticks, char button) { // Constructor
-            this.ticks = ticks;
-            this.button = button;
-            this.toggle = new Toggle();
-        }
+    private void resetLift() {
+        if (this.elevatorTouchSwitch()) return;
 
-        public void update(OpMode opMode) {
-            switch (this.button) {
-                case 'a':
-                    this.toggle.update(opMode.gamepad1.a);
-                    break;
-                case 'b':
-                    this.toggle.update(opMode.gamepad1.b);
-                    break;
-                case 'x':
-                    this.toggle.update(opMode.gamepad1.x);
-                    break;
-                case 'y':
-                    this.toggle.update(opMode.gamepad1.y);
-                    break;
-                default:
-                    this.toggle.update(false);
-                    break;
-            }
-        }
+        ElapsedTime timer = new ElapsedTime();
 
-        public boolean isPressed() {
-            return this.toggle.isPressed();
-        }
+        right_elevator.setPower(-0.2);
+        while (!this.elevatorTouchSwitch() && timer.seconds() < 4);
+        right_elevator.setPower(0);
 
-        public boolean isClicked() {
-            return this.toggle.isClicked();
-        }
+        right_elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public void setTargetPos(int target) {
-        this.currentTarget = MathUtil.clamp(getRelativePos(target), 0, 1);
+    public int getPos() {
+        return (-this.right_elevator.getCurrentPosition());
     }
 
     public double getRelativePos(int ticks) {
@@ -80,10 +44,11 @@ public class Lift {
         return getRelativePos(this.getPos());
     }
 
-    public int getPos() {
-        return (-this.RE.getCurrentPosition());
-    }
-
+//    public void setTargetPos(int target) {
+//        this.currentTarget = MathUtil.clamp(getRelativePos(target), 0, 1);
+//    }
+//
+//
 //    public void fixPos(int target) { // Target has to be provided as ticks, and is transferred to a relativePos
 //        this.tickFixTarget = getRelativePos(target);
 //        if (this.liftFixThread == null || this.liftFixThread.isAlive())
@@ -105,18 +70,20 @@ public class Lift {
 //    }
 
     public void init(HardwareMap hw) {
-        RE = hw.get(DcMotorEx.class, "RE");
-//        LL = hw.get(DcMotor.class, "LL");
-        RE.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        RE.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
 
-        RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        right_elevator = hw.get(DcMotorEx.class, "RE");
+        right_elevator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        right_elevator.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        right_elevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         grabberRight = hw.get(CRServo.class, "grabber_right");
         grabberLeft = hw.get(CRServo.class, "grabber_left");
 
         grabberLeft.setDirection(CRServo.Direction.FORWARD);
         grabberRight.setDirection(CRServo.Direction.REVERSE);
+
+//        resetLift();
     }
 
     public void setGrabbersPower(double pow) {
@@ -132,7 +99,7 @@ public class Lift {
 //    }
 //
 //    public void goToEdge(double maxPower, LiftDirection direction) { this.goToEdge(maxPower, false, direction); }
-
+//
 //    public void goTo(double maxPower, boolean resetPos, double targetX) {
 //        if (MathUtil.inRange(targetX, this.getRelativePos() - 0.03, this.getRelativePos() + 0.03)) {
 //            startGoToX = resetPos ? getRelativePos() : startGoToX;
@@ -141,31 +108,24 @@ public class Lift {
 //                            (((getRelativePos() - ) / (targetX - startGoToX)) * 2) :
 //                            (1 + 1 - 2 * ((getRelativePos() - startGoToX) / (targetX - startGoToX))))
 //            );
-
-
 //        } else this.setPower(0);
 //    }
-
-
-    public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DON'T CHANGE OR REMOVE)
-        if (MathUtil.inRange(this.getRelativePos(),
-                this.currentTarget - 10,
-                this.currentTarget + 10)) {
-            this.setPower(0);
-        } else if (MathUtil.outOfRange(this.getRelativePos(),
-                this.currentTarget - 7,
-                this.currentTarget + 7)) {
-            this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
-        } else {
-            this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));
-        }
-    }
-
-    public void goTo() {
-        this.goTo(this.defaultLiftPower);
-    }
-
-    //    public void setPower(double... power) {
+//
+//    public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DON'T CHANGE OR REMOVE)
+//        if (MathUtil.inRange(this.getRelativePos(), this.currentTarget - 10, this.currentTarget + 10)) {
+//            this.setPower(0);
+//        } else if (MathUtil.outOfRange(this.getRelativePos(), this.currentTarget - 7, this.currentTarget + 7)) {
+//            this.setPower(maxPower * Math.signum(this.currentTarget - this.getRelativePos()));
+//        } else {
+//            this.setPower(0.2 * Math.signum(this.currentTarget - this.getRelativePos()));
+//        }
+//    }
+//
+//    public void goTo() {
+//        this.goTo(this.defaultLiftPower);
+//    }
+//
+//    public void setPower(double... power) {
 //        if ((!(this.getPos() < this.LIFT_MIN && getAveragePower(power) < 0)) ||
 //                (!(this.getPos() > this.LIFT_RANGE && getAveragePower(power) > 0))) {
 //            RE.setPower(power[0]);
@@ -180,7 +140,7 @@ public class Lift {
 //        }
 //    }
     public void setPower(double pow) {
-        RE.setPower(this.getPos() >= this.LIFT_RANGE - 90 ? -0.1 : pow);
+        right_elevator.setPower(this.getPos() >= this.LIFT_RANGE - 90 ? -0.1 : pow);
     }
 
     public double getAveragePower(double[] power) {
@@ -197,18 +157,70 @@ public class Lift {
 
     public void breakMotor() {
 
-        RE.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        right_elevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     }
 
     public void reset() {
-        RE.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RE.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        right_elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public double[] getPower() {
-        return new double[]{this.RE.getPower()};
+        return new double[]{this.right_elevator.getPower()};
     }
 
     public static void doNothing() {
+    }
+
+    enum State {
+        Maintain, // (pos: int)
+        Manual,
+        Goto,
+    }
+    State state;
+
+    public enum LiftLevel {
+        Floor(0),
+        First(1264),
+        Second(2066),
+        Third(2845);
+
+        final int position;
+        LiftLevel(int p) { this.position = p; }
+    }
+
+    public void setLiftPower(double pow) {
+        if (Math.abs(pow) > 0.25) {
+            this.setState(State.Manual);
+            right_elevator.setPower(pow);
+        } else {
+            if (!right_elevator.isBusy()) {
+                this.setState(State.Maintain);
+                right_elevator.setPower(0.8);
+            }
+        }
+    }
+
+    public void gotoLevel(LiftLevel level) {
+        right_elevator.setTargetPosition(level.position);
+        this.setState(State.Goto);
+    }
+
+    private void setState(State newState) {
+        if (newState == this.state) return;
+
+        if (newState == State.Manual) {
+            right_elevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            this.state = State.Manual;
+        } else if (newState == State.Maintain) {
+            right_elevator.setTargetPosition(right_elevator.getCurrentPosition());
+            right_elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            right_elevator.setPower(0.8);
+            this.state = State.Maintain;
+        } else if (newState == State.Goto) {
+            right_elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            right_elevator.setPower(0.8);
+            this.state = State.Goto;
+        }
     }
 }
