@@ -145,6 +145,7 @@ public class Lift {
 //        } else this.setPower(0);
 //    }
 
+
     public void goTo(double maxPower) { // CAN BE USED AS FIX POSITION AS WELL (DON'T CHANGE OR REMOVE)
         if (MathUtil.inRange(this.getRelativePos(),
                 this.currentTarget - 10,
