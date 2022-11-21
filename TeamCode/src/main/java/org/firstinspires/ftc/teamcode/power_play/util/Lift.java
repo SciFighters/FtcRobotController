@@ -142,6 +142,7 @@ public class Lift {
 //                            (1 + 1 - 2 * ((getRelativePos() - startGoToX) / (targetX - startGoToX))))
 //            );
 
+
 //        } else this.setPower(0);
 //    }
 
