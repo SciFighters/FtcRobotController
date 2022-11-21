@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.power_play.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
@@ -56,11 +57,15 @@ public class AutoFlow {
         }
     }
 
-    final double robotLength = 0.4572;
+    final double robotLength = 0.4064;
     final int screenWidth = 640;
     final int screenHeight = 360;
 
-    Location startLocation = new Location(0.6, robotLength / 2);
+    Location startLocation = new Location(0.9, robotLength / 2);
+    Location coneLocation = new Location(1.5, 1.5,90);
+
+
+
     Auto auto;
     ALLIANCE alliance;
     StartPos startPos;
@@ -84,4 +89,12 @@ public class AutoFlow {
 
     }
 
+    public void run() {
+
+        drive.goToLocation(coneLocation,1,0.3,coneLocation.angle);
+
+        //Autonomous starts
+
+    }
 }
+
