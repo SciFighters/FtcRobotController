@@ -1,28 +1,29 @@
 package org.firstinspires.ftc.teamcode.power_play;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
-import org.firstinspires.ftc.teamcode.power_play.util.Lift.Levels;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 
 @TeleOp
 public class Constantin extends LinearOpMode {
-    private DcMotorEx fl = null, fr = null, bl = null, br = null;
-
-    private Lift lift = new Lift();
-
-    String state = "WITHOUT ENCODER";
+    Lift lift = new Lift();
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
-    // Levels 1, 2, 3, 4 of button: a, b, x, y.
-    Levels[] levels = {Levels.lvl1, Levels.lvl2, Levels.lvl3, Levels.lvl4};
+
+    Toggle A = new Toggle();
+    Toggle B = new Toggle();
+    Toggle X = new Toggle();
+    Toggle Y = new Toggle();
 
     @Override
     public void runOpMode() {
+        this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addLine("Starting Initializing");
         telemetry.update();
 
@@ -35,45 +36,57 @@ public class Constantin extends LinearOpMode {
 
         drive.resetOrientation(0);
         while (opModeIsActive()) {
+            if (gamepad1.start && gamepad1.x) {
+                drive.resetOrientation(0);
+            }
+
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
 
             double y = pow(-gamepad1.left_stick_y) * boost;
             double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
-            double power = 0;
             drive.setPowerOriented(y, x, turn, true);
-
-            for (Levels level : levels) {
-                level.update(this);
-
-                if (level.isPressed())
-                    this.lift.setTargetPos(level.ticks);
-            }
-
-            if (MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10)) { // Checks if the gamepad2 (right stick y axis)
-                power = gamepad2.right_stick_y;
-//                if (lift.getPos() < (this.lift.LIFT_RANGE - 120) && gamepad2.left_stick_y != 0)
-//                    telemetry.addData("Lift Power", power);
-//                else power = -0.1;
-                this.lift.setPower(power);
-                this.lift.setTargetPos(lift.getPos());
-            } else {
-                this.lift.setPower(0);
-                lift.goTo();
-            }
-            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
-            telemetry.addData("Lift Power", 0);
-            telemetry.addData("current target", this.lift.currentTarget);
-            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
-            if (gamepad1.x && gamepad1.start) {
-                drive.resetOrientation(0);
-            }
-
 
             if (gamepad2.dpad_up) lift.setGrabbersPower(0.8);
             else if (gamepad2.dpad_down) lift.setGrabbersPower(-0.8);
             else lift.setGrabbersPower(0);
+
+            lift.setLiftPower(gamepad2.right_stick_y);
+
+            A.update(gamepad2.a);
+            B.update(gamepad2.b);
+            X.update(gamepad2.x);
+            Y.update(gamepad2.y);
+
+            if (A.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
+            if (B.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
+            if (X.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
+            if (Y.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
+
+//            for (Levels level : levels) {
+//                level.update(this);
+//
+//                if (level.isPressed())
+//                    this.lift.setTargetPos(level.ticks);
+//            }
+
+//            if (MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10)) { // Checks if the gamepad2 (right stick y axis)
+//                power = gamepad2.right_stick_y;
+////                if (lift.getPos() < (this.lift.LIFT_RANGE - 120) && gamepad2.left_stick_y != 0)
+////                    telemetry.addData("Lift Power", power);
+////                else power = -0.1;
+//                this.lift.setPower(power);
+//                this.lift.setTargetPos(lift.getPos());
+//            } else {
+//                this.lift.setPower(0);
+//                lift.goTo();
+//            }
+
+            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
+            telemetry.addData("Lift Power", 0);
+            telemetry.addData("current target", this.lift.currentTarget);
+            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
 
             telemetry.addData("lift pos : ", lift.getPos());
