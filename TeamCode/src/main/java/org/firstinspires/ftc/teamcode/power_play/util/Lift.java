@@ -17,7 +17,9 @@ public class Lift {
 
     private CRServo grabberRight = null, grabberLeft = null;
 
-    boolean elevatorTouchSwitch() { return !this.touchDown.getState(); }
+    boolean elevatorTouchSwitch() {
+        return !this.touchDown.getState();
+    }
 
     private void resetLift() {
         if (this.elevatorTouchSwitch()) return;
@@ -25,7 +27,7 @@ public class Lift {
         ElapsedTime timer = new ElapsedTime();
 
         right_elevator.setPower(-0.2);
-        while (!this.elevatorTouchSwitch() && timer.seconds() < 4);
+        while (!this.elevatorTouchSwitch() && timer.seconds() < 4) ;
         right_elevator.setPower(0);
 
         right_elevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -91,7 +93,7 @@ public class Lift {
         grabberRight.setPower(pow);
     }
 
-//    public void goToEdge(double maxPower, boolean restartGoToXsetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling
+    //    public void goToEdge(double maxPower, boolean restartGoToXsetLastPos, LiftDirection direction) { // maxPower is the target-maximum power of the lift. ResetLastPos - to reset or not the lastPosition (if the movement starts anew, it should be reset). Direction - the direction in which the lift is traveling
 //        lastMovePos = resetLastPos ? getRelativePos() : lastMovePos;
 //        this.setPower(direction.directionMul * 0.05 +
 //                (direction.directionMul * 0.95 * maxPower) * ((Math.abs(this.getRelativePos() - this.lastMovePos) /
@@ -177,6 +179,7 @@ public class Lift {
         Manual,
         Goto,
     }
+
     State state;
 
     public enum LiftLevel {
@@ -186,7 +189,10 @@ public class Lift {
         Third(2845);
 
         final int position;
-        LiftLevel(int p) { this.position = p; }
+
+        LiftLevel(int p) {
+            this.position = p;
+        }
     }
 
     public void setLiftPower(double pow) {
@@ -196,17 +202,19 @@ public class Lift {
         } else {
             if (!right_elevator.isBusy()) {
                 this.setState(State.Maintain);
-                right_elevator.setPower(0.8);
             }
         }
     }
 
-    public void gotoLevel(LiftLevel level) {
-        right_elevator.setTargetPosition(level.position);
-        this.setState(State.Goto);
+    public void gotoLevel(LiftLevel level) { // level = LiftLevel.Floor / First / Second / Third
+        this.setState(State.Goto, level.position);
     }
 
     private void setState(State newState) {
+        setState(newState, 0);
+    }
+
+    private void setState(State newState, int position) {
         if (newState == this.state) return;
 
         if (newState == State.Manual) {
@@ -218,6 +226,7 @@ public class Lift {
             right_elevator.setPower(0.8);
             this.state = State.Maintain;
         } else if (newState == State.Goto) {
+            right_elevator.setTargetPosition(position);
             right_elevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             right_elevator.setPower(0.8);
             this.state = State.Goto;
