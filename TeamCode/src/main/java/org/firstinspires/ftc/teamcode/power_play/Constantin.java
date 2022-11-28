@@ -48,10 +48,11 @@ public class Constantin extends LinearOpMode {
             double turn = pow(gamepad1.right_stick_x * boost);
             drive.setPowerOriented(y, x, turn, true);
 
-            if (gamepad2.dpad_up) lift.setGrabbersPower(0.8);
-            else if (gamepad2.dpad_down) lift.setGrabbersPower(-0.8);
-            else lift.setGrabbersPower(0);
-
+            if (gamepad2.dpad_up) {
+                lift.grabber(true);
+            } else if (gamepad2.dpad_down) {
+                lift.grabber(false);
+            }
             lift.setLiftPower(-gamepad2.right_stick_y);
 
             A.update(gamepad2.a);
@@ -87,8 +88,10 @@ public class Constantin extends LinearOpMode {
             telemetry.addData("Lift Power", 0);
             telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            telemetry.addData("lift pos : ", lift.right_elevator.getCurrentPosition());
-            telemetry.addData("elevator busy", lift.right_elevator.isBusy());
+            telemetry.addData("Left lift pos : ", lift.leftElevator.getCurrentPosition());
+            telemetry.addData("Right lift pos : ", lift.rightElevator.getCurrentPosition());
+            telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
+            telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
             telemetry.update();
         }
     }
