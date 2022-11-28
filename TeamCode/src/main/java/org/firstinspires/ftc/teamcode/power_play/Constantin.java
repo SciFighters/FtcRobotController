@@ -52,7 +52,7 @@ public class Constantin extends LinearOpMode {
             else if (gamepad2.dpad_down) lift.setGrabbersPower(-0.8);
             else lift.setGrabbersPower(0);
 
-            lift.setLiftPower(-gamepad2.right_stick_y);
+            lift.setLiftPower(gamepad2.right_stick_y);
 
             A.update(gamepad2.a);
             B.update(gamepad2.b);
@@ -85,10 +85,11 @@ public class Constantin extends LinearOpMode {
 
             telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
             telemetry.addData("Lift Power", 0);
+            telemetry.addData("current target", this.lift.currentTarget);
             telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            telemetry.addData("lift pos : ", lift.right_elevator.getCurrentPosition());
-            telemetry.addData("elevator busy", lift.right_elevator.isBusy());
+
+            telemetry.addData("lift pos : ", lift.getPos());
             telemetry.update();
         }
     }
