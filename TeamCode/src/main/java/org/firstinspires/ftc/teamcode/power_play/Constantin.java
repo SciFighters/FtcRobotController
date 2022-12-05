@@ -20,6 +20,7 @@ public class Constantin extends LinearOpMode {
     Toggle B = new Toggle();
     Toggle X = new Toggle();
     Toggle Y = new Toggle();
+    Toggle RB = new Toggle();
 
     @Override
     public void runOpMode() {
@@ -42,7 +43,6 @@ public class Constantin extends LinearOpMode {
 
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
-
             double y = pow(-gamepad1.left_stick_y) * boost;
             double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
@@ -59,6 +59,7 @@ public class Constantin extends LinearOpMode {
             B.update(gamepad2.b);
             X.update(gamepad2.x);
             Y.update(gamepad2.y);
+            RB.update(gamepad2.right_bumper);
 
             if (A.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
             if (B.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
