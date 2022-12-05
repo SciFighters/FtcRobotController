@@ -12,9 +12,10 @@ public class Lift {
     public final int LIFT_RANGE = 3227, LIFT_MIN = 10; // max amount of ticks in the lift..
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
-
-    private Servo grabberRight = null, grabberLeft = null;
-
+    public DigitalChannel jointSwitch = null;
+    private DcMotor jointMotor = null;
+    private Servo grabberRight = null, grabberLeft = null, jointServo = null;
+    ;
 
     public void init(HardwareMap hw) {
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
@@ -30,13 +31,17 @@ public class Lift {
         rightElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         //endregion
-        //region Grabbers
+        //region Gathering System
         grabberRight = hw.get(Servo.class, "grabber_right");
         grabberLeft = hw.get(Servo.class, "grabber_left");
         grabberLeft.setDirection(Servo.Direction.FORWARD);
         grabberRight.setDirection(Servo.Direction.REVERSE);
+        jointMotor = hw.get(DcMotor.class, "JM");
+        jointSwitch = hw.get(DigitalChannel.class, "JT");
+        jointServo = hw.get(Servo.class, "JS");
         //endregion
         // resetLift();
+        //resetJoint();
     }
 
     private void resetLift() {
@@ -55,10 +60,25 @@ public class Lift {
         leftElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    void resetJoint() {
+        if (this.jointTouchSwitch()) return;
+
+        ElapsedTime timer = new ElapsedTime();
+
+        jointMotor.setPower(-0.2);
+        while (!this.jointTouchSwitch() && timer.seconds() < 4) ;
+        jointMotor.setPower(0);
+        jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     boolean elevatorTouchSwitch() {
         return !this.touchDown.getState();
     }
 
+    boolean jointTouchSwitch() {
+        return !this.jointSwitch.getState();
+    }
 
     public void grabber(boolean grab) {
         grabberLeft.setPosition(grab ? 1 : 0);
@@ -67,17 +87,13 @@ public class Lift {
 
     enum State {
         Maintain, // (pos: int)
-        Manual,
-        Goto,
+        Manual, Goto,
     }
 
     State state;
 
     public enum LiftLevel {
-        Floor(0),
-        First(1264),
-        Second(2066),
-        Third(2845);
+        Floor(0), First(1264), Second(2066), Third(2845);
 
         final int position;
 
