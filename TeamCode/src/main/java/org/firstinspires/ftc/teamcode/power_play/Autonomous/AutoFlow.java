@@ -1,19 +1,12 @@
 package org.firstinspires.ftc.teamcode.power_play.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
-public class AutoPower {
+public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
     private Lift lift = null;
@@ -77,7 +70,7 @@ public class AutoPower {
     StartPos startPos;
 
 
-    public AutoPower(LinearOpMode opMode, ALLIANCE alliance, StartPos startPos, Auto auto) {
+    public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPos startPos, Auto auto) {
         this.opMode = opMode;
         this.alliance = alliance;
         this.startPos = startPos;
