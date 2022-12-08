@@ -12,9 +12,9 @@ public class Lift {
     public final int LIFT_RANGE = 3227, LIFT_MIN = 10; // max amount of ticks in the lift..
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
-    public DigitalChannel jointSwitch = null;
-    private DcMotor jointMotor = null;
-    private Servo grabberRight = null, grabberLeft = null, jointServo = null;
+    public DigitalChannel flipTouchSwitch = null;
+    private DcMotor flipMotor = null;
+    private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
     ;
 
     public void init(HardwareMap hw) {
@@ -36,9 +36,9 @@ public class Lift {
         grabberLeft = hw.get(Servo.class, "grabber_left");
         grabberLeft.setDirection(Servo.Direction.FORWARD);
         grabberRight.setDirection(Servo.Direction.REVERSE);
-        jointMotor = hw.get(DcMotor.class, "JM");
-        jointSwitch = hw.get(DigitalChannel.class, "JT");
-        jointServo = hw.get(Servo.class, "JS");
+        flipMotor = hw.get(DcMotor.class, "JM");
+        flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
+        rotateServo = hw.get(Servo.class, "JS");
         //endregion
         // resetLift();
         //resetJoint();
@@ -65,11 +65,11 @@ public class Lift {
 
         ElapsedTime timer = new ElapsedTime();
 
-        jointMotor.setPower(-0.2);
+        flipMotor.setPower(-0.2);
         while (!this.jointTouchSwitch() && timer.seconds() < 4) ;
-        jointMotor.setPower(0);
-        jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flipMotor.setPower(0);
+        flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     boolean elevatorTouchSwitch() {
@@ -77,7 +77,7 @@ public class Lift {
     }
 
     boolean jointTouchSwitch() {
-        return !this.jointSwitch.getState();
+        return !this.flipTouchSwitch.getState();
     }
 
     public void grabber(boolean grab) {
@@ -85,12 +85,20 @@ public class Lift {
         grabberRight.setPosition(grab ? 1 : 0);
     }
 
-    enum State {
+    enum LiftState {
         Maintain, // (pos: int)
         Manual, Goto,
     }
-
-    State state;
+    LiftState liftState;
+    enum ArmState {
+        Home,
+        Begin,
+        Rotate1,
+        Flip,
+        Rotate2,
+        End
+    }
+    ArmState armState;
 
     public enum LiftLevel {
         Floor(0), First(1264), Second(2066), Third(2845);
@@ -104,24 +112,46 @@ public class Lift {
 
     public void setLiftPower(double pow) {
         if (Math.abs(pow) > 0.25) {
-            this.setState(State.Manual);
+            this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
             leftElevator.setPower(pow);
-        } else if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
-            this.setState(State.Maintain); // Keep current position
+        } else update();
+    }
+
+    public void update(){
+        if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
+            this.setLiftState(LiftState.Maintain); // Keep current position
+        }
+        switch(this.armState){
+            case Begin:
+                if(!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate1);
+                break;
+            case Rotate1:
+
+                break;
+            case Flip:
+                if(!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate2);
+                break;
+            case Rotate2:
+
+                break;
+            default:
+                break;
         }
     }
 
     public void gotoLevel(LiftLevel level) {
+        if (level == LiftLevel.Floor) setArmState(ArmState.Home);
+        else setArmState(ArmState.Begin);
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
-        this.setState(State.Goto);
+        this.setLiftState(LiftState.Goto);
     }
 
-    private void setState(State newState) {
-        if (newState == this.state) return; // State unchanged => do nothing
+    private void setLiftState(LiftState newLiftState) {
+        if (newLiftState == this.liftState) return; // State unchanged => do nothing
 
-        switch (newState) {
+        switch (newLiftState) {
             case Manual:
                 rightElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // Run with power getting setPower from outside
                 leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -143,6 +173,39 @@ public class Lift {
             default:
                 break;
         }
-        this.state = newState;
+        this.liftState = newLiftState;
+    }
+    private void setArmState(ArmState newState){
+        if (newState == this.armState) return;
+        switch(newState){
+            case Home:
+                flipMotor.setTargetPosition(0);
+                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                flipMotor.setPower(0.8);
+                rotateServo.setPosition(0);
+                grabber(true);
+                break;
+            case Begin:
+                flipMotor.setTargetPosition(30);
+                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                flipMotor.setPower(0.8);
+                break;
+            case Rotate1:
+                rotateServo.setPosition(0.5);
+                break;
+            case Flip:
+                flipMotor.setTargetPosition(180);
+                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                flipMotor.setPower(0.8);
+                break;
+            case Rotate2:
+                rotateServo.setPosition(1);
+                break;
+            case End:
+                break;
+            default:
+                break;
+        }
+        this.armState = newState;
     }
 }
