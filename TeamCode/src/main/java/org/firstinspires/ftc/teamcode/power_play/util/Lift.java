@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
-import android.util.Log;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Lift {
@@ -14,7 +13,7 @@ public class Lift {
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
     private DcMotor flipMotor = null;
-    //private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
+    private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
 
 
     public void init(HardwareMap hw) {
@@ -36,18 +35,19 @@ public class Lift {
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 //        Log.w("Goren", "" + rightElevator.getTargetPositionTolerance());
-        rightElevator.setTargetPositionTolerance(15);
-        leftElevator.setTargetPositionTolerance(15);
+        final int gotoTolerance = 32;
+        rightElevator.setTargetPositionTolerance(gotoTolerance);
+        leftElevator.setTargetPositionTolerance(gotoTolerance);
 
         //endregion
         //region Gathering System
-        //grabberRight = hw.get(Servo.class, "grabber_right");
-        //grabberLeft = hw.get(Servo.class, "grabber_left");
-        //grabberLeft.setDirection(Servo.Direction.FORWARD);
-        //grabberRight.setDirection(Servo.Direction.REVERSE);
+        grabberRight = hw.get(Servo.class, "grabber_right");
+        grabberLeft = hw.get(Servo.class, "grabber_left");
+        grabberLeft.setDirection(Servo.Direction.FORWARD);
+        grabberRight.setDirection(Servo.Direction.REVERSE);
         flipMotor = hw.get(DcMotor.class, "JM");
-        //flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
-        //rotateServo = hw.get(Servo.class, "JS");
+        flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
+        rotateServo = hw.get(Servo.class, "rotateServo");
         //endregion
         // resetLift();
         //resetJoint();
@@ -90,19 +90,24 @@ public class Lift {
     }
 
     public void grabber(boolean grab) {
-        //grabberLeft.setPosition(grab ? 1 : 0);
-        //grabberRight.setPosition(grab ? 1 : 0);
+        grabberLeft.setPosition(grab ? 1 : 0);
+        grabberRight.setPosition(grab ? 1 : 0);
     }
 
-    enum LiftState {
+
+    public enum LiftState {
         Maintain, // (pos: int)
-        Manual, Goto,
+        Manual,
+        Goto,
+        Idle;
     }
 
     private LiftState liftState;
-    public LiftState $getState() { return liftState; }
+    public LiftState getState() { return liftState; }
+    public void setState(LiftState state) { this.liftState = state; }
 
-    enum ArmState {
+
+    public enum ArmState {
         Home,
         Begin,
         Rotate1,
@@ -124,18 +129,24 @@ public class Lift {
     }
 
     public void setLiftPower(double pow) {
+
         if (Math.abs(pow) > 0.25) {
+            if(pow < 0) { // If negative
+                pow *= 0.06;
+            }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
             leftElevator.setPower(pow);
-        } else {
-            if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
-                this.setLiftState(LiftState.Maintain); // Keep current position
-            }
+        } else if (!leftElevator.isBusy() && !(liftState == LiftState.Idle)) { // Stick is 0 and right_elevator isn't busy.
+            this.setLiftState(LiftState.Maintain); // Keep current position
         }
     }
 
+
     public void update() {
+//        if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
+//            this.setLiftState(LiftState.Maintain); // Keep current position
+//        }
         switch (this.armState) {
             case Begin:
                 if (!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate1);
@@ -191,7 +202,7 @@ public class Lift {
         this.liftState = newLiftState;
     }
 
-    private void setArmState(ArmState newState) {
+    public void setArmState(ArmState newState) {
         if (newState == this.armState) return;
         switch (newState) {
             case Home:

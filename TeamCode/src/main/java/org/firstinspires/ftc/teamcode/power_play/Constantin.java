@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
@@ -16,11 +15,13 @@ public class Constantin extends LinearOpMode {
     Lift lift = new Lift();
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
 
-    Toggle A = new Toggle();
-    Toggle B = new Toggle();
-    Toggle X = new Toggle();
-    Toggle Y = new Toggle();
-    Toggle RB = new Toggle();
+    Toggle Level0 = new Toggle();
+    Toggle Level1 = new Toggle();
+    Toggle Level2 = new Toggle();
+    Toggle Level3 = new Toggle();
+    Toggle grabber = new Toggle();
+    Toggle flipGrabber = new Toggle();
+
 
     @Override
     public void runOpMode() {
@@ -40,6 +41,9 @@ public class Constantin extends LinearOpMode {
             if (gamepad1.start && gamepad1.x) {
                 drive.resetOrientation(0);
             }
+            if(gamepad2.start && gamepad2.x) {
+                this.lift.setState(Lift.LiftState.Idle);
+            }
 
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
@@ -48,24 +52,26 @@ public class Constantin extends LinearOpMode {
             double turn = pow(gamepad1.right_stick_x * boost);
             drive.setPowerOriented(y, x, turn, true);
 
-            if (gamepad2.dpad_up) {
-                lift.grabber(true);
-            } else if (gamepad2.dpad_down) {
-                lift.grabber(false);
-            }
+//            if (gamepad2.dpad_up) {
+//                flipGrabber.
+//            } else if (gamepad2.dpad_down) {
+//                lift.grabber(false);
+//            }
             lift.setLiftPower(-gamepad2.right_stick_y);
 
-            A.update(gamepad2.a);
-            B.update(gamepad2.b);
-            X.update(gamepad2.x);
-            Y.update(gamepad2.y);
-            RB.update(gamepad2.right_bumper);
+            Level0.update(gamepad2.a);
+            Level1.update(gamepad2.b);
+            Level2.update(gamepad2.x);
+            Level3.update(gamepad2.y);
+            grabber.update(gamepad2.right_bumper);
+            flipGrabber.update(gamepad2.right_trigger >= 0.6);
 
-            if (A.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
-            if (B.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
-            if (X.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
-            if (Y.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
-
+            if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
+            if (Level1.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
+            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
+            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
+            if (grabber.isClicked()) lift.grabber(grabber.getState());
+//            if (flipGrabber.isClicked()) lift.setArmState();
 //            for (Levels level : levels) {
 //                level.update(this);
 //
@@ -94,7 +100,7 @@ public class Constantin extends LinearOpMode {
             telemetry.addData("Right lift pow", lift.rightElevator.getPower());
             telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
             telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
-            telemetry.addData("State", lift.$getState());
+            telemetry.addData("State", lift.getState());
             telemetry.update();
         }
     }

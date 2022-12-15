@@ -90,7 +90,7 @@ public class AutoFlow {
 
     public void run() {
 //Autonomous starts
-        if (auto == auto.FULL) {
+        if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third);
             for (int i = 0; i < 4; i++) {
                 drive.goToLocation(highJunction, 1, 0.2, highJunction.angle);
