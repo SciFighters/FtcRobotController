@@ -85,14 +85,16 @@ public class Constantin extends LinearOpMode {
 //                lift.goTo();
 //            }
 
-            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
-            telemetry.addData("Lift Power", 0);
-            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
+//            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
+//            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            telemetry.addData("Left lift pos : ", lift.leftElevator.getCurrentPosition());
-            telemetry.addData("Right lift pos : ", lift.rightElevator.getCurrentPosition());
+            telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());
+            telemetry.addData("Right lift pos", lift.rightElevator.getCurrentPosition());
+            telemetry.addData("Left lift pow", lift.leftElevator.getPower());
+            telemetry.addData("Right lift pow", lift.rightElevator.getPower());
             telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
             telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
+            telemetry.addData("State", lift.$getState());
             telemetry.update();
         }
     }

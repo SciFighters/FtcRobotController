@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,21 +15,30 @@ public class Lift {
     public DigitalChannel flipTouchSwitch = null;
     private DcMotor flipMotor = null;
     //private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
-    ;
+
 
     public void init(HardwareMap hw) {
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
         //region Set Elevator Motors
         rightElevator = hw.get(DcMotorEx.class, "RE");
         leftElevator = hw.get(DcMotorEx.class, "LE");
+
         rightElevator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         leftElevator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
         rightElevator.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         leftElevator.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        rightElevator.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftElevator.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rightElevator.setDirection(DcMotorEx.Direction.REVERSE);
+        leftElevator.setDirection(DcMotorEx.Direction.FORWARD);
+
         rightElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+//        Log.w("Goren", "" + rightElevator.getTargetPositionTolerance());
+        rightElevator.setTargetPositionTolerance(15);
+        leftElevator.setTargetPositionTolerance(15);
+
         //endregion
         //region Gathering System
         //grabberRight = hw.get(Servo.class, "grabber_right");
@@ -89,7 +99,8 @@ public class Lift {
         Manual, Goto,
     }
 
-    LiftState liftState;
+    private LiftState liftState;
+    public LiftState $getState() { return liftState; }
 
     enum ArmState {
         Home,
@@ -117,13 +128,14 @@ public class Lift {
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
             leftElevator.setPower(pow);
-        } //else update();
+        } else {
+            if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
+                this.setLiftState(LiftState.Maintain); // Keep current position
+            }
+        }
     }
 
     public void update() {
-//        if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
-//            this.setLiftState(LiftState.Maintain); // Keep current position
-//        }
         switch (this.armState) {
             case Begin:
                 if (!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate1);
@@ -159,12 +171,13 @@ public class Lift {
                 leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 break;
             case Maintain:
-                rightElevator.setTargetPosition(rightElevator.getCurrentPosition());
+                int t = leftElevator.getCurrentPosition();
+                rightElevator.setTargetPosition(t);
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(0.6);
-                leftElevator.setTargetPosition(leftElevator.getCurrentPosition());
+                rightElevator.setPower(0.3);
+                leftElevator.setTargetPosition(t);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                leftElevator.setPower(0.6);
+                leftElevator.setPower(0.3);
                 break;
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
