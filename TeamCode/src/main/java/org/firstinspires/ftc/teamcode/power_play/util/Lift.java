@@ -95,16 +95,18 @@ public class Lift {
     }
 
 
+    public void flip(boolean flipped){
+        rotateServo.setPosition(flipped ? 1 : 0);
+    }
     public enum LiftState {
-        Maintain, // (pos: int)
+        Idle,
+        Maintain, // (pos: int),
         Manual,
-        Goto,
-        Idle;
+        Goto;
     }
 
     private LiftState liftState;
     public LiftState getState() { return liftState; }
-    public void setState(LiftState state) { this.liftState = state; }
 
 
     public enum ArmState {
@@ -129,10 +131,9 @@ public class Lift {
     }
 
     public void setLiftPower(double pow) {
-
         if (Math.abs(pow) > 0.25) {
             if(pow < 0) { // If negative
-                pow *= 0.06;
+                pow = 0.01 * (double)(leftElevator.getCurrentPosition()-200)/3000.0;
             }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
@@ -173,10 +174,16 @@ public class Lift {
         this.setLiftState(LiftState.Goto);
     }
 
-    private void setLiftState(LiftState newLiftState) {
+    public void setLiftState(LiftState newLiftState) {
         if (newLiftState == this.liftState) return; // State unchanged => do nothing
 
         switch (newLiftState) {
+            case Idle:
+                rightElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                rightElevator.setPower(0);
+                leftElevator.setPower(0);
+                break;
             case Manual:
                 rightElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // Run with power getting setPower from outside
                 leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
