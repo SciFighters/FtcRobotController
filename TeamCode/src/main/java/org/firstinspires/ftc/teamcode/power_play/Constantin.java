@@ -55,11 +55,6 @@ public class Constantin extends LinearOpMode {
             double turn = pow(gamepad1.right_stick_x * boost);
             drive.setPowerOriented(y, x, turn, true);
 
-//            if (gamepad2.dpad_up) {
-//                flipGrabber.
-//            } else if (gamepad2.dpad_down) {
-//                lift.grabber(false);
-//            }
             lift.setLiftPower(-gamepad2.right_stick_y);
 
             Level0.update(gamepad2.a);
@@ -75,8 +70,8 @@ public class Constantin extends LinearOpMode {
             if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
             if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
-            if (rotateGrabber.isClicked()) lift.flip(rotateGrabber.getState());
-            //            if (flipGrabber.isClicked()) lift.setArmState();
+            if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
+            if (flipGrabber.isClicked()) lift.toggleFlip();
 //            for (Levels level : levels) {
 //                level.update(this);
 //
@@ -99,13 +94,15 @@ public class Constantin extends LinearOpMode {
 //            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
 //            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
+            telemetry.addData("Flip Grabber", lift.flipMotor.getCurrentPosition());
             telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());
             telemetry.addData("Right lift pos", lift.rightElevator.getCurrentPosition());
             telemetry.addData("Left lift pow", lift.leftElevator.getPower());
             telemetry.addData("Right lift pow", lift.rightElevator.getPower());
             telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
             telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
-            telemetry.addData("State", lift.getState());
+            telemetry.addData("Lift State", lift.getState());
+            telemetry.addData("Arm State", lift.getArmState());
             telemetry.update();
         }
     }
