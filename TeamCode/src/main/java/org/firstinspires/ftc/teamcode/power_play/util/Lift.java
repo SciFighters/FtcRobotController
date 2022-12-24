@@ -6,10 +6,11 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 //DONT DELETE 1194 2013
 public class Lift {
     public final int LIFT_RANGE = 1150, LIFT_MIN = 10; // max amount of ticks in the lift..
-    public final int FLIP_POSITION = 120, HALF_POSITION=60; //flip motor max count of 180 degrees
+    public final int FLIP_POSITION = 120, HALF_POSITION = 60; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
@@ -18,11 +19,11 @@ public class Lift {
 
 
     public void init(HardwareMap hw) {
+        flipMotor = hw.get(DcMotor.class, "JM");
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
         //region Set Elevator Motors
         rightElevator = hw.get(DcMotorEx.class, "RE");
         leftElevator = hw.get(DcMotorEx.class, "LE");
-
         rightElevator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         leftElevator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -47,13 +48,11 @@ public class Lift {
         grabberLeft = hw.get(Servo.class, "grabber_left");
         grabberLeft.setDirection(Servo.Direction.FORWARD);
         grabberRight.setDirection(Servo.Direction.REVERSE);
-        flipMotor = hw.get(DcMotor.class, "JM");
         flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
         rotateServo = hw.get(Servo.class, "rotateServo");
         //endregion
-        // resetLift();
-        //resetJoint();
+        //resetLift();
     }
 
     private void resetLift() {
@@ -70,14 +69,15 @@ public class Lift {
         rightElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftElevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        resetJoint();
     }
 
-    void resetJoint() {
+    public void resetJoint() {
         if (this.jointTouchSwitch()) return;
 
         ElapsedTime timer = new ElapsedTime();
 
-        flipMotor.setPower(-0.2);
+        flipMotor.setPower(0.2);
         while (!this.jointTouchSwitch() && timer.seconds() < 4) ;
         flipMotor.setPower(0);
         flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -98,13 +98,15 @@ public class Lift {
     }
 
 
-    public void rotate(boolean rotated){
+    public void rotate(boolean rotated) {
         rotateServo.setPosition(rotated ? 1 : 0);
     }
+
     public void toggleFlip() {
         if (this.armState != ArmState.Flip) setArmState(ArmState.Flip);
         else setArmState(ArmState.Home);
     }
+
     public enum LiftState {
         Idle,
         Maintain, // (pos: int),
@@ -113,7 +115,10 @@ public class Lift {
     }
 
     private LiftState liftState;
-    public LiftState getState() { return liftState; }
+
+    public LiftState getState() {
+        return liftState;
+    }
 
 
     public enum ArmState {
@@ -129,7 +134,7 @@ public class Lift {
     ArmState armState;
 
     public enum LiftLevel {
-        Floor(0), First(1264/2), Second(2066/2), Third(2845/2);
+        Floor(0), First(292), Second(601), Third(886);
 
         final int position;
 
@@ -140,9 +145,14 @@ public class Lift {
 
     public void setLiftPower(double pow) {
         if (Math.abs(pow) > 0.2) {
-            if(pow < 0) { // If negative
-                // pow = 0.01 * (double)(leftElevator.getCurrentPosition()-200)/3000.0;
-                pow = 0.1 * (double)(leftElevator.getCurrentPosition()-200)/3000.0 + pow/4;
+            if (pow < 0) { // If negative
+                if (leftElevator.getCurrentPosition() > 400)
+                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
+//                if (leftElevator.getCurrentPosition() > 400) {
+//                    pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
+//                } else {
+//                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
+//                }
             }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
@@ -177,7 +187,7 @@ public class Lift {
 
     public void gotoLevel(LiftLevel level) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-        else setArmState(ArmState.Half);
+        else setArmState(ArmState.Flip); // Not sure what does half mean, changed to flip
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
         this.setLiftState(LiftState.Goto);
@@ -260,7 +270,8 @@ public class Lift {
         }
         this.armState = newState;
     }
-    public ArmState getArmState(){
+
+    public ArmState getArmState() {
         return this.armState;
     }
 }

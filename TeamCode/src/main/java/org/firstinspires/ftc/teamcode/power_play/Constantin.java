@@ -24,7 +24,6 @@ public class Constantin extends LinearOpMode {
     Toggle rotateGrabber = new Toggle();
 
 
-
     @Override
     public void runOpMode() {
         this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -43,7 +42,7 @@ public class Constantin extends LinearOpMode {
             if (gamepad1.start && gamepad1.x) {
                 drive.resetOrientation(0);
             }
-            if(gamepad2.start && gamepad2.x) {
+            if (gamepad2.start && gamepad2.x) {
                 this.lift.setLiftState(Lift.LiftState.Idle);
                 continue;
             }
