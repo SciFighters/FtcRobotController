@@ -61,8 +61,8 @@ public class Constantin extends LinearOpMode {
             lift.setLiftPower(-gamepad2.right_stick_y);
 
             Level0.update(gamepad2.a);
-            Level1.update(gamepad2.b);
-            Level2.update(gamepad2.x);
+            Level1.update(gamepad2.b && !gamepad2.start);
+            Level2.update(gamepad2.x && !gamepad2.start);
             Level3.update(gamepad2.y);
             grabber.update(gamepad2.right_bumper);
             flipGrabber.update(gamepad2.dpad_up || gamepad2.dpad_down);
