@@ -192,7 +192,7 @@ public class Lift {
 
     public void gotoLevel(LiftLevel level) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-        else setArmState(ArmState.Half);
+        else setArmState(ArmState.Flip);
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
         this.setLiftState(LiftState.Goto);
