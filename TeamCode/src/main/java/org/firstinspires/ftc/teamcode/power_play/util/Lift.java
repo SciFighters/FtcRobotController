@@ -78,10 +78,10 @@ public class Lift {
         if (this.jointTouchSwitch()) return;
 
         grabber(true);
-        ElapsedTime timer = new ElapsedTime();
+        // ElapsedTime timer = new ElapsedTime(); // not sure why exists
 
         flipMotor.setPower(-0.2);
-        while (!this.jointTouchSwitch() && timer.seconds() < 4);
+        while (!this.jointTouchSwitch() /*&& timer.seconds() < 4*/);
         flipMotor.setPower(0);
         flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
