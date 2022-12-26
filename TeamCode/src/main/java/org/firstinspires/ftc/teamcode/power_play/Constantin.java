@@ -41,6 +41,7 @@ public class Constantin extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.start && gamepad1.x) {
                 drive.resetOrientation(0);
+                continue;
             }
             if (gamepad2.start && gamepad2.x) {
                 this.lift.setLiftState(Lift.LiftState.Idle);

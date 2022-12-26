@@ -35,9 +35,11 @@ public class Lift {
 
         rightElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        flipMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-//        Log.w("Goren", "" + rightElevator.getTargetPositionTolerance());
+        flipMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         final int gotoTolerance = 32;
         rightElevator.setTargetPositionTolerance(gotoTolerance);
         leftElevator.setTargetPositionTolerance(gotoTolerance);
@@ -48,11 +50,12 @@ public class Lift {
         grabberLeft = hw.get(Servo.class, "grabber_left");
         grabberLeft.setDirection(Servo.Direction.FORWARD);
         grabberRight.setDirection(Servo.Direction.REVERSE);
-        flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
         rotateServo = hw.get(Servo.class, "rotateServo");
         //endregion
         //resetLift();
+
+        resetJoint();
     }
 
     private void resetLift() {
@@ -69,16 +72,16 @@ public class Lift {
         rightElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftElevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        resetJoint();
     }
 
     public void resetJoint() {
         if (this.jointTouchSwitch()) return;
 
+        grabber(true);
         ElapsedTime timer = new ElapsedTime();
 
-        flipMotor.setPower(0.2);
-        while (!this.jointTouchSwitch() && timer.seconds() < 4) ;
+        flipMotor.setPower(-0.2);
+        while (!this.jointTouchSwitch() && timer.seconds() < 4);
         flipMotor.setPower(0);
         flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -146,6 +149,7 @@ public class Lift {
     public void setLiftPower(double pow) {
         if (Math.abs(pow) > 0.2) {
             if (pow < 0) { // If negative
+                pow /= 3;
                 if (leftElevator.getCurrentPosition() > 400)
                     pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
 //                if (leftElevator.getCurrentPosition() > 400) {
