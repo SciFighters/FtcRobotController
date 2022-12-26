@@ -24,6 +24,8 @@ public class Constantin extends LinearOpMode {
     Toggle flipGrabber = new Toggle();
     Toggle rotateGrabber = new Toggle();
 
+    private Toggle turningToggle = new Toggle();
+
 
     @Override
     public void runOpMode() {
@@ -38,6 +40,9 @@ public class Constantin extends LinearOpMode {
 
         waitForStart();
 
+        int turningCount = 0;
+        double targetHeading = 0;
+
         drive.resetOrientation(0);
         while (opModeIsActive()) {
             batteryLevel = hardwareMap.voltageSensor.get("Control Hub").getVoltage();
@@ -45,6 +50,7 @@ public class Constantin extends LinearOpMode {
             if (gamepad1.start) {
                 if (gamepad1.x) {
                     drive.resetOrientation(0);
+                    targetHeading = drive.getHeading();
                 }
                 continue;
             }
@@ -60,6 +66,23 @@ public class Constantin extends LinearOpMode {
             double y = pow(-gamepad1.left_stick_y) * boost;
             double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
+
+            // #region angle correction
+
+            turningToggle.update(Math.abs(turn) > 0.02);
+
+            if (turningToggle.isReleased()) turningCount = 8;
+            if (!turningToggle.isPressed()) turningCount--;
+            if (turningCount == 0) targetHeading = drive.getHeading();
+
+            if (!turningToggle.isPressed() && turningCount < 0) {
+                double delta = drive.getDeltaHeading(targetHeading);
+                double gain = 0.02;
+                turn = delta * gain;
+            }
+
+            // #endregion angle correction
+
             drive.setPowerOriented(y, x, turn, true);
 
             lift.setLiftPower(-gamepad2.right_stick_y);
