@@ -37,16 +37,17 @@ public class AutoFlow {
     }
 
     public enum Auto {
-        SHORT(1),
-        LONG(2),
-        PARK(3),
-        FULL(4),
-        CYCLING(5);
+        SHORT(1,true),
+        LONG(2,true),
+        PARK(3,true),
+        FULL(4,true),
+        CYCLING(5,true);
 
-        public int value;
-
-        Auto(int value) {
-            this.value = value;
+        public int _value;
+        public boolean _isParking;
+        Auto(int _value, boolean isParking) {
+            this._value = _value;
+            this._isParking = isParking;
         }
     }
 
@@ -60,8 +61,8 @@ public class AutoFlow {
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
     Location park1 = new Location(0.3, 1.5);
-    Location park2 = highJunction;
-    Location park3 = coneLocation;
+    Location park2 = new Location(highJunction);
+    Location park3 = new Location(coneLocation);
     //endregion
 
 
@@ -83,22 +84,26 @@ public class AutoFlow {
     public void init() {
         //initWebcam();
         //ToDo inits
+//        drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, new Location(0.5, 0.5));
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
 
     }
+    private void parkAtConeLocation() {
+
+    }
+
 
     public void run() {
 //Autonomous starts
         if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third);
-            for (int i = 0; i < 4; i++) {
-                drive.goToLocation(highJunction, 1, 0.2, highJunction.angle);
-                lift.grabber(true);
-                lift.gotoLevel(Lift.LiftLevel.Floor);
-
-                drive.goToLocation(coneLocation, 1, 0.2, coneLocation.angle);
-                lift.grabber(false);
+            for (int i = 0; i < 4; i++) { // Going to put 4 cones
+                drive.goToLocation(highJunction, 1, 0.2, 0);
+                lift.grabber(false); // changed to false
+                lift.gotoLevel(Lift.LiftLevel.Floor); // TODO: check if the height right? (cone pile)
+                drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
+                lift.grabber(true); //(Changed to true) TODO: check validity of grabber ability
                 lift.gotoLevel(Lift.LiftLevel.Third);
             }
 
@@ -107,11 +112,11 @@ public class AutoFlow {
         if (auto==auto.LONG){ //backup, less points
             lift.gotoLevel(Lift.LiftLevel.Third);
             drive.goToLocation(highJunctionSafe,1,0.2,highJunctionSafe.angle);
-            lift.grabber(true);
+            lift.grabber(false); //(Changed to false) TODO: check
             for (int i = 0; i < 3; i++) {
                 lift.gotoLevel(Lift.LiftLevel.Floor);
                 drive.goToLocation(coneLocation,1,0.2,coneLocation.angle);
-                lift.grabber(false);
+                lift.grabber(true); //(Changed to true)
 
                 lift.gotoLevel(Lift.LiftLevel.Second);
                 drive.goToLocation(medJunction,1,0.2,medJunction.angle);
@@ -119,6 +124,13 @@ public class AutoFlow {
 
             }
         }
+
+
+        // TODO: Parking in the right place... (OpenCV)
+        if(auto._isParking) parkAtConeLocation();
+
+        //
+
     }
 
 }
