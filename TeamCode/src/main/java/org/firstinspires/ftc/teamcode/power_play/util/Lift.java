@@ -40,7 +40,7 @@ public class Lift {
         flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        final int gotoTolerance = 32;
+        final int gotoTolerance = 10;
         rightElevator.setTargetPositionTolerance(gotoTolerance);
         leftElevator.setTargetPositionTolerance(gotoTolerance);
 
@@ -152,6 +152,7 @@ public class Lift {
                 pow /= 3;
                 if (leftElevator.getCurrentPosition() > 400)
                     pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
+//                    pow = 0.3 * ((double)leftElevator.getCurrentPosition()/LIFT_RANGE - 0.3) + pow / 4;
 //                if (leftElevator.getCurrentPosition() > 400) {
 //                    pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
 //                } else {
@@ -191,7 +192,7 @@ public class Lift {
 
     public void gotoLevel(LiftLevel level) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-        else setArmState(ArmState.Flip); // Not sure what does half mean, changed to flip
+        else setArmState(ArmState.Half);
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
         this.setLiftState(LiftState.Goto);
@@ -239,20 +240,20 @@ public class Lift {
             case Home:
                 flipMotor.setTargetPosition(0);
                 flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.7);
+                flipMotor.setPower(0.9);
                 rotateServo.setPosition(0);
                 grabber(true);
                 break;
             case Flip:
                 flipMotor.setTargetPosition(FLIP_POSITION);
                 flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.8);
+                flipMotor.setPower(0.9);
                 rotateServo.setPosition(1);
                 break;
             case Half:
                 flipMotor.setTargetPosition(HALF_POSITION);
                 flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.8);
+                flipMotor.setPower(0.9);
                 rotateServo.setPosition(1);
                 break;
             case Begin:

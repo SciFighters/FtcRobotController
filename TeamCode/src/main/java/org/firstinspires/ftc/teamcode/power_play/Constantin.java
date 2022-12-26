@@ -42,12 +42,16 @@ public class Constantin extends LinearOpMode {
         while (opModeIsActive()) {
             batteryLevel = hardwareMap.voltageSensor.get("Control Hub").getVoltage();
             batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
-            if (gamepad1.start && gamepad1.x) {
-                drive.resetOrientation(0);
+            if (gamepad1.start) {
+                if (gamepad1.x) {
+                    drive.resetOrientation(0);
+                }
                 continue;
             }
-            if (gamepad2.start && gamepad2.x) {
-                this.lift.setLiftState(Lift.LiftState.Idle);
+            if (gamepad2.start) {
+                if (gamepad2.x) {
+                    this.lift.setLiftState(Lift.LiftState.Idle);
+                }
                 continue;
             }
 
@@ -61,8 +65,8 @@ public class Constantin extends LinearOpMode {
             lift.setLiftPower(-gamepad2.right_stick_y);
 
             Level0.update(gamepad2.a);
-            Level1.update(gamepad2.b && !gamepad2.start);
-            Level2.update(gamepad2.x && !gamepad2.start);
+            Level1.update(gamepad2.b);
+            Level2.update(gamepad2.x);
             Level3.update(gamepad2.y);
             grabber.update(gamepad2.right_bumper);
             flipGrabber.update(gamepad2.dpad_up || gamepad2.dpad_down);
