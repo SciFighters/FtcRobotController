@@ -16,6 +16,7 @@ public class Constantin extends LinearOpMode {
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
     double batteryLevel;
     double batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
+    //region button toggles
     Toggle Level0 = new Toggle();
     Toggle Level1 = new Toggle();
     Toggle Level2 = new Toggle();
@@ -25,7 +26,7 @@ public class Constantin extends LinearOpMode {
     Toggle rotateGrabber = new Toggle();
 
     private Toggle turningToggle = new Toggle();
-
+    //endregion
 
     @Override
     public void runOpMode() {
@@ -67,7 +68,7 @@ public class Constantin extends LinearOpMode {
             double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
 
-            // #region angle correction
+            //region angle correction
 
             turningToggle.update(Math.abs(turn) > 0.02);
 
@@ -81,7 +82,7 @@ public class Constantin extends LinearOpMode {
                 turn = delta * gain;
             }
 
-            // #endregion angle correction
+            //endregion angle correction
 
             drive.setPowerOriented(y, x, turn, true);
 
@@ -96,7 +97,10 @@ public class Constantin extends LinearOpMode {
             rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
 
             if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
-            if (Level1.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
+            if (Level1.isClicked()) {
+                lift.gotoLevel(Lift.LiftLevel.First);
+                lift.setArmState(Lift.ArmState.Flip); // sets the arm state to flip only if gamepad2.b is clicked
+            }
             if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
             if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
@@ -124,7 +128,7 @@ public class Constantin extends LinearOpMode {
 //            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
 //            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            telemetry.addData("Flip Grabber", lift.flipMotor.getCurrentPosition());
+            telemetry.addData("Flip Grabber", lift.jointMotor.getCurrentPosition());
             telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());
             telemetry.addData("Right lift pos", lift.rightElevator.getCurrentPosition());
             telemetry.addData("Left lift pow", lift.leftElevator.getPower());

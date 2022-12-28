@@ -37,14 +37,15 @@ public class AutoFlow {
     }
 
     public enum Auto {
-        SHORT(1,true),
-        LONG(2,true),
-        PARK(3,true),
-        FULL(4,true),
-        CYCLING(5,true);
+        SHORT(1, true),
+        LONG(2, true),
+        PARK(3, true),
+        FULL(4, true),
+        CYCLING(5, true);
 
         public int _value;
         public boolean _isParking;
+
         Auto(int _value, boolean isParking) {
             this._value = _value;
             this._isParking = isParking;
@@ -89,6 +90,7 @@ public class AutoFlow {
         opMode.telemetry.update();
 
     }
+
     private void parkAtConeLocation() {
 
     }
@@ -109,17 +111,17 @@ public class AutoFlow {
 
 
         }
-        if (auto==auto.LONG){ //backup, less points
+        if (auto == auto.LONG) { //backup, less points
             lift.gotoLevel(Lift.LiftLevel.Third);
-            drive.goToLocation(highJunctionSafe,1,0.2,highJunctionSafe.angle);
+            drive.goToLocation(highJunctionSafe, 1, 0.2, highJunctionSafe.angle);
             lift.grabber(false); //(Changed to false) TODO: check
             for (int i = 0; i < 3; i++) {
                 lift.gotoLevel(Lift.LiftLevel.Floor);
-                drive.goToLocation(coneLocation,1,0.2,coneLocation.angle);
+                drive.goToLocation(coneLocation, 1, 0.2, coneLocation.angle);
                 lift.grabber(true); //(Changed to true)
 
                 lift.gotoLevel(Lift.LiftLevel.Second);
-                drive.goToLocation(medJunction,1,0.2,medJunction.angle);
+                drive.goToLocation(medJunction, 1, 0.2, medJunction.angle);
                 lift.grabber(false);
 
             }
@@ -127,7 +129,7 @@ public class AutoFlow {
 
 
         // TODO: Parking in the right place... (OpenCV)
-        if(auto._isParking) parkAtConeLocation();
+        if (auto._isParking) parkAtConeLocation();
 
         //
 

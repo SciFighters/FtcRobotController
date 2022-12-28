@@ -7,19 +7,18 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-//DONT DELETE 1194 2013
+//DON'T DELETE 1194 2013
 public class Lift {
-    public final int LIFT_RANGE = 1150, LIFT_MIN = 10; // max amount of ticks in the lift..
+    public final int LIFT_RANGE = 1200, LIFT_MIN = 10; // max amount of ticks in the lift..
     public final int FLIP_POSITION = 120, HALF_POSITION = 60; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
-    public DcMotor flipMotor = null;
+    public DcMotor jointMotor = null;
     private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
 
-
     public void init(HardwareMap hw) {
-        flipMotor = hw.get(DcMotor.class, "JM");
+        jointMotor = hw.get(DcMotor.class, "JM");
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
         //region Set Elevator Motors
         rightElevator = hw.get(DcMotorEx.class, "RE");
@@ -36,9 +35,9 @@ public class Lift {
         rightElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        flipMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jointMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         final int gotoTolerance = 10;
         rightElevator.setTargetPositionTolerance(gotoTolerance);
@@ -80,11 +79,11 @@ public class Lift {
         grabber(true);
         // ElapsedTime timer = new ElapsedTime(); // not sure why exists
 
-        flipMotor.setPower(-0.2);
-        while (!this.jointTouchSwitch() /*&& timer.seconds() < 4*/);
-        flipMotor.setPower(0);
-        flipMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flipMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jointMotor.setPower(-0.2);
+        while (!this.jointTouchSwitch() /*&& timer.seconds() < 4*/) ;
+        jointMotor.setPower(0);
+        jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     boolean elevatorTouchSwitch() {
@@ -151,13 +150,13 @@ public class Lift {
             if (pow < 0) { // If negative
                 pow /= 3;
                 if (leftElevator.getCurrentPosition() > 400)
-                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
-//                    pow = 0.3 * ((double)leftElevator.getCurrentPosition()/LIFT_RANGE - 0.3) + pow / 4;
-//                if (leftElevator.getCurrentPosition() > 400) {
-//                    pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
-//                } else {
-//                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
-//                }
+                    //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
+                    pow = 0.3 * ((double) leftElevator.getCurrentPosition() / LIFT_RANGE - 0.3) + pow / 4;
+                if (leftElevator.getCurrentPosition() > 400) {
+                    pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
+                } else {
+                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
+                }
             }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
@@ -166,21 +165,19 @@ public class Lift {
             this.setLiftState(LiftState.Maintain); // Keep current position
         }
     }
-
-
 //    public void update() {
 ////        if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
 ////            this.setLiftState(LiftState.Maintain); // Keep current position
 ////        }
 //        switch (this.armState) {
 //            case Begin:
-//                if (!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate1);
+//                if (!this.jointMotor.isBusy()) this.setArmState(ArmState.Rotate1);
 //                break;
 //            case Rotate1:
 //
 //                break;
 //            case Flip:
-//                if (!this.flipMotor.isBusy()) this.setArmState(ArmState.Rotate2);
+//                if (!this.jointMotor.isBusy()) this.setArmState(ArmState.Rotate2);
 //                break;
 //            case Rotate2:
 //
@@ -192,7 +189,7 @@ public class Lift {
 
     public void gotoLevel(LiftLevel level) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-        else setArmState(ArmState.Flip);
+//        else setArmState(ArmState.Flip); didn't understand why, fixed
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
         this.setLiftState(LiftState.Goto);
@@ -207,7 +204,7 @@ public class Lift {
                 leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 rightElevator.setPower(0);
                 leftElevator.setPower(0);
-                flipMotor.setPower(0);
+                jointMotor.setPower(0);
                 break;
             case Manual:
                 rightElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // Run with power getting setPower from outside
@@ -224,9 +221,9 @@ public class Lift {
                 break;
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(1);
+                rightElevator.setPower(0.4);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                leftElevator.setPower(1);
+                leftElevator.setPower(0.4);
                 break;
             default:
                 break;
@@ -238,28 +235,28 @@ public class Lift {
         if (newState == this.armState) return;
         switch (newState) {
             case Home:
-                flipMotor.setTargetPosition(0);
-                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.9);
+                jointMotor.setTargetPosition(0);
+                jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
                 grabber(true);
                 break;
             case Flip:
-                flipMotor.setTargetPosition(FLIP_POSITION);
-                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.9);
+                jointMotor.setTargetPosition(FLIP_POSITION);
+                jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                jointMotor.setPower(0.9);
                 rotateServo.setPosition(1);
                 break;
             case Half:
-                flipMotor.setTargetPosition(HALF_POSITION);
-                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.9);
+                jointMotor.setTargetPosition(HALF_POSITION);
+                jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                jointMotor.setPower(0.9);
                 rotateServo.setPosition(1);
                 break;
             case Begin:
-                flipMotor.setTargetPosition(30);
-                flipMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                flipMotor.setPower(0.8);
+                jointMotor.setTargetPosition(30);
+                jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                jointMotor.setPower(0.8);
                 break;
             case Rotate1:
                 rotateServo.setPosition(0.5);
