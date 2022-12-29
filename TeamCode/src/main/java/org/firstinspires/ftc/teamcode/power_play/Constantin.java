@@ -99,7 +99,6 @@ public class Constantin extends LinearOpMode {
             if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
             if (Level1.isClicked()) {
                 lift.gotoLevel(Lift.LiftLevel.First);
-                lift.setArmState(Lift.ArmState.Flip); // sets the arm state to flip only if gamepad2.b is clicked
             }
             if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
             if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);

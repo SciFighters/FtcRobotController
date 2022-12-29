@@ -149,6 +149,7 @@ public class Lift {
         if (Math.abs(pow) > 0.2) {
             if (pow < 0) { // If negative
                 pow /= 3;
+                pow /= 3;
                 if (leftElevator.getCurrentPosition() > 400)
                     //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
                     pow = 0.3 * ((double) leftElevator.getCurrentPosition() / LIFT_RANGE - 0.3) + pow / 4;
@@ -189,7 +190,7 @@ public class Lift {
 
     public void gotoLevel(LiftLevel level) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-//        else setArmState(ArmState.Flip); didn't understand why, fixed
+        else setArmState(ArmState.Flip);
         rightElevator.setTargetPosition(level.position);
         leftElevator.setTargetPosition(level.position);
         this.setLiftState(LiftState.Goto);
@@ -221,9 +222,9 @@ public class Lift {
                 break;
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(0.4);
+                rightElevator.setPower(0.6);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                leftElevator.setPower(0.4);
+                leftElevator.setPower(0.6);
                 break;
             default:
                 break;
