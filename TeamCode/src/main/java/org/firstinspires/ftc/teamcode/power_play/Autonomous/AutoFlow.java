@@ -37,9 +37,9 @@ public class AutoFlow {
     }
 
     public enum Auto {
-        SHORT(1, true),
-        LONG(2, true),
-        PARK(3, true),
+        PARK(1, true),
+        SHORT(2, true),
+        LONG(3, true),
         FULL(4, true),
         CYCLING(5, true);
 
@@ -80,6 +80,7 @@ public class AutoFlow {
 
 
         this.drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_DASHBOARD_FIELD, alliance == ALLIANCE.BLUE ? DriveClass.DriveMode.BLUE : DriveClass.DriveMode.RED);
+        this.lift = new Lift();
     }
 
     public void init() {
@@ -87,6 +88,7 @@ public class AutoFlow {
         //ToDo inits
 //        drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, new Location(0.5, 0.5));
         drive.init(opMode.hardwareMap);
+        lift.init(opMode.hardwareMap);
         opMode.telemetry.update();
 
     }
@@ -101,7 +103,7 @@ public class AutoFlow {
         if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third);
             for (int i = 0; i < 4; i++) { // Going to put 4 cones
-                drive.goToLocation(highJunction, 1, 0.2, 0);
+                drive.goToLocation(highJunction, 1, 0.06, 0);
                 lift.grabber(false); // changed to false
                 lift.gotoLevel(Lift.LiftLevel.Floor); // TODO: check if the height right? (cone pile)
                 drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
@@ -136,5 +138,6 @@ public class AutoFlow {
     }
 
 }
+
 
 

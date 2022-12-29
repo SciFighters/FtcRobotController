@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(group = "RED")
-//@Disabled
+@Disabled
 public class Red_Bump_SHORT extends LinearOpMode {
 	AutoFlow auto = new AutoFlow(this, AutoFlow.ALLIANCE.RED, AutoFlow.StartPos.BARRIER, AutoFlow.Auto.SHORT);
 	@Override
