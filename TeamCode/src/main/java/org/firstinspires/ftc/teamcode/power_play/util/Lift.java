@@ -148,12 +148,10 @@ public class Lift {
     public void setLiftPower(double pow) {
         if (Math.abs(pow) > 0.2) {
             if (pow < 0) { // If negative
-                pow /= 3;
-                pow /= 3;
-                if (leftElevator.getCurrentPosition() > 400)
-                    //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
-                    pow = 0.3 * ((double) leftElevator.getCurrentPosition() / LIFT_RANGE - 0.3) + pow / 4;
+                pow /= 9;
                 if (leftElevator.getCurrentPosition() > 400) {
+                    //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
+                    //pow = 0.3 * ((double) leftElevator.getCurrentPosition() / LIFT_RANGE - 0.3) + pow / 4;
                     pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
                 } else {
                     pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
@@ -222,9 +220,9 @@ public class Lift {
                 break;
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(0.6);
+                rightElevator.setPower(0.5);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                leftElevator.setPower(0.6);
+                leftElevator.setPower(0.5);
                 break;
             default:
                 break;

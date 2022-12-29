@@ -82,7 +82,7 @@ public class Constantin extends LinearOpMode {
                 turn = delta * gain;
             }
 
-            //endregion angle correction
+            //endregion
 
             drive.setPowerOriented(y, x, turn, true);
 
