@@ -91,6 +91,14 @@ public class AutoFlow {
         //ToDo inits
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
+        public void gotoLocation(int location) {
+            gotoLocation(1);
+            gotoLocation(2);
+            gotoLocation(3);
+
+        }
+
+            }
 
     }
 
