@@ -127,6 +127,8 @@ public class Lift {
             default:
                 break;
         }
-        this.state = newState;
+        this.state = newState; // 
+
+
     }
 }
