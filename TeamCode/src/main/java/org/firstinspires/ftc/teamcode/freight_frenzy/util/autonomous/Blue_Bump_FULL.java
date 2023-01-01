@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(group = "BLUE")
-//@Disabled
+@Disabled
 public class Blue_Bump_FULL extends LinearOpMode {
 	@Override
 	public void runOpMode() {

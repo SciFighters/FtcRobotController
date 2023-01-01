@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
@@ -15,11 +14,19 @@ import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 public class Constantin extends LinearOpMode {
     Lift lift = new Lift();
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
+    double batteryLevel;
+    double batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
+    //region button toggles
+    Toggle Level0 = new Toggle();
+    Toggle Level1 = new Toggle();
+    Toggle Level2 = new Toggle();
+    Toggle Level3 = new Toggle();
+    Toggle grabber = new Toggle();
+    Toggle flipGrabber = new Toggle();
+    Toggle rotateGrabber = new Toggle();
 
-    Toggle A = new Toggle();
-    Toggle B = new Toggle();
-    Toggle X = new Toggle();
-    Toggle Y = new Toggle();
+    private Toggle turningToggle = new Toggle();
+    //endregion
 
     @Override
     public void runOpMode() {
@@ -34,37 +41,70 @@ public class Constantin extends LinearOpMode {
 
         waitForStart();
 
+        int turningCount = 0;
+        double targetHeading = 0;
+
         drive.resetOrientation(0);
         while (opModeIsActive()) {
-            if (gamepad1.start && gamepad1.x) {
-                drive.resetOrientation(0);
+            batteryLevel = hardwareMap.voltageSensor.get("Control Hub").getVoltage();
+            batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
+            if (gamepad1.start) {
+                if (gamepad1.x) {
+                    drive.resetOrientation(0);
+                    targetHeading = drive.getHeading();
+                }
+                continue;
+            }
+            if (gamepad2.start) {
+                if (gamepad2.x) {
+                    this.lift.setLiftState(Lift.LiftState.Idle);
+                }
+                continue;
             }
 
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
-
             double y = pow(-gamepad1.left_stick_y) * boost;
             double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
+
+            //region angle correction
+
+            turningToggle.update(Math.abs(turn) > 0.02);
+
+            if (turningToggle.isReleased()) turningCount = 8;
+            if (!turningToggle.isPressed()) turningCount--;
+            if (turningCount == 0) targetHeading = drive.getHeading();
+
+            if (!turningToggle.isPressed() && turningCount < 0) {
+                double delta = drive.getDeltaHeading(targetHeading);
+                double gain = 0.02;
+                turn = delta * gain;
+            }
+
+            //endregion
+
             drive.setPowerOriented(y, x, turn, true);
 
-            if (gamepad2.dpad_up) {
-                lift.grabber(true);
-            } else if (gamepad2.dpad_down) {
-                lift.grabber(false);
-            }
             lift.setLiftPower(-gamepad2.right_stick_y);
 
-            A.update(gamepad2.a);
-            B.update(gamepad2.b);
-            X.update(gamepad2.x);
-            Y.update(gamepad2.y);
+            Level0.update(gamepad2.a);
+            Level1.update(gamepad2.b);
+            Level2.update(gamepad2.x);
+            Level3.update(gamepad2.y);
+            grabber.update(gamepad2.right_bumper);
+            flipGrabber.update(gamepad2.dpad_up || gamepad2.dpad_down);
+            rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
 
-            if (A.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
-            if (B.isClicked()) lift.gotoLevel(Lift.LiftLevel.First);
-            if (X.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
-            if (Y.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
-
+            if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
+            if (Level1.isClicked()) {
+                lift.gotoLevel(Lift.LiftLevel.First);
+            }
+            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
+            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
+            if (grabber.isClicked()) lift.grabber(grabber.getState());
+            if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
+            if (flipGrabber.isClicked()) lift.toggleFlip();
 //            for (Levels level : levels) {
 //                level.update(this);
 //
@@ -84,14 +124,20 @@ public class Constantin extends LinearOpMode {
 //                lift.goTo();
 //            }
 
-            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
-            telemetry.addData("Lift Power", 0);
-            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
+//            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
+//            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            telemetry.addData("Left lift pos : ", lift.leftElevator.getCurrentPosition());
-            telemetry.addData("Right lift pos : ", lift.rightElevator.getCurrentPosition());
+            telemetry.addData("Flip Grabber", lift.jointMotor.getCurrentPosition());
+            telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());
+            telemetry.addData("Right lift pos", lift.rightElevator.getCurrentPosition());
+            telemetry.addData("Left lift pow", lift.leftElevator.getPower());
+            telemetry.addData("Right lift pow", lift.rightElevator.getPower());
             telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
             telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
+            telemetry.addData("Lift State", lift.getState());
+            telemetry.addData("Arm State", lift.getArmState());
+            telemetry.addData("Battery level", batteryLevel);
+            telemetry.addData("Battery percentage", batteryLevel);
             telemetry.update();
         }
     }
