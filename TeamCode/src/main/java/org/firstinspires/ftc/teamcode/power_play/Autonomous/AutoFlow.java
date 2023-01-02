@@ -91,39 +91,24 @@ public class AutoFlow {
         //ToDo inits
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
-        public void gotoLocation(int location) {
-            gotoLocation(1);
-            gotoLocation(2);
-            gotoLocation(3);
 
-        }
-
-            }
 
     }
 
-    public void gotoParkingPosition(int positionIndex) {
+
+    public void gotoParkingPosition(ParkingPosition parkingPosition) {
         double power = 0.8;
-        double tolerance = 1;
+        double tolerance = 0.3;
         double timeout = 0;
-        switch (positionIndex) {
-            case 1:
-                drive.goToLocation(ParkingPosition.one.location, power, tolerance, timeout);
-                break;
-            case 2:
-                drive.goToLocation(ParkingPosition.two.location, power, tolerance, timeout);
-                break;
-            case 3:
-                drive.goToLocation(ParkingPosition.three.location, power, tolerance, timeout);
-                break;
-        }
+        drive.goToLocation(new Location(drive.getPosX(), parkingPosition.location.y), power, tolerance, timeout);
+        drive.goToLocation(parkingPosition.location, power, tolerance, timeout);
     }
 
     public void run() {
 
         //drive.goToLocation(coneLocation, 1, 0.3, coneLocation.angle);
-        drive.goToLocation(new Location(0,0.80), 1, 0.3, coneLocation.angle);
-        drive.goToLocation(new Location(0.70,0.80), 1, 0.3, coneLocation.angle);
+        drive.goToLocation(new Location(0, 0.80), 1, 0.3, coneLocation.angle);
+        drive.goToLocation(new Location(0.70, 0.80), 1, 0.3, coneLocation.angle);
 
         //Autonomous starts
 
