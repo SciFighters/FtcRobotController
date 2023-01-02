@@ -24,9 +24,9 @@ public class AutoFlow {
     }
 
     public enum ParkingPosition {
-        one(new Location(-0.80, 0.80)),
+        one(new Location(-0.75, 0.93)),
         two(new Location(0, 0.80)),
-        three(new Location(0.70, 0.80));
+        three(new Location(0.70, 0.93));
 
         public Location location;
 
@@ -107,8 +107,8 @@ public class AutoFlow {
     public void run() {
 
         //drive.goToLocation(coneLocation, 1, 0.3, coneLocation.angle);
-        drive.goToLocation(new Location(0, 0.80), 1, 0.3, coneLocation.angle);
-        drive.goToLocation(new Location(0.70, 0.80), 1, 0.3, coneLocation.angle);
+        gotoParkingPosition(ParkingPosition.three);
+
 
         //Autonomous starts
 
