@@ -15,8 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
-import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.opencv.core.Point;
 
 public class DriveClass {
@@ -61,21 +59,24 @@ public class DriveClass {
 
     private double forwardTicksPerMeter;
     private double strafeTicksPerMeter;
+
     // DriveMode - (direction & origin of IMU_Integrator)
     public enum DriveMode {
-        BLUE(1,new Point(0.5 * 0.6,-3 * 0.6), new Point(-1,-1)),
-        RED(2, new Point(-0.5 * 0.6, -3 * 0.6), new Point(1,1));
+        BLUE(1, new Point(0.5 * 0.6, -3 * 0.6), new Point(-1, -1)),
+        RED(2, new Point(-0.5 * 0.6, -3 * 0.6), new Point(1, 1));
 
-//        public static double tile = 0.6;
+        //        public static double tile = 0.6;
         public int index;
         public Point origin;
         public Point direciton;
+
         DriveMode(int index, Point origin, Point direction) {
             this.index = index;
             this.origin = origin;
             this.direciton = direction;
         }
     }
+
     DriveMode mode;
 
     ElapsedTime timer = new ElapsedTime();
@@ -97,7 +98,7 @@ public class DriveClass {
             this.forwardTicksPerMeter = 1753;
             this.strafeTicksPerMeter = 2006;
         }
-        switch(robot) {
+        switch (robot) {
             case JACCOUSE:
                 this.forwardTicksPerMeter = 1562.5;
                 this.strafeTicksPerMeter = 1645.83;
@@ -378,11 +379,27 @@ public class DriveClass {
     public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout) {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout);
     }
+
+    enum Axis {
+        x, y;
+    }
+
+    public double goToLocationOnAxis(Location location, double power, double tolerance, double timeout, Axis axis) {
+        switch (axis) {
+            case x:
+                goTo(location.x, getPosY(), power, location.angle, 0.15, timeout);
+            case y:
+                goTo(getPosX(), location.y, power, location.angle, 0.15, timeout);
+        }
+        return goToLocation(location, power, tolerance, timeout);
+    }
+
     public double goToLocation(Location location, double power, double tolerance, double timeout) {
         return goTo(location.x, location.y, power, location.angle, tolerance, timeout);
     }
 
     public final int MAX_IDLE_BREAK = 20;
+
     public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout) {
         int goToIdle = 0; //if not moving
         boolean isCheckingIdle = false;
@@ -442,12 +459,12 @@ public class DriveClass {
             double breakGain = 0.5;
             double breakPower = remainDist * breakGain + minPower;
 
-            if ((breakPower < power ) && (tolerance <= 0.05)) { //
+            if ((breakPower < power) && (tolerance <= 0.05)) { //
                 power = breakPower;
             }
 
             double headingErr = getDeltaHeading(targetHeading) / 180;
-            double headingGain =  Math.max(0.6, -0.25 * totalDist + 0.95) ; // y = -0.25x + 0.95
+            double headingGain = Math.max(0.6, -0.25 * totalDist + 0.95); // y = -0.25x + 0.95
             double correction = headingGain * headingErr;
             double Vy = RVy * power;
             double Vx = RVx * power;
@@ -469,11 +486,11 @@ public class DriveClass {
             opMode.telemetry.addData("power", power);
             opMode.telemetry.update();
 
-            if((timeout != 0 && timeout <= timer.seconds())) break;
+            if ((timeout != 0 && timeout <= timer.seconds())) break;
 
             // time delta
             currentTime = System.nanoTime();
-            double timeDelta = ((currentTime - lastTime) / Math.pow(10,9)); // time delta in seconds
+            double timeDelta = ((currentTime - lastTime) / Math.pow(10, 9)); // time delta in seconds
             lastTime = currentTime;
             // Idle checker
             double velocityRange = 0.0001;
@@ -481,17 +498,25 @@ public class DriveClass {
             double dy = lastY - currentY;
             double velocity = Math.hypot(dx, dy) / timeDelta;
             Log.d("velocity", String.valueOf(velocity));
-            if(remainDist < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
-            lastX = currentX; lastY = currentY;
-            if(goToIdle >= MAX_IDLE_BREAK) { remainDist = -1; break; }
+            if (remainDist < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
+            lastX = currentX;
+            lastY = currentY;
+            if (goToIdle >= MAX_IDLE_BREAK) {
+                remainDist = -1;
+                break;
+            }
         }
         setPower(0, 0, 0);
         return remainDist;
     }
 
     private boolean inRange(double min, double max, double value) {
-        if(max < min) { double tempMax = max; max = min; min = tempMax; }
-        if(value > min && value < max) return true;
+        if (max < min) {
+            double tempMax = max;
+            max = min;
+            min = tempMax;
+        }
+        if (value > min && value < max) return true;
         return false;
     }
 

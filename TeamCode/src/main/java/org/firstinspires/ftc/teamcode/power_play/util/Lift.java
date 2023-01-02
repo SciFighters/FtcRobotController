@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //DON'T DELETE 1194 2013
 public class Lift {
-    public final int LIFT_RANGE = 1200, LIFT_MIN = 10; // max amount of ticks in the lift..
+    public static final int LIFT_RANGE = 1200, LIFT_MIN = 10; // max amount of ticks in the lift..
     public final int FLIP_POSITION = 120, HALF_POSITION = 60; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
@@ -136,7 +136,10 @@ public class Lift {
     ArmState armState;
 
     public enum LiftLevel {
-        Floor(0), First(292), Second(601), Third(886);
+        Floor(0),
+        First((int) (0.243 * LIFT_RANGE)),
+        Second((int) (0.5 * LIFT_RANGE)),
+        Third((int) (0.733 * LIFT_RANGE));
 
         final int position;
 
@@ -150,8 +153,6 @@ public class Lift {
             if (pow < 0) { // If negative
                 pow /= 9;
                 if (leftElevator.getCurrentPosition() > 400) {
-                    //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 4;
-                    //pow = 0.3 * ((double) leftElevator.getCurrentPosition() / LIFT_RANGE - 0.3) + pow / 4;
                     pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
                 } else {
                     pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
@@ -187,11 +188,16 @@ public class Lift {
 //    }
 
     public void gotoLevel(LiftLevel level) {
+        gotoLevel(level, 0);
+    }
+
+    public void gotoLevel(LiftLevel level, int positionDiff) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
         else setArmState(ArmState.Flip);
-        rightElevator.setTargetPosition(level.position);
-        leftElevator.setTargetPosition(level.position);
+        rightElevator.setTargetPosition(level.position + positionDiff);
+        leftElevator.setTargetPosition(level.position + positionDiff);
         this.setLiftState(LiftState.Goto);
+
     }
 
     public void setLiftState(LiftState newLiftState) {
