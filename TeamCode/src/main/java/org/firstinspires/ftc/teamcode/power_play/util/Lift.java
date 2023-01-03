@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //DON'T DELETE 1194 2013
 public class Lift {
-    public static final int LIFT_RANGE = 1200, LIFT_MIN = 10; // max amount of ticks in the lift..
+    public static final int LIFT_RANGE = 3050, LIFT_MIN = 10; // max amount of ticks in the lift..
     public final int FLIP_POSITION = 120, HALF_POSITION = 60; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
@@ -31,7 +31,6 @@ public class Lift {
 
         rightElevator.setDirection(DcMotorEx.Direction.REVERSE);
         leftElevator.setDirection(DcMotorEx.Direction.FORWARD);
-
         rightElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         leftElevator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
@@ -52,7 +51,7 @@ public class Lift {
         flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
         rotateServo = hw.get(Servo.class, "rotateServo");
         //endregion
-        //resetLift();
+        resetLift();
 
         resetJoint();
     }
@@ -62,8 +61,8 @@ public class Lift {
 
         ElapsedTime timer = new ElapsedTime();
 
-        rightElevator.setPower(-0.2);
-        leftElevator.setPower(-0.2);
+        rightElevator.setPower(-0.3);
+        leftElevator.setPower(-0.3);
         while (!this.elevatorTouchSwitch() && timer.seconds() < 4) ;
         rightElevator.setPower(0);
         leftElevator.setPower(0);
@@ -137,9 +136,9 @@ public class Lift {
 
     public enum LiftLevel {
         Floor(0),
-        First((int) (0.243 * LIFT_RANGE)),
-        Second((int) (0.5 * LIFT_RANGE)),
-        Third((int) (0.733 * LIFT_RANGE));
+        First(810),
+        Second(1660),
+        Third(2500);
 
         final int position;
 
@@ -151,12 +150,10 @@ public class Lift {
     public void setLiftPower(double pow) {
         if (Math.abs(pow) > 0.2) {
             if (pow < 0) { // If negative
-                pow /= 9;
-                if (leftElevator.getCurrentPosition() > 400) {
-                    pow = 0.1 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE;
-                } else {
-                    pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
-                }
+                //pow /= 9;
+                //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
+                pow = -0.3;
+
             }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
