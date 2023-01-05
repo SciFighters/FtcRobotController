@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.power_play.util.Location;
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
-    Location coneLocation = new Location(1.5, 1.5, 90); // also park 3
+    Location coneLocation = new Location(-0.4, 1.5, 90); // also park 3
     Location highJunction = new Location(0.9, 1.5, -45); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
@@ -23,6 +23,17 @@ public class AutoFlow {
         public int mul;
 
         ALLIANCE(int mul) {
+            this.mul = mul;
+        }
+    }
+
+    public enum SIDE {
+        LEFT(-1),
+        RIGHT(1);
+
+        public int mul;
+
+        SIDE(int mul) {
             this.mul = mul;
         }
     }
@@ -113,25 +124,27 @@ public class AutoFlow {
                 parkingPosition_tolerance,
                 parkingPosition_tolerance);
     }
+
     private void parkAtConeLocation() {
 
     }
+
     public void run() {
         if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third);
             for (int i = 0; i < 4; i++) { // Going to put 4 cones
                 drive.goToLocation(highJunction, 1, 0.06, 0);
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
                 lift.grabber(false); // opens grabber
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
                 lift.gotoLevel(Lift.LiftLevel.Floor); // TODO: check if the height right? (cone pile)
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
                 drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
                 lift.grabber(true); //(Changed to true) TODO: check validity of grabber ability
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
                 lift.gotoLevel(Lift.LiftLevel.Third);
-                opMode.sleep((int)(2 * 1000));
+                opMode.sleep((int) (2 * 1000));
             }
         }
         //TODO: DO NOT DELETE CODE
@@ -157,6 +170,23 @@ public class AutoFlow {
         if (auto._isParking) parkAtConeLocation();
 
         //
+    }
+
+    public void placeCones() {
+        drive.goToLocation(new Location(drive.getPosX(), coneLocation.y), 0.5, 0.1, 3); // goes to robot x, and cone y
+        drive.goToLocation(new Location(coneLocation.x, drive.getPosY()), 0.5, 0.1, 3); // goes to cone x, and robot y
+        drive.turn(90, 0.5);
+        lift.grabber(false); // opens grabber
+        lift.gotoLevel(Lift.LiftLevel.cone5); // goes to the highest cone
+        drive.goToLocation(new Location(drive.getPosX() + 0.2, drive.getPosY()), 0.5, 0.1, 3);
+        lift.grabber(true); // closes grabber
+        lift.gotoLevel(Lift.LiftLevel.Third); // goes to max height of elevator
+        drive.turn(-90, 0.5);
+        drive.goToLocation(new Location(highJunction.x, highJunction.y), 0.5, 0.1, 3); // goes to high junction position
+        lift.toggleFlip(); // changes side of flip motors
+        lift.grabber(false); // opens grabber
+
+
     }
 }
 
