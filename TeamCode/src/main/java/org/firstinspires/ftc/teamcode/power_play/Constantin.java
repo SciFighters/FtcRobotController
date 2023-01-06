@@ -24,7 +24,7 @@ public class Constantin extends LinearOpMode {
     Toggle grabber = new Toggle();
     Toggle flipGrabber = new Toggle();
     Toggle rotateGrabber = new Toggle();
-
+    Toggle Level3_1 = new Toggle();
     private Toggle turningToggle = new Toggle();
     //endregion
 
@@ -92,16 +92,18 @@ public class Constantin extends LinearOpMode {
             Level1.update(gamepad2.x);
             Level2.update(gamepad2.b);
             Level3.update(gamepad2.y);
+            Level3_1.update(gamepad2.back);
             grabber.update(gamepad2.right_bumper);
             flipGrabber.update(gamepad2.dpad_up || gamepad2.dpad_down);
             rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
 
-            if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor);
+            if (Level0.isClicked()) lift.gotoLevel(Lift.LiftLevel.Floor, true);
             if (Level1.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.First);
+                lift.gotoLevel(Lift.LiftLevel.First, true);
             }
-            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second);
-            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third);
+            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true);
+            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true);
+            if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
             if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
             if (flipGrabber.isClicked()) lift.toggleFlip();
@@ -135,9 +137,12 @@ public class Constantin extends LinearOpMode {
             telemetry.addData("left elevator busy", lift.leftElevator.isBusy());
             telemetry.addData("right elevator busy", lift.rightElevator.isBusy());
             telemetry.addData("Lift State", lift.getState());
-            telemetry.addData("Arm State", lift.getArmState());
+            telemetry.addData("Arm State ", lift.getArmState());
             telemetry.addData("Battery level", batteryLevel);
             telemetry.addData("Battery percentage", batteryLevel);
+            telemetry.addData("Position x", drive.getPosX());
+            telemetry.addData("Position y", drive.getPosY());
+            telemetry.addData("Heading", drive.getHeading());
             telemetry.update();
         }
     }

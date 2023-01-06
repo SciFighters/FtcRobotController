@@ -143,7 +143,8 @@ public class Lift {
         Floor(0),
         First(810),
         Second(1660),
-        Third(2500);
+        Third(2500),
+        ThirdFront(3000);
 
         final int position;
 
@@ -189,13 +190,13 @@ public class Lift {
 //        }
 //    }
 
-    public void gotoLevel(LiftLevel level) {
-        gotoLevel(level, 0);
+    public void gotoLevel(LiftLevel level, boolean flip) {
+        gotoLevel(level, 0, flip);
     }
 
-    public void gotoLevel(LiftLevel level, int positionDiff) {
+    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip) {
         if (level == LiftLevel.Floor) setArmState(ArmState.Home);
-        else setArmState(ArmState.Flip);
+        else if (flip) setArmState(ArmState.Flip);
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
         this.setLiftState(LiftState.Goto);
