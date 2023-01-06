@@ -13,6 +13,7 @@ public class TestAuto extends LinearOpMode {
 
 		waitForStart();
 
-		auto.placeFirstCone(); // TODO: Change to placeCones
+//		auto.placeFirstCone(); // TODO: Change to placeCones
+		auto.placeCones();
 	}
 }

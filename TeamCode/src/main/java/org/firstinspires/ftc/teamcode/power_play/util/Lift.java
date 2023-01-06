@@ -136,10 +136,10 @@ public class Lift {
 
     public enum LiftLevel {
         cone1(0),
-        cone2(84),
-        cone3(168),
-        cone4(252),
-        cone5(336),
+        cone2(104),
+        cone3(188),
+        cone4(272),
+        cone5(356), // previously 336
         Floor(0),
         First(810),
         Second(1660),

@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.power_play.util.Location;
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
-    Location coneLocation = new Location(-0.5, 1.5, 90); // also park 3
+    Location coneLocation = new Location(-0.85, 1.5, 90); // also park 3
     Location highJunction = new Location(1.8, 1.5, -45); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
@@ -172,24 +172,21 @@ public class AutoFlow {
         lift.grabber(false);
 
     }
-
     public void placeCones() {
-        placeFirstCone();
+        lift.gotoLevel(Lift.LiftLevel.cone5, false); // goes to the highest cone
+        lift.grabber(false); // opens grabber
         drive.goToLocation(new Location(drive.getPosX(), coneLocation.y), 0.5, 0.1, 3); // goes to robot x, and cone y
         drive.turn(-90, 0.5);
         drive.goToLocation(new Location(coneLocation.x, drive.getPosY(), -90), 0.5, 0.1, 3); // goes to cone x, and robot y
-        lift.grabber(false); // opens grabber
-        lift.gotoLevel(Lift.LiftLevel.cone5, true); // goes to the highest cone
-        drive.goToLocation(new Location(drive.getPosX() + 0.4, drive.getPosY(), -90), 0.5, 0.1, 3);
+//        drive.goToLocation(new Location(drive.getPosX() + 0.4, drive.getPosY(), -90), 0.5, 0.1, 3);
         opMode.sleep(500);
         lift.grabber(true); // closes grabber
         opMode.sleep(500);
-        lift.gotoLevel(Lift.LiftLevel.Third, false); // goes to max height of elevator
-        drive.turn(90, 0.5);
-        drive.goToLocation(new Location(highJunction.x, highJunction.y, 90), 0.5, 0.1, 3); // goes to high junction position
-        lift.toggleFlip(); // changes side of flip motors
-        lift.grabber(false); // opens grabber
-
+//        lift.gotoLevel(Lift.LiftLevel.Third, false); // goes to max height of elevator
+//        drive.turn(90, 0.5);
+//        drive.goToLocation(new Location(highJunctionSafe.x, highJunctionSafe.y, 90), 0.5, 0.1, 3); // goes to high junction position
+//        lift.toggleFlip(); // changes side of flip motors
+//        lift.grabber(false); // opens grabber
 
     }
 }
