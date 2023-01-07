@@ -85,7 +85,7 @@ public class Lift {
         jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    boolean elevatorTouchSwitch() {
+    public boolean elevatorTouchSwitch() {
         return !this.touchDown.getState();
     }
 
@@ -136,10 +136,10 @@ public class Lift {
 
     public enum LiftLevel {
         cone1(0),
-        cone2(104),
-        cone3(188),
-        cone4(272),
-        cone5(356), // previously 336
+        cone2(134),
+        cone3(218),
+        cone4(302),
+        cone5(386), // previously 336
         Floor(0),
         First(810),
         Second(1660),
@@ -195,7 +195,9 @@ public class Lift {
     }
 
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip) {
-        if (level == LiftLevel.Floor) setArmState(ArmState.Home);
+        if (level == LiftLevel.Floor) {
+            setArmState(ArmState.Home);
+        }
         else if (flip) setArmState(ArmState.Flip);
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
@@ -247,12 +249,13 @@ public class Lift {
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
-                grabber(true);
+
+
                 break;
             case Flip:
                 jointMotor.setTargetPosition(FLIP_POSITION);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                jointMotor.setPower(0.9);
+                jointMotor.setPower(0.6);
                 rotateServo.setPosition(1);
                 break;
             case Half:
