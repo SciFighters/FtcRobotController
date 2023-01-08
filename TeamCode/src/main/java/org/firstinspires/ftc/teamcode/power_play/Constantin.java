@@ -33,7 +33,6 @@ public class Constantin extends LinearOpMode {
         this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addLine("Starting Initializing");
         telemetry.update();
-        boolean bOpenGrabber = false;
         drive.init(hardwareMap);
         lift.init(hardwareMap);
 
@@ -102,11 +101,6 @@ public class Constantin extends LinearOpMode {
 
             if (Level0.isClicked()) {
                 lift.gotoLevel(Lift.LiftLevel.Floor, true);
-                bOpenGrabber = true;
-            }
-            if (bOpenGrabber && lift.elevatorTouchSwitch()) {
-                lift.grabber(false);
-                bOpenGrabber = false;
             }
             if (Level1.isClicked()) {
                 lift.gotoLevel(Lift.LiftLevel.First, true);

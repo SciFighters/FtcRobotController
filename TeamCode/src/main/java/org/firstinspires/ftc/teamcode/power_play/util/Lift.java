@@ -197,8 +197,7 @@ public class Lift {
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip) {
         if (level == LiftLevel.Floor) {
             setArmState(ArmState.Home);
-        }
-        else if (flip) setArmState(ArmState.Flip);
+        } else if (flip) setArmState(ArmState.Flip);
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
         this.setLiftState(LiftState.Goto);
@@ -249,8 +248,7 @@ public class Lift {
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
-
-
+                grabber(true);
                 break;
             case Flip:
                 jointMotor.setTargetPosition(FLIP_POSITION);
