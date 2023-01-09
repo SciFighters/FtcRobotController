@@ -29,9 +29,9 @@ public class SleevePipeline extends OpenCvPipeline {
     public static volatile Scalar max_color3 = new Scalar(75, 255, 255);
 
     public enum ParkingLocation {
-        Left,
-        Middle,
-        Right,
+        One,
+        Two,
+        Three,
     }
 
     private volatile ParkingLocation parkingLocation = null;
@@ -128,9 +128,9 @@ public class SleevePipeline extends OpenCvPipeline {
                 Imgproc.rectangle(frame, r, new Scalar(255, 255, 0), 2);
             }
 
-            if (maxN == 1) this.parkingLocation = ParkingLocation.Left;
-            else if (maxN == 2) this.parkingLocation = ParkingLocation.Middle;
-            else if (maxN == 3) this.parkingLocation = ParkingLocation.Right;
+            if (maxN == 1) this.parkingLocation = ParkingLocation.One;
+            else if (maxN == 2) this.parkingLocation = ParkingLocation.Two;
+            else if (maxN == 3) this.parkingLocation = ParkingLocation.Three;
         } else {
             // either set parkingLocation to null or leave it as is
         }
