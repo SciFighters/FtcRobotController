@@ -40,6 +40,9 @@ public class RobotReveal extends LinearOpMode {
             if (gamepad1.left_stick_y > 0) {
                 drive.setPower(-0.5, 0, 0);
             }
+            if (gamepad1.a) {
+                drive.setPower(0, 0, 0);
+            }
         }
     }
 
