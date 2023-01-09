@@ -103,9 +103,9 @@ public class Lift {
         rotateServo.setPosition(rotated ? 1 : 0);
     }
 
-    public void toggleFlip() {
-        if (this.armState != ArmState.Flip) setArmState(ArmState.Flip);
-        else setArmState(ArmState.Home);
+    public void toggleFlip(Toggle grabberToggle) {
+        if (this.armState != ArmState.Flip) setArmState(ArmState.Flip, grabberToggle);
+        else setArmState(ArmState.Home, grabberToggle);
     }
 
     public enum LiftState {
@@ -158,7 +158,7 @@ public class Lift {
             if (pow < 0) { // If negative
                 //pow /= 9;
                 //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
-                pow = -0.3;
+                pow = -0.5;
 
             }
             this.setLiftState(LiftState.Manual);
@@ -190,14 +190,14 @@ public class Lift {
 //        }
 //    }
 
-    public void gotoLevel(LiftLevel level, boolean flip) {
-        gotoLevel(level, 0, flip);
+    public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
+        gotoLevel(level, 0, flip, grabberToggle);
     }
 
-    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip) {
+    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle) {
         if (level == LiftLevel.Floor) {
-            setArmState(ArmState.Home);
-        } else if (flip) setArmState(ArmState.Flip);
+            setArmState(ArmState.Home, grabberToggle);
+        } else if (flip) setArmState(ArmState.Flip, grabberToggle);
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
         this.setLiftState(LiftState.Goto);
@@ -240,7 +240,7 @@ public class Lift {
         this.liftState = newLiftState;
     }
 
-    public void setArmState(ArmState newState) {
+    public void setArmState(ArmState newState, Toggle grabberToggle) {
         if (newState == this.armState) return;
         switch (newState) {
             case Home:
@@ -249,12 +249,15 @@ public class Lift {
                 jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
                 grabber(true);
+                if (grabberToggle != null) grabberToggle.set(true);
                 break;
             case Flip:
                 jointMotor.setTargetPosition(FLIP_POSITION);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.6);
                 rotateServo.setPosition(1);
+                grabber(true);
+                if (grabberToggle != null) grabberToggle.set(true);
                 break;
             case Half:
                 jointMotor.setTargetPosition(HALF_POSITION);

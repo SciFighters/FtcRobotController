@@ -13,6 +13,30 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class CameraInitializer {
+	/**
+	 *
+	 * Supported resolutions:
+	 * [640x480],
+	 * [160x90],
+	 * [160x120],
+	 * [176x144],
+	 * [320x180],
+	 * [320x240],
+	 * [352x288],
+	 * [432x240],
+	 * [640x360],
+	 * [800x448],
+	 * [800x600],
+	 * [864x480],
+	 * [960x720],
+	 * [1024x576],
+	 * [1280x720],
+	 * [1600x896],
+	 * [1920x1080],
+	 * [2304x1296],
+	 * [2304x1536]
+	 *
+	 * */
 	public static void initialize(OpMode opmode, String cameraName, int width, int height, OpenCvPipeline pipeline, boolean streamToDashboard) {
 		int cameraMonitorViewID = opmode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opmode.hardwareMap.appContext.getPackageName());
 
@@ -25,7 +49,7 @@ public class CameraInitializer {
 			@Override
 			public void onOpened() {
 				webcam.startStreaming(width, height, OpenCvCameraRotation.UPRIGHT);
-				FtcDashboard.getInstance().startCameraStream(webcam, 0);
+//				FtcDashboard.getInstance().startCameraStream(webcam, 12);
 			}
 
 			@Override

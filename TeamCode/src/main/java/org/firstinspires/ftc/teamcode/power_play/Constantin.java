@@ -85,6 +85,8 @@ public class Constantin extends LinearOpMode {
 
             //endregion
 
+            if (gamepad1.dpad_left)  x = -0.3;
+            if (gamepad1.dpad_right) x = 0.3;
             drive.setPowerOriented(y, x, turn, true);
 
             lift.setLiftPower(-gamepad2.right_stick_y);
@@ -100,17 +102,17 @@ public class Constantin extends LinearOpMode {
             rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
 
             if (Level0.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.Floor, true);
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber);
             }
             if (Level1.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.First, true);
+                lift.gotoLevel(Lift.LiftLevel.First, true, grabber);
             }
-            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true);
-            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true);
-            if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false);
+            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true, grabber);
+            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true, grabber);
+            if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, grabber);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
             if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
-            if (flipGrabber.isClicked()) lift.toggleFlip();
+            if (flipGrabber.isClicked()) lift.toggleFlip(grabber);
 //            for (Levels level : levels) {
 //                level.update(this);
 //

@@ -123,34 +123,34 @@ public class AutoFlow {
 
     public void run() {
         if (auto == Auto.FULL) {
-            lift.gotoLevel(Lift.LiftLevel.Third, true);
+            lift.gotoLevel(Lift.LiftLevel.Third, true, null);
             for (int i = 0; i < 4; i++) { // Going to put 4 cones
                 drive.goToLocation(highJunction, 1, 0.06, 0);
                 opMode.sleep((int) (2 * 1000));
                 lift.grabber(false); // opens grabber
                 opMode.sleep((int) (2 * 1000));
-                lift.gotoLevel(Lift.LiftLevel.Floor, true); // TODO: check if the height right? (cone pile)
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, null); // TODO: check if the height right? (cone pile)
                 opMode.sleep((int) (2 * 1000));
                 drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
                 opMode.sleep((int) (2 * 1000));
                 lift.grabber(true); //(Changed to true) TODO: check validity of grabber ability
                 opMode.sleep((int) (2 * 1000));
-                lift.gotoLevel(Lift.LiftLevel.Third, true);
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
                 opMode.sleep((int) (2 * 1000));
             }
         }
         //TODO: DO NOT DELETE CODE
         if (auto == auto.LONG) { //backup, less points
-            lift.gotoLevel(Lift.LiftLevel.Third, true);
+            lift.gotoLevel(Lift.LiftLevel.Third, true, null);
             drive.goToLocation(highJunctionSafe, 1, 0.2, highJunctionSafe.angle);
 
             lift.grabber(false); //(Changed to false) TODO: check
             for (int i = 0; i < 3; i++) {
-                lift.gotoLevel(Lift.LiftLevel.Floor, true);
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, null);
                 drive.goToLocation(coneLocation, 1, 0.2, coneLocation.angle);
                 lift.grabber(true); //(Changed to true)
                 final int tickDiff = 30;
-                lift.gotoLevel(Lift.LiftLevel.Second, -(i * tickDiff), true);
+                lift.gotoLevel(Lift.LiftLevel.Second, -(i * tickDiff), true, null);
 
                 drive.goToLocation(medJunction, 1, 0.2, medJunction.angle);
                 lift.grabber(false);
@@ -165,7 +165,7 @@ public class AutoFlow {
     }
 
     public void placeFirstCone() {
-        lift.gotoLevel(Lift.LiftLevel.ThirdFront, false);
+        lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, null);
         drive.goToLocation(new Location(0, highJunction.y, drive.getHeading()), 0.5, 0.1, 3); // goes to high junction position
         drive.goToLocation(new Location(highJunction.x, highJunction.y,
                 drive.getHeading()), 0.4, 0.1, 3);
@@ -177,7 +177,7 @@ public class AutoFlow {
 
     public void placeCones() {
 
-        lift.gotoLevel(Lift.LiftLevel.cone5, false); // goes to the highest cone
+        lift.gotoLevel(Lift.LiftLevel.cone5, false, null); // goes to the highest cone
         lift.grabber(false); // opens grabber
         opMode.sleep(50);
         drive.goToLocation(new Location(0, coneLocation.y, drive.getHeading()),
@@ -191,9 +191,9 @@ public class AutoFlow {
         opMode.sleep(300);
         lift.grabber(true); // closes grabber
         opMode.sleep(500);
-        lift.gotoLevel(Lift.LiftLevel.Third, false);
+        lift.gotoLevel(Lift.LiftLevel.Third, false, null);
         opMode.sleep(500);
-        lift.toggleFlip();
+        lift.toggleFlip(null);
         drive.goToLocation(new Location(drive.getPosX() + 0.5,
                         drive.getPosY(),
                         drive.getHeading()),
