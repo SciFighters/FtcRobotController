@@ -62,13 +62,12 @@ public class DriveClass {
 
     // DriveMode - (direction & origin of IMU_Integrator)
     public enum DriveMode {
-        BLUE(1, new Point(0.5 * 0.6, -3 * 0.6), new Point(-1, -1)),
-        RED(2, new Point(-0.5 * 0.6, -3 * 0.6), new Point(1, 1));
+        LEFT(1, new Point(0, 0), new Point(-1, -1)),
+        RIGHT(2, new Point(0, 0), new Point(1, 1));
 
         //        public static double tile = 0.6;
         public int index;
-        public Point origin;
-        public Point direciton;
+        public Point origin, direciton;
 
         DriveMode(int index, Point origin, Point direction) {
             this.index = index;
@@ -103,17 +102,22 @@ public class DriveClass {
                 this.forwardTicksPerMeter = 1562.5;
                 this.strafeTicksPerMeter = 1645.83;
                 break;
-//            case COBALT:
-//                this.forwardTicksPerMeter = 1753;
-//                this.strafeTicksPerMeter = 2006;
-//                break;
+            case COBALT:
+                this.forwardTicksPerMeter = 1753;
+                this.strafeTicksPerMeter = 2006;
+                break;
             case SCORPION:
                 this.forwardTicksPerMeter = 2455;
                 this.strafeTicksPerMeter = 2587;
                 break;
+            case CONSTANTIN:
+                this.forwardTicksPerMeter = 1753;
+                this.strafeTicksPerMeter = 2006;
+                break;
             default:
                 this.forwardTicksPerMeter = 1753;
                 this.strafeTicksPerMeter = 2006;
+
         }
 
         this.useEncoders = (flags & USE_ENCODERS) != 0;
@@ -627,4 +631,21 @@ public class DriveClass {
 //
 //        return a;
 //    }
+
+    public void hoverBoard() { // Fix
+        // telemetry - Angles (XYZ)
+        Orientation heading = imu.getAngularOrientation();
+//        opMode.telemetry.addData("First angle (most used angle)",heading.firstAngle);
+        opMode.telemetry.addData("Second angle",heading.secondAngle);
+        opMode.telemetry.addData("Third angle",heading.thirdAngle);
+    }
+
+    public void hoverBoardMode() {
+        float angle = imu.getAngularOrientation().thirdAngle;
+        final float k = 0.01f;
+        if(Math.abs(angle) > 0.3)
+            setPower(k * angle, 0, 0);
+    }
+
+
 }

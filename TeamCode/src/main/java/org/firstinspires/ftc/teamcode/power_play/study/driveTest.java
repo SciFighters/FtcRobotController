@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 
@@ -18,7 +17,7 @@ public class driveTest extends LinearOpMode {
 
 
     public void initiate(HardwareMap hw) {
-        drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0,0), org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass.USE_BRAKE | org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass.USE_DASHBOARD_FIELD,org.firstinspires.ftc.teamcode.power_play.util.DriveClass.DriveMode.BLUE);
+        drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0,0), org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass.USE_BRAKE | org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass.USE_DASHBOARD_FIELD,org.firstinspires.ftc.teamcode.power_play.util.DriveClass.DriveMode.LEFT);
         runtime = new ElapsedTime();
         drive.init(hw);
     }

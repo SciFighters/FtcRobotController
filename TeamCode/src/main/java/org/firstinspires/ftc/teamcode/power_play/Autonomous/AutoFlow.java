@@ -16,15 +16,7 @@ public class AutoFlow {
     final double tile = 0.6;
 
     //region Enums
-    public enum ALLIANCE {
-        BLUE(1), RED(-1);
 
-        public int mul;
-
-        ALLIANCE(int mul) {
-            this.mul = mul;
-        }
-    }
 
     public enum SIDE {
         LEFT(-1), RIGHT(1);
@@ -50,7 +42,8 @@ public class AutoFlow {
     }
 
     public enum StartPos {
-        front(1), back(-1);
+        LEFT(1),
+        RIGHT(-1);
 
         int mul;
 
@@ -77,21 +70,19 @@ public class AutoFlow {
     final int screenHeight = 360;
 
 
-    Location startLocation = new Location(0, robotLength / 2);
-
-
+    Location startLocation = new Location(-1.5, robotLength / 2);
     Auto auto;
-    ALLIANCE alliance;
     StartPos startPos;
     private Lift lift = null;
 
-    public AutoFlow(LinearOpMode opMode, ALLIANCE alliance, StartPos startPos, Auto auto) {
+    public AutoFlow(LinearOpMode opMode, StartPos startPos, Auto auto) {
         this.opMode = opMode;
-        this.alliance = alliance;
         this.startPos = startPos;
         this.auto = auto;
 
-        this.drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_DASHBOARD_FIELD, alliance == ALLIANCE.BLUE ? DriveClass.DriveMode.BLUE : DriveClass.DriveMode.RED);
+        this.drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_DASHBOARD_FIELD, startPos == StartPos.LEFT ? DriveClass.DriveMode.LEFT : DriveClass.DriveMode.LEFT);
+
+
     }
 
     public void init() {

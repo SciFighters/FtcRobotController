@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 @TeleOp
 public class Constantin extends LinearOpMode {
     Lift lift = new Lift();
-    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.BLUE);
+    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
     double batteryLevel;
     double batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
     //region button toggles
@@ -85,7 +85,7 @@ public class Constantin extends LinearOpMode {
 
             //endregion
 
-            if (gamepad1.dpad_left)  x = -0.3;
+            if (gamepad1.dpad_left) x = -0.3;
             if (gamepad1.dpad_right) x = 0.3;
             drive.setPowerOriented(y, x, turn, true);
 
@@ -134,6 +134,8 @@ public class Constantin extends LinearOpMode {
 
 //            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
 //            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
+
+            drive.hoverBoard();
 
             telemetry.addData("Flip Grabber", lift.jointMotor.getCurrentPosition());
             telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());
