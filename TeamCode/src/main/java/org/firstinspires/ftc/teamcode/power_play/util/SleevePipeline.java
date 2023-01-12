@@ -17,14 +17,14 @@ import java.util.ArrayList;
 
 @Config
 public class SleevePipeline extends OpenCvPipeline {
-//    public static volatile int minh1, maxh1, minh2, maxh2, minh3, maxh3;
+    //    public static volatile int minh1, maxh1, minh2, maxh2, minh3, maxh3;
 //    static int minSB = 125, maxSB = 255;
     public static volatile Scalar min_color1 = new Scalar(10, 125, 125);
     public static volatile Scalar max_color1 = new Scalar(30, 255, 255);
 
     public static volatile Scalar min_color2 = new Scalar(145, 125, 125);
     public static volatile Scalar max_color2 = new Scalar(175, 255, 255);
-//
+    //
     public static volatile Scalar min_color3 = new Scalar(40, 125, 125);
     public static volatile Scalar max_color3 = new Scalar(75, 255, 255);
 
@@ -35,7 +35,10 @@ public class SleevePipeline extends OpenCvPipeline {
     }
 
     private volatile ParkingLocation parkingLocation = null;
-    public ParkingLocation getParkingLocation() { return this.parkingLocation; }
+
+    public ParkingLocation getParkingLocation() {
+        return this.parkingLocation;
+    }
 
     private Mat hsv = null;
     private Mat thresholded = null;

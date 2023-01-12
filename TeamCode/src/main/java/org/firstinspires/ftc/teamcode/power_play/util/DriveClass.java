@@ -632,7 +632,7 @@ public class DriveClass {
 //        return a;
 //    }
 
-    public void hoverBoard() { // Fix
+    public void anglesTelemetry() { // Fix
         // telemetry - Angles (XYZ)
         Orientation heading = imu.getAngularOrientation();
 //        opMode.telemetry.addData("First angle (most used angle)",heading.firstAngle);

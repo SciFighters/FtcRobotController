@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.power_play;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -30,7 +28,7 @@ public class Constantin extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+//        this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addLine("Starting Initializing");
         telemetry.update();
         drive.init(hardwareMap);
@@ -91,7 +89,9 @@ public class Constantin extends LinearOpMode {
 
             lift.setLiftPower(-gamepad2.right_stick_y);
 
-
+            if (gamepad1.back) {
+                drive.hoverBoardMode();
+            }
             Level0.update(gamepad2.a);
             Level1.update(gamepad2.x);
             Level2.update(gamepad2.b);
@@ -135,7 +135,7 @@ public class Constantin extends LinearOpMode {
 //            telemetry.addData("y axis of right stick is activated", MathUtil.outOfRange(gamepad2.right_stick_y * 100, -10, 10));
 //            telemetry.addData("current power (taken)", gamepad2.right_stick_y);
 
-            drive.hoverBoard();
+            drive.anglesTelemetry();
 
             telemetry.addData("Flip Grabber", lift.jointMotor.getCurrentPosition());
             telemetry.addData("Left lift pos", lift.leftElevator.getCurrentPosition());

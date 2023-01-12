@@ -191,7 +191,7 @@ public class Lift {
 //    }
 
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
-        gotoLevel(level, 0, flip, grabberToggle);
+        gotoLevel(level, flip, grabberToggle);
     }
 
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle) {
