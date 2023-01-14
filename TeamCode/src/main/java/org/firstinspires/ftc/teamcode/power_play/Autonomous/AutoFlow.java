@@ -5,14 +5,17 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.power_play.util.SleevePipeline;
 
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
+    private SleevePipeline pipeline;
     Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
     Location highJunction = new Location(0.4, 1.62, -180); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
+    private ParkingPosition parkingPosition;
     final double tile = 0.6;
 
     //region Enums
@@ -70,7 +73,7 @@ public class AutoFlow {
     final int screenHeight = 360;
 
 
-    Location startLocation = new Location(-1.5, robotLength / 2);
+    Location startLocation = new Location(-0.9, robotLength / 2); // LEFT
     Auto auto;
     StartPos startPos;
     private Lift lift = null;
@@ -87,12 +90,28 @@ public class AutoFlow {
 
     public void init() {
         //initWebcam();
-        //ToDo inits
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
         this.lift = new Lift();
         lift.init(opMode.hardwareMap);
         lift.grabber(true); // closes grabbers, init
+
+    }
+
+    public void init2() {
+        //initWebcam();
+        drive.init(opMode.hardwareMap);
+        opMode.telemetry.update();
+        this.lift = new Lift();
+        pipeline = new SleevePipeline();
+        switch (pipeline.getParkingLocation()) {
+            case One:
+                parkingPosition = ParkingPosition.one;
+            case Two:
+                parkingPosition = ParkingPosition.two;
+            case Three:
+                parkingPosition = ParkingPosition.three;
+        }
 
     }
 
@@ -204,6 +223,10 @@ public class AutoFlow {
 //        drive.goToLocation(new Location(highJunctionSafe.x, highJunctionSafe.y, 90), 0.5, 0.1, 3); // goes to high junction position
 //        lift.toggleFlip(); // changes side of flip motors
 //        lift.grabber(false); // opens grabber
+
+    }
+
+    public void run2() {
 
     }
 }

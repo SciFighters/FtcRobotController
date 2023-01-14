@@ -636,14 +636,14 @@ public class DriveClass {
         // telemetry - Angles (XYZ)
         Orientation heading = imu.getAngularOrientation();
 //        opMode.telemetry.addData("First angle (most used angle)",heading.firstAngle);
-        opMode.telemetry.addData("Second angle",heading.secondAngle);
-        opMode.telemetry.addData("Third angle",heading.thirdAngle);
+        opMode.telemetry.addData("Second angle", heading.secondAngle);
+        opMode.telemetry.addData("Third angle", heading.thirdAngle);
     }
 
     public void hoverBoardMode() {
         float angle = imu.getAngularOrientation().thirdAngle;
         final float k = 0.01f;
-        if(Math.abs(angle) > 0.3)
+        if (Math.abs(angle) > 0.3)
             setPower(k * angle, 0, 0);
     }
 
