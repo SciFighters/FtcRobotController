@@ -32,9 +32,9 @@ public class AutoFlow {
     }
 
     public enum ParkingPosition {
-        one(new Location(-0.75, 0.93)),
-        two(new Location(0, 0.80)),
-        three(new Location(0.70, 1.50)),
+        one(new Location(-1.5, 0.6)),
+        two(new Location(-0.9, 0.6)),
+        three(new Location(-0.3, 0.6)),
         threeClose(new Location(1, 0.90));
 
         public Location location;
@@ -104,6 +104,7 @@ public class AutoFlow {
         opMode.telemetry.update();
         this.lift = new Lift();
         pipeline = new SleevePipeline();
+        pipeline.init();
         switch (pipeline.getParkingLocation()) {
             case One:
                 parkingPosition = ParkingPosition.one;
@@ -227,7 +228,7 @@ public class AutoFlow {
     }
 
     public void run2() {
-
+        gotoParkingPosition(parkingPosition);
     }
 }
 
