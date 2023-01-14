@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.power_play;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,7 +30,7 @@ public class Constantin extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-//        this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        this.telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addLine("Starting Initializing");
         telemetry.update();
         drive.init(hardwareMap);
