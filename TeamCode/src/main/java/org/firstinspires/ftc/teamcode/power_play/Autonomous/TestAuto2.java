@@ -10,12 +10,13 @@ public class TestAuto2 extends LinearOpMode {
     public void runOpMode() {
         AutoFlow auto = new AutoFlow(this, AutoFlow.StartPos.LEFT, AutoFlow.Auto.FULL); //bacl
 
-        auto.init2();
+        auto.init();
 
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
-        auto.run2();
+        auto.test();
+        //auto.gotoParkingPosition(AutoFlow.ParkingPosition.three);
         telemetry.addData("Time ", timer.time());
         telemetry.update();
         sleep(20_000);

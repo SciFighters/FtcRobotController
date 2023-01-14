@@ -7,6 +7,7 @@ import android.util.Log;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -142,10 +143,10 @@ public class DriveClass {
         //endregion get from hw
 
         //region setDirection
-        fl.setDirection(DcMotorEx.Direction.REVERSE);
-        fr.setDirection(DcMotorEx.Direction.FORWARD);
-        bl.setDirection(DcMotorEx.Direction.REVERSE);
-        br.setDirection(DcMotorEx.Direction.FORWARD);
+        fl.setDirection(DcMotorEx.Direction.FORWARD);
+        fr.setDirection(DcMotorEx.Direction.REVERSE);
+        bl.setDirection(DcMotorEx.Direction.FORWARD);
+        br.setDirection(DcMotorEx.Direction.REVERSE);
         //endregion setDirection
 
         fl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);

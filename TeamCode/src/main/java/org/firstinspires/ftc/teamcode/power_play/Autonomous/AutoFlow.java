@@ -2,20 +2,27 @@ package org.firstinspires.ftc.teamcode.power_play.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
+import org.firstinspires.ftc.teamcode.power_play.util.CameraInitializer;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.SleevePipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
     private SleevePipeline pipeline;
     Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
-    Location highJunction = new Location(0.4, 1.62, -180); // also park 2
+    Location highJunction = new Location(-0.6, 1.7, 0); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
-    private ParkingPosition parkingPosition;
+    private ParkingPosition parkingPosition = ParkingPosition.one;
     final double tile = 0.6;
 
     //region Enums
@@ -73,7 +80,7 @@ public class AutoFlow {
     final int screenHeight = 360;
 
 
-    Location startLocation = new Location(-0.9, robotLength / 2); // LEFT
+    Location startLocation = new Location(-0.9, robotLength / 2,-180); // LEFT
     Auto auto;
     StartPos startPos;
     private Lift lift = null;
@@ -88,8 +95,8 @@ public class AutoFlow {
 
     }
 
-    public void init() {
-        //initWebcam();
+    public void init2() {
+
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
         this.lift = new Lift();
@@ -98,23 +105,29 @@ public class AutoFlow {
 
     }
 
-    public void init2() {
-        //initWebcam();
+    public void init() {
+
         drive.init(opMode.hardwareMap);
         opMode.telemetry.update();
         this.lift = new Lift();
         pipeline = new SleevePipeline();
-        pipeline.init();
-        switch (pipeline.getParkingLocation()) {
-            case One:
-                parkingPosition = ParkingPosition.one;
-            case Two:
-                parkingPosition = ParkingPosition.two;
-            case Three:
-                parkingPosition = ParkingPosition.three;
-        }
+        CameraInitializer.initialize(opMode, "webcam", 640, 360, pipeline, false);
 
+        pipeline.getParkingLocation();
+        opMode.telemetry.addData("camara is on", pipeline.getParkingLocation());
+        SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
+        if (loc == SleevePipeline.ParkingLocation.One) {
+
+            opMode.telemetry.addLine("1");
+        } else if (loc == SleevePipeline.ParkingLocation.Two) {
+            opMode.telemetry.addLine("2");
+        } else if(loc == SleevePipeline.ParkingLocation.Three) {
+            opMode.telemetry.addLine("3");
+         }
+
+        opMode.telemetry.update();
     }
+
 
 
     public void gotoParkingPosition(ParkingPosition parkingPosition) {
@@ -176,10 +189,10 @@ public class AutoFlow {
     }
 
     public void placeFirstCone() {
-        lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, null);
-        drive.goToLocation(new Location(0, highJunction.y, drive.getHeading()), 0.5, 0.1, 3); // goes to high junction position
-        drive.goToLocation(new Location(highJunction.x, highJunction.y,
-                drive.getHeading()), 0.4, 0.1, 3);
+        lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+        drive.goToLocation(new Location(drive.getPosX(), highJunction.y - 0.1, drive.getHeading()), 0.5, 0.05, 3); // goes to high junction position
+        opMode.sleep(500);
+        drive.goToLocation(new Location(highJunction.x, highJunction.y, drive.getHeading()), 0.4, 0.05, 3);
         opMode.sleep(300);
         lift.grabber(false);
         opMode.sleep(300);
@@ -229,6 +242,13 @@ public class AutoFlow {
 
     public void run2() {
         gotoParkingPosition(parkingPosition);
+    }
+    public  void test(){
+        drive.goTo(-0.9,0.4,0.5,drive.getHeading(),0.04,100);
+        lift.init(opMode.hardwareMap);
+        lift.grabber(true);
+        placeFirstCone();
+
     }
 }
 
