@@ -4,6 +4,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
@@ -11,6 +12,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 public class RodLine extends OpenCvPipeline {
+	private int frameWidth;
+
 	private Mat hsb;
 
 	private Mat yellowLayer;
@@ -19,8 +22,17 @@ public class RodLine extends OpenCvPipeline {
 
 	private Mat rod;
 
+	private volatile double distFromRod = 0;
+	/**
+	 * -1 <= d <= 1
+	 * If `d > 0` then the rod is in the right half of the screen
+	 * */
+	public double getDistFromRod() { return this.distFromRod; }
+
 	@Override
 	public void init(Mat frame) {
+		this.frameWidth = frame.width();
+
 		hsb = new Mat(frame.rows(), frame.cols(), CvType.CV_8UC3);
 
 		yellowLayer = new Mat(frame.rows(), frame.cols(), CvType.CV_8UC1);
@@ -55,7 +67,12 @@ public class RodLine extends OpenCvPipeline {
 				}
 			}
 
-			Imgproc.rectangle(frame, Imgproc.boundingRect(contours.get(max_i)), new Scalar(0, 255, 0), 2);
+			Rect boundingRect = Imgproc.boundingRect(contours.get(max_i));
+			Imgproc.rectangle(frame, boundingRect, new Scalar(0, 255, 0), 2);
+			double centerRodX = boundingRect.x + (boundingRect.width / 2.0);
+			this.distFromRod = (centerRodX - (this.frameWidth / 2.0)) / (this.frameWidth / 2.0);
+		} else {
+			this.distFromRod = 0;
 		}
 
 		return frame;
