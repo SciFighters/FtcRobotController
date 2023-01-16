@@ -78,7 +78,7 @@ public class DriveClass {
     }
 
     DriveMode mode;
-
+    
     ElapsedTime timer = new ElapsedTime();
 
     public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags, DriveMode mode) {
