@@ -54,6 +54,7 @@ public class Lift {
         resetLift();
 
         resetJoint();
+
     }
 
     private void resetLift() {

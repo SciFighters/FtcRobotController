@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.power_play.util;
 
 public class Location {
 
-	public double x, y, angle;
+	public double x, y, angle=0;
 
 	public Location(double x, double y) {
 		this.x = x;

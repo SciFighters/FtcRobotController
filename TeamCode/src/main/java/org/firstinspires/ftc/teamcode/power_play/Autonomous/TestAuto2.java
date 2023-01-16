@@ -15,10 +15,8 @@ public class TestAuto2 extends LinearOpMode {
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
+
         auto.test();
-        //auto.gotoParkingPosition(AutoFlow.ParkingPosition.three);
-        telemetry.addData("Time ", timer.time());
-        telemetry.update();
         sleep(20_000);
     }
 }

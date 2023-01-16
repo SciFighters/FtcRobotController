@@ -43,6 +43,8 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	private Point origin; // origin point of action
 	private Point direction; // x,y direction for dashboard
 
+	private double angularOffset = 0;
+
 
 	private BNO055IMU imu = null;
 	BNO055IMU.Parameters parameters = null;
@@ -73,7 +75,7 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 	public  double getX() { return position.x; }
 	public  double getY() { return position.y; }
 
-	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter, boolean useDahsboard, Point origin, Point direction) {
+	IMU_Integrator(BNO055IMU imu, HardwareMap hw, double forwardTicksPerMeter, double strafeTicksPerMeter, boolean useDahsboard, Point origin, Point direction, double angularOffset) {
 		this.imu = imu;
 		// Constructor
 		fl = hw.get(DcMotorEx.class, "fl");
@@ -90,6 +92,7 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 			this.pathx = new ArrayList<>();
 			this.pathy = new ArrayList<>();
 		}
+		this.angularOffset = angularOffset;
 	}
 
 	public FS getDeltaDistance() {
@@ -127,6 +130,7 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 		this.velocity = initialVelocity != null ? initialVelocity : this.velocity;
 		this.acceleration = null;
 
+
 		if (this.useDashBoard) {
 			Point p = transformDashboard(this.position);
 			this.pathx.add(p.x);
@@ -143,7 +147,7 @@ public class IMU_Integrator implements BNO055IMU.AccelerationIntegrator {
 
 	public double getHeading() {
 		Orientation orientation = imu.getAngularOrientation();
-		return -orientation.firstAngle;
+		return -orientation.firstAngle + angularOffset;
 	}
 
 	@Override

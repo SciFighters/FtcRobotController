@@ -244,11 +244,11 @@ public class DriveClass {
         double currentAngle = getHeading();
         double delta = target - currentAngle;
 
-        if (delta < 180) {
-            delta = delta + 360;
+        if (delta < -180) {
+            delta = delta % 360 + 360;
         }
         if (delta > 180) {
-            delta = delta - 360;
+            delta = delta % 360 - 360;
         }
 
         return delta;

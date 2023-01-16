@@ -191,7 +191,7 @@ public class DriveClass {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
 
-        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, this.mode.origin, this.mode.direciton);
+        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, this.mode.origin, this.mode.direciton, startingPosition.angle);
 
         imu.initialize(parameters);
 
@@ -265,11 +265,11 @@ public class DriveClass {
         double currentAngle = getHeading();
         double delta = target - currentAngle;
 
-        if (delta < 180) {
-            delta = delta + 360;
+        if (delta % 360 < -180) {
+            delta = delta % 360 + 360;
         }
-        if (delta > 180) {
-            delta = delta - 360;
+        if (delta % 360 > 180) {
+            delta = delta % 360 - 360;
         }
 
         return delta;
@@ -641,12 +641,12 @@ public class DriveClass {
         opMode.telemetry.addData("Third angle", heading.thirdAngle);
     }
 
-//    public void hoverBoardMode() {
-//        float angle = imu.getAngularOrientation().thirdAngle;
-//        final float k = 0.01f;
-//        if (Math.abs(angle) > 0.3)
-//            setPower(k * angle, 0, 0);
-//    }
+    public void hoverBoardMode() {
+        float angle = imu.getAngularOrientation().thirdAngle;
+        final float k = 0.01f;
+        if (Math.abs(angle) > 0.3)
+            setPower(k * angle, 0, 0);
+    }
 
 
 }
