@@ -123,7 +123,9 @@ public class AutoFlow {
             opMode.telemetry.addLine("2");
         } else if(loc == SleevePipeline.ParkingLocation.Three) {
             opMode.telemetry.addLine("3");
-         }
+        }
+
+        opMode.telemetry.addData("heding", drive.getHeading());
 
         opMode.telemetry.update();
     }

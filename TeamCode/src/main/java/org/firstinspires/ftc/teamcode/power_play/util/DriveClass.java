@@ -143,10 +143,10 @@ public class DriveClass {
         //endregion get from hw
 
         //region setDirection
-        fl.setDirection(DcMotorEx.Direction.FORWARD);
-        fr.setDirection(DcMotorEx.Direction.REVERSE);
-        bl.setDirection(DcMotorEx.Direction.FORWARD);
-        br.setDirection(DcMotorEx.Direction.REVERSE);
+        fl.setDirection(DcMotorEx.Direction.REVERSE);
+        fr.setDirection(DcMotorEx.Direction.FORWARD);
+        bl.setDirection(DcMotorEx.Direction.REVERSE);
+        br.setDirection(DcMotorEx.Direction.FORWARD);
         //endregion setDirection
 
         fl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -258,7 +258,7 @@ public class DriveClass {
 
     public double getHeading() {
         Orientation orientation = imu.getAngularOrientation();
-        return -orientation.firstAngle;
+        return -orientation.firstAngle + startingPosition.angle;
     }
 
     public double getDeltaHeading(double target) {
