@@ -78,7 +78,7 @@ public class DriveClass {
     }
 
     DriveMode mode;
-
+    
     ElapsedTime timer = new ElapsedTime();
 
     public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags, DriveMode mode) {
@@ -641,12 +641,12 @@ public class DriveClass {
         opMode.telemetry.addData("Third angle", heading.thirdAngle);
     }
 
-    public void hoverBoardMode() {
-        float angle = imu.getAngularOrientation().thirdAngle;
-        final float k = 0.01f;
-        if (Math.abs(angle) > 0.3)
-            setPower(k * angle, 0, 0);
-    }
+//    public void hoverBoardMode() {
+//        float angle = imu.getAngularOrientation().thirdAngle;
+//        final float k = 0.01f;
+//        if (Math.abs(angle) > 0.3)
+//            setPower(k * angle, 0, 0);
+//    }
 
 
 }

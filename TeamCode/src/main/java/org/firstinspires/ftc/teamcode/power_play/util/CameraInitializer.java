@@ -37,7 +37,7 @@ public class CameraInitializer {
 	 * [2304x1536]
 	 *
 	 * */
-	public static void initialize(OpMode opmode, String cameraName, int width, int height, OpenCvPipeline pipeline, boolean streamToDashboard) {
+	public static void initialize(OpMode opmode, String cameraName, int width, int height, SleevePipeline pipeline, boolean streamToDashboard) {
 		int cameraMonitorViewID = opmode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opmode.hardwareMap.appContext.getPackageName());
 
 		WebcamName webcamName = opmode.hardwareMap.get(WebcamName.class, cameraName);
