@@ -2,17 +2,11 @@ package org.firstinspires.ftc.teamcode.power_play.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.power_play.util.CameraInitializer;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.SleevePipeline;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
     private LinearOpMode opMode = null;
@@ -80,7 +74,7 @@ public class AutoFlow {
     final int screenHeight = 360;
 
 
-    Location startLocation = new Location(-0.9, robotLength / 2,-180); // LEFT
+    Location startLocation = new Location(-0.9, robotLength / 2, -180); // LEFT
     Auto auto;
     StartPos startPos;
     private Lift lift = null;
@@ -121,13 +115,12 @@ public class AutoFlow {
             opMode.telemetry.addLine("1");
         } else if (loc == SleevePipeline.ParkingLocation.Two) {
             opMode.telemetry.addLine("2");
-        } else if(loc == SleevePipeline.ParkingLocation.Three) {
+        } else if (loc == SleevePipeline.ParkingLocation.Three) {
             opMode.telemetry.addLine("3");
-         }
+        }
 
         opMode.telemetry.update();
     }
-
 
 
     public void gotoParkingPosition(ParkingPosition parkingPosition) {
@@ -243,8 +236,9 @@ public class AutoFlow {
     public void run2() {
         gotoParkingPosition(parkingPosition);
     }
-    public  void test(){
-        drive.goTo(-0.9,0.4,0.5,drive.getHeading(),0.04,100);
+
+    public void test() {
+        drive.goTo(-0.9, 0.4, 0.5, drive.getHeading(), 0.04, 100);
         lift.init(opMode.hardwareMap);
         lift.grabber(true);
         placeFirstCone();
