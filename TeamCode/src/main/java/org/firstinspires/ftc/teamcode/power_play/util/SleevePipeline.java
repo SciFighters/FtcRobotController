@@ -18,9 +18,9 @@ import java.util.ArrayList;
 @Config
 public class SleevePipeline extends OpenCvPipeline {
 	//    public static volatile int minh1, maxh1, minh2, maxh2, minh3, maxh3;
-	public static volatile int ming = 40, maxg = 75;
-	public static volatile int minp = 145, maxp = 175;
-	public static volatile int minb = 90, maxb = 115;
+	public static volatile int ming = 40, maxg = 75; // Green
+	public static volatile int minp = 145, maxp = 175; // Pink
+	public static volatile int minb = 90, maxb = 115; // Blue
 
 	// Orange
 //	public static volatile Scalar min_color1 = new Scalar(10, 125, 125);
@@ -113,9 +113,9 @@ public class SleevePipeline extends OpenCvPipeline {
 			//        MatOfPoint contour2 = processColor(min_color2, max_color2);
 			//        MatOfPoint contour3 = processColor(min_color3, max_color3);
 
-			MatOfPoint contour1 = processColor(new Scalar(ming, 75, 100), new Scalar(maxg, 255, 255));
-			MatOfPoint contour2 = processColor(new Scalar(minp, 125, 125), new Scalar(maxp, 255, 255));
-			MatOfPoint contour3 = processColor(new Scalar(minb, 100, 100), new Scalar(maxb, 255, 255));
+			MatOfPoint contour1 = processColor(new Scalar(ming, 75, 100), new Scalar(maxg, 255, 255)); // PREVIOUSLY 75, 100 -> 255, 255
+			MatOfPoint contour2 = processColor(new Scalar(minp, 125, 125), new Scalar(maxp, 255, 255));// PREVIOUSLY 125, 125 -> 255, 255
+			MatOfPoint contour3 = processColor(new Scalar(minb, 100, 100), new Scalar(maxb, 255, 255)); // PREVIOUSLY 100, 100 -> 255, 255
 
 			double color1Area = contour1 == null ? 0 : Imgproc.contourArea(contour1);
 			double color2Area = contour2 == null ? 0 : Imgproc.contourArea(contour2);

@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.power_play.util;
 
 public class Location {
 
-	public double x, y, angle=0;
+	public double x, y, angle = 0;
 
 	public Location(double x, double y) {
 		this.x = x;
@@ -36,4 +36,12 @@ public class Location {
 		return new Location(this.x, this.y + offset, this.angle);
 	}
 	public Location offsetX(double offset) { return new Location(this.x + offset, this.y, this.angle); }
+
+	public Location stayOnX(DriveClass drive) {
+		return new Location(drive.getPosX(), this.y);
+	}
+	public Location stayOnY(DriveClass drive) {
+		return new Location(this.x, drive.getPosY());
+	}
+
 }

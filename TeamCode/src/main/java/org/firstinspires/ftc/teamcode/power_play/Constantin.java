@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 @TeleOp
 public class Constantin extends LinearOpMode {
     Lift lift = new Lift();
-    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
+    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(0, 0, 0), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
     double batteryLevel;
     double batteryPercentage = (batteryLevel - 11.7) / (12.6 - 11.7);
     //region button toggles

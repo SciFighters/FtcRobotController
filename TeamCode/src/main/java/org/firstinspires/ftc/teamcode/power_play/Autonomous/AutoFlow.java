@@ -95,7 +95,10 @@ public class AutoFlow {
         this.auto = auto;
 
         this.drive = new DriveClass(opMode, DriveClass.ROBOT.CONSTANTIN, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_DASHBOARD_FIELD, startPos == StartPos.LEFT ? DriveClass.DriveMode.LEFT : DriveClass.DriveMode.LEFT);
+//        if(auto == Auto.PARK) startLocation = startLocation.offsetX()
+
     }
+
 
     public void init() {
 
@@ -135,6 +138,7 @@ public class AutoFlow {
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
         if (loc == SleevePipeline.ParkingLocation.One) {
             opMode.telemetry.addLine("1");
+
         } else if (loc == SleevePipeline.ParkingLocation.Two) {
             opMode.telemetry.addLine("2");
         } else if(loc == SleevePipeline.ParkingLocation.Three) {
@@ -178,8 +182,8 @@ public class AutoFlow {
         }
 
         // TODO: Parking in the right place... (OpenCV)
-        if (auto._isParking) parkAtConeLocation();
-
+        if (auto._isParking) gotoParkingPosition(parkingPosition);
+        if (auto == Auto.PARK) drive.turn(-179, 0.5);
         //
     }
 
@@ -188,12 +192,13 @@ public class AutoFlow {
         //drive.goTo(drive.getPosX(), 1,0.5, -100, 0.15, 3); // goes to high junction position
 //        drive.goTo(drive.getPosX(), 1.4,0.5, -100, 0.15, 3); // goes to high junction position
 //        opMode.sleep(500);
+
         drive.goTo(drive.getPosX(), 1.3, 0.5, drive.getHeading(), 0.07, 0);
         drive.goTo(drive.getPosX(), 1.6, 0.5, 135, 0.07, 0);
         drive.goTo(drive.getPosX(), 1.3, 0.3, 180, 0.07, 0);
 
         drive.goToLocation(highJunction, 0.4, 0.01, 3);
-        opMode.sleep(200);
+        opMode.sleep(500);
         lift.grabber(false);
     }
 
