@@ -19,7 +19,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
-    private SleevePipeline pipeline;
+    private SleevePipeline pipeline = new SleevePipeline();
     Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
     Location highJunction = new Location(-0.72, 1.62, -135); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
@@ -27,7 +27,7 @@ public class AutoFlow {
     Location pre_highJunction = new Location(-0.9, 1.5);
 
     Location medJunction = new Location(0.9, 1.5, -135); // also park 2
-    private ParkingPosition parkingPosition = ParkingPosition.two;
+    private ParkingPosition parkingPosition;
     final double tile = 0.6;
 
     //region Enums
@@ -101,23 +101,22 @@ public class AutoFlow {
 
 
     public void init() {
-
         CameraInitializer.initialize(opMode, "webcam", 320, 180, pipeline, false);
+
         drive.init(opMode.hardwareMap);
         this.lift = new Lift();
         lift.init(opMode.hardwareMap);
         lift.grabber(true); // closes grabbers, init
-        pipeline = new SleevePipeline();
-        opMode.sleep(1000);
-        opMode.telemetry.addData("camara is on", pipeline.getParkingLocation());
-        SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
-        if (loc == SleevePipeline.ParkingLocation.One) {
-            opMode.telemetry.addLine("1");
-        } else if (loc == SleevePipeline.ParkingLocation.Two) {
-            opMode.telemetry.addLine("2");
-        } else if(loc == SleevePipeline.ParkingLocation.Three) {
-            opMode.telemetry.addLine("3");
-        }
+
+//        opMode.telemetry.addData("camara is on", pipeline.getParkingLocation());
+//        SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
+//        if (loc == SleevePipeline.ParkingLocation.One) {
+//            opMode.telemetry.addLine("1");
+//        } else if (loc == SleevePipeline.ParkingLocation.Two) {
+//            opMode.telemetry.addLine("2");
+//        } else if(loc == SleevePipeline.ParkingLocation.Three) {
+//            opMode.telemetry.addLine("3");
+//        }
         opMode.telemetry.addData("heading", drive.getHeading());
         opMode.telemetry.update();
     }
@@ -134,16 +133,15 @@ public class AutoFlow {
     }
 
     public void run() {
-        opMode.telemetry.addData("camara is on", pipeline.getParkingLocation());
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
-        if (loc == SleevePipeline.ParkingLocation.One) {
-            opMode.telemetry.addLine("1");
+        opMode.telemetry.addData("camara is on", loc);
+        if (loc == SleevePipeline.ParkingLocation.One) this.parkingPosition = ParkingPosition.one;
+        else if (loc == SleevePipeline.ParkingLocation.Two) this.parkingPosition = ParkingPosition.two;
+        else this.parkingPosition = ParkingPosition.three;
 
-        } else if (loc == SleevePipeline.ParkingLocation.Two) {
-            opMode.telemetry.addLine("2");
-        } else if(loc == SleevePipeline.ParkingLocation.Three) {
-            opMode.telemetry.addLine("3");
-        }
+        if (loc == SleevePipeline.ParkingLocation.One) opMode.telemetry.addLine("1");
+        else if (loc == SleevePipeline.ParkingLocation.Two) opMode.telemetry.addLine("2");
+        else if (loc == SleevePipeline.ParkingLocation.Three) opMode.telemetry.addLine("3");
 
         if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third, true, null);
