@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.power_play.util;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //DON'T DELETE 1194 2013
 public class Lift {
     public static final int LIFT_RANGE = 3050, LIFT_MIN = 10; // max amount of ticks in the lift..
-    public final int FLIP_POSITION = 146, HALF_POSITION = 60; //flip motor max count of 180 degrees
+    public final int FLIP_POSITION = 136; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
@@ -37,6 +38,7 @@ public class Lift {
         jointMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        jointMotor.setDirection(DcMotor.Direction.REVERSE);
 
         final int gotoTolerance = 10;
         rightElevator.setTargetPositionTolerance(gotoTolerance);
@@ -51,10 +53,9 @@ public class Lift {
         flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
         rotateServo = hw.get(Servo.class, "rotateServo");
         //endregion
+
         resetLift();
-
         resetJoint();
-
     }
 
     private void resetLift() {
@@ -126,7 +127,6 @@ public class Lift {
     public enum ArmState {
         Home,
         Flip,
-        Half,
         Begin,
         Rotate1,
         Rotate2,
@@ -245,7 +245,7 @@ public class Lift {
         if (newState == this.armState) return;
         switch (newState) {
             case Home:
-                jointMotor.setTargetPosition(0);
+                jointMotor.setTargetPosition(FLIP_POSITION);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
@@ -253,18 +253,12 @@ public class Lift {
                 if (grabberToggle != null) grabberToggle.set(true);
                 break;
             case Flip:
-                jointMotor.setTargetPosition(FLIP_POSITION);
+                jointMotor.setTargetPosition(0);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.6);
                 rotateServo.setPosition(1);
                 grabber(true);
                 if (grabberToggle != null) grabberToggle.set(true);
-                break;
-            case Half:
-                jointMotor.setTargetPosition(HALF_POSITION);
-                jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                jointMotor.setPower(0.9);
-                rotateServo.setPosition(1);
                 break;
             case Begin:
                 jointMotor.setTargetPosition(30);
