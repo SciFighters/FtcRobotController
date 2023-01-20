@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.power_play.util;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //DON'T DELETE 1194 2013
 public class Lift {
     public static final int LIFT_RANGE = 3050, LIFT_MIN = 10; // max amount of ticks in the lift..
-    public final int FLIP_POSITION = 136; //flip motor max count of 180 degrees
+    public final int FLIP_POSITION = 138; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
