@@ -1,21 +1,16 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
-
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
-
-import java.util.ArrayList;
 
 // TODO: clean code
 // TODO: hand rail boost
@@ -25,6 +20,7 @@ import java.util.ArrayList;
 // TODO: drive heading correction - reduce game
 
 @TeleOp(group = "Jaccouse")
+@Disabled
 public class Jaccouse extends LinearOpMode {
 	final double tile = 0.6;
 

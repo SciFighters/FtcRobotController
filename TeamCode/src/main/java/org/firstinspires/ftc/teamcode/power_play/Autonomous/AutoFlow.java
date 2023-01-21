@@ -4,29 +4,25 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.power_play.util.CameraInitializer;
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.SleevePipeline;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
     private LinearOpMode opMode = null;
     private DriveClass drive = null;
     private SleevePipeline pipeline = new SleevePipeline();
+
+    //region positions
     Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
-    Location highJunction = new Location(-0.72, 1.62, -135); // also park 2
+    Location highJunction = new Location(-0.58, 1.67, 180); // also park 2
+    Location medJunction = new Location(-0.58, 1.67, 0); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location conePushLocation = new Location(-0.9, 1.7);
     Location pre_highJunction = new Location(-0.9, 1.5);
-
-    Location medJunction = new Location(0.9, 1.5, -135); // also park 2
+    //endregion
     private ParkingPosition parkingPosition;
     final double tile = 0.6;
 
@@ -44,9 +40,9 @@ public class AutoFlow {
     }
 
     public enum ParkingPosition {
-        one(new Location(-1.5, 1.45, 180)),
-        two(new Location(-0.9, 1.45, 180)),
-        three(new Location(-0.3, 1.45, 180));
+        one(new Location(-1.5, 1.52, 180)),
+        two(new Location(-0.9, 1.52, 180)),
+        three(new Location(-0.3, 1.52, 180));
 
         public Location location;
 
@@ -84,7 +80,7 @@ public class AutoFlow {
     final int screenHeight = 360;
 
 
-    Location startLocation = new Location(-0.9, robotLength / 2,180); // LEFT
+    Location startLocation = new Location(-0.9, robotLength / 2, 180); // LEFT
     Auto auto;
     StartPos startPos;
     private Lift lift = null;
@@ -117,7 +113,15 @@ public class AutoFlow {
 //        } else if(loc == SleevePipeline.ParkingLocation.Three) {
 //            opMode.telemetry.addLine("3");
 //        }
-        opMode.telemetry.addData("heading", drive.getHeading());
+        SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
+        if (loc == SleevePipeline.ParkingLocation.One) this.parkingPosition = ParkingPosition.one;
+        else if (loc == SleevePipeline.ParkingLocation.Two)
+            this.parkingPosition = ParkingPosition.two;
+        else this.parkingPosition = ParkingPosition.three;
+
+        if (loc == SleevePipeline.ParkingLocation.One) opMode.telemetry.addLine("1");
+        else if (loc == SleevePipeline.ParkingLocation.Two) opMode.telemetry.addLine("2");
+        else if (loc == SleevePipeline.ParkingLocation.Three) opMode.telemetry.addLine("3");
         opMode.telemetry.update();
     }
 
@@ -136,13 +140,15 @@ public class AutoFlow {
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
         opMode.telemetry.addData("camara is on", loc);
         if (loc == SleevePipeline.ParkingLocation.One) this.parkingPosition = ParkingPosition.one;
-        else if (loc == SleevePipeline.ParkingLocation.Two) this.parkingPosition = ParkingPosition.two;
+        else if (loc == SleevePipeline.ParkingLocation.Two)
+            this.parkingPosition = ParkingPosition.two;
         else this.parkingPosition = ParkingPosition.three;
+        opMode.telemetry.update();
 
         if (loc == SleevePipeline.ParkingLocation.One) opMode.telemetry.addLine("1");
         else if (loc == SleevePipeline.ParkingLocation.Two) opMode.telemetry.addLine("2");
         else if (loc == SleevePipeline.ParkingLocation.Three) opMode.telemetry.addLine("3");
-
+        opMode.telemetry.update();
         if (auto == Auto.FULL) {
             lift.gotoLevel(Lift.LiftLevel.Third, true, null);
             for (int i = 0; i < 4; i++) { // Going to put 4 cones
@@ -186,16 +192,15 @@ public class AutoFlow {
     }
 
     public void placeFirstCone() {
-        lift.gotoLevel(Lift.LiftLevel.Third, true, null);
         //drive.goTo(drive.getPosX(), 1,0.5, -100, 0.15, 3); // goes to high junction position
 //        drive.goTo(drive.getPosX(), 1.4,0.5, -100, 0.15, 3); // goes to high junction position
 //        opMode.sleep(500);
 
-        drive.goTo(drive.getPosX(), 1.3, 0.5, drive.getHeading(), 0.07, 0);
-        drive.goTo(drive.getPosX(), 1.6, 0.5, 135, 0.07, 0);
-        drive.goTo(drive.getPosX(), 1.3, 0.3, 180, 0.07, 0);
-
-        drive.goToLocation(highJunction, 0.4, 0.01, 3);
+        drive.goTo(drive.getPosX(), 1.65, 0.4, drive.getHeading(), 0.07, 0);
+        drive.goTo(drive.getPosX(), 1.5, 0.3, drive.getHeading(), 0.07, 0);
+        lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+        opMode.sleep(300);
+        drive.goToLocation(highJunction, 0.4, 0.05, 3);
         opMode.sleep(500);
         lift.grabber(false);
     }
@@ -244,7 +249,8 @@ public class AutoFlow {
     public void run2() {
         gotoParkingPosition(parkingPosition);
     }
-    public void test(){
+
+    public void test() {
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
         Log.e("Sci", "camera initialization failed: " + loc);
         opMode.telemetry.addData("camara is on", loc);
@@ -255,7 +261,7 @@ public class AutoFlow {
         } else if (loc == SleevePipeline.ParkingLocation.Two) {
             opMode.telemetry.addLine("2");
             parkingPosition = ParkingPosition.two;
-        } else if(loc == SleevePipeline.ParkingLocation.Three) {
+        } else if (loc == SleevePipeline.ParkingLocation.Three) {
             opMode.telemetry.addLine("3");
             parkingPosition = ParkingPosition.three;
         } else {
@@ -264,7 +270,15 @@ public class AutoFlow {
             parkingPosition = ParkingPosition.two;
         }
         placeFirstCone();
-        gotoParkingPosition(parkingPosition);
+        // gotoParkingPosition(parkingPosition);
+    }
+
+    public void run3() {
+        placeFirstCone(); // places first cone
+
+        drive.goToLocation(new Location(0, 0.3), 0.4, 0, 0.1, 0);
+        opMode.sleep(300);
+        drive.turnTo(0, 0.4);
+
     }
 }
-

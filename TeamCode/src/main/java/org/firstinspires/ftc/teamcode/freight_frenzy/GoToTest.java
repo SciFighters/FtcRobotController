@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.Toggle;
 
 @TeleOp(group = "Jacouj")
-//@Disabled
+@Disabled
 public class GoToTest extends LinearOpMode {
 	final double tile = 0.6;
 

@@ -12,7 +12,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @TeleOp
-//@Disabled
+@Disabled
 public class DuckLineTester extends LinearOpMode {
 	final private int screenWidth = 640;
 	final private int screenHeight = 360;
