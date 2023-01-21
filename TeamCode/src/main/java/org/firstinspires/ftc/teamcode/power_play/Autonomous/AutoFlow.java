@@ -11,85 +11,28 @@ import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.SleevePipeline;
 
 public class AutoFlow {
-    private LinearOpMode opMode = null;
-    private DriveClass drive = null;
-    private SleevePipeline pipeline = new SleevePipeline();
-
-    public enum ConeJunction {
-        mid,
-        high,
-        safe,
-        parkingOnly
-    }
-
+    final double tile = 0.6;
+    final double robotLength = 0.4404;
+    final int screenWidth = 640;
+    final int screenHeight = 360;
     //region positions
-    Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
-    Location highJunction = new Location(-0.58, 1.67, 180); // also park 2
+    Location coneLocation = new Location(-1.81, 1.55, 90); // also park 3
+    Location highJunction = new Location(-0.58, 1.68, 180); // also park 2
     Location midJunction = new Location(-0.58, 1.38, 0); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location conePushLocation = new Location(-0.9, 1.7);
     Location pre_highJunction = new Location(-0.9, 1.5);
-    //endregion
-    private ParkingPosition parkingPosition;
-    final double tile = 0.6;
-
-    //region Enums
-
-
-    public enum SIDE {
-        LEFT(-1), RIGHT(1);
-
-        public int mul;
-
-        SIDE(int mul) {
-            this.mul = mul;
-        }
-    }
-
-    public enum ParkingPosition {
-        one(new Location(-1.5, 1.52, 180)),
-        two(new Location(-0.9, 1.52, 180)),
-        three(new Location(-0.3, 1.52, 180));
-
-        public Location location;
-
-        ParkingPosition(Location location) {
-            this.location = location;
-        }
-    }
-
-    public enum StartPos {
-        LEFT(1),
-        RIGHT(-1);
-
-        int mul;
-
-        StartPos(int mul) {
-            this.mul = mul;
-        }
-    }
-
-    public enum Auto {
-        PARK(1, true), SHORT(2, true), LONG(3, true), FULL(4, true), CYCLING(5, true);
-
-        public int value;
-        public boolean _isParking;
-
-        Auto(int value, boolean isParking) {
-            this.value = value;
-            this._isParking = isParking;
-        }
-    }
-    //endregion
-
-    final double robotLength = 0.4404;
-    final int screenWidth = 640;
-    final int screenHeight = 360;
-
-
     Location startLocation = new Location(-0.9, robotLength / 2, 180); // LEFT
     Auto auto;
+
+    //region Enums
     StartPos startPos;
+    private LinearOpMode opMode = null;
+    private DriveClass drive = null;
+    private SleevePipeline pipeline = new SleevePipeline();
+    //endregion
+    //endregion
+    private ParkingPosition parkingPosition;
     private Lift lift = null;
 
     public AutoFlow(LinearOpMode opMode, StartPos startPos, Auto auto) {
@@ -101,7 +44,6 @@ public class AutoFlow {
 //        if(auto == Auto.PARK) startLocation = startLocation.offsetX()
 
     }
-
 
     public void init() {
         CameraInitializer.initialize(opMode, "webcam", 320, 180, pipeline, false);
@@ -141,6 +83,19 @@ public class AutoFlow {
 
     private void parkAtConeLocation() {
 
+    }
+
+    public void placeCone(Location junction, Lift.LiftLevel height) {
+        lift.grabber(true);
+        drive.goToLocation(new Location(drive.getPosX(), 1.55, drive.getHeading()), 0.4, 0.01, 0);
+        drive.turnTo(-90, 0.3);
+        lift.gotoLevel(height, true, null);
+        opMode.sleep(300);
+        drive.goToLocation(new Location(-1.3, drive.getPosY(), drive.getHeading()), 0.4, 0.01, 0);
+        opMode.sleep(300);
+        drive.goToLocation(new Location(drive.getPosX(), coneLocation.y, drive.getHeading()), 0.4, 0.01, 0);
+        drive.goToLocation(new Location(coneLocation.x, drive.getPosY(), drive.getHeading()), 0.4, 0.01, 0);
+        lift.grabber(false);
     }
 
     public void run() {
@@ -222,51 +177,11 @@ public class AutoFlow {
                 conePosition = highJunctionSafe;
                 break;
         }
-        drive.goToLocation(new Location(conePosition), 0.4, 0.05, 3);
-        opMode.sleep(500);
-        lift.grabber(false);
-
-    }
-
-    public void placeCones() {
-
-        lift.gotoLevel(Lift.LiftLevel.cone5, false, null); // goes to the highest cone
-        lift.grabber(false); // opens grabber
-        opMode.sleep(50);
-        drive.goToLocation(new Location(0, coneLocation.y, drive.getHeading()),
-                0.5, 0.1, 3); // goes to robot x, and cone y
-        drive.turnTo(-90, 0.5);
-        drive.goToLocation(new Location(-0.2, coneLocation.y, drive.getHeading()),
-                0.5, 0.1, 3); // goes to robot x, and cone y
-        drive.turnTo(-90, 0.5);
-        drive.goToLocation(new Location(-0.50, drive.getPosY(), -90), 0.5, 0.1, 3); // goes to cone x, and robot y
-//        drive.goToLocation(new Location(drive.getPosX() + 0.4, drive.getPosY(), -90), 0.5, 0.1, 3);
+        drive.goToLocation(conePosition, 0.4, 0.01, 0);
         opMode.sleep(300);
-        lift.grabber(true); // closes grabber
-        opMode.sleep(500);
-        lift.gotoLevel(Lift.LiftLevel.Third, false, null);
-        opMode.sleep(500);
-        lift.toggleFlip(null);
-        drive.goToLocation(new Location(drive.getPosX() + 0.5,
-                        drive.getPosY(),
-                        drive.getHeading()),
-                0.5, 0.1, 3);
-        drive.turnTo(-180, 0.5);
-        opMode.sleep(500);
-        drive.goToLocation(new Location(highJunction.x + 0.1,
-                        highJunction.y,
-                        drive.getHeading()),
-                0.3, 0.1, 3);
-        opMode.sleep(400);
         lift.grabber(false);
+        drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() - 0.1, drive.getHeading()), 0.4, 0.01, 0);
         opMode.sleep(300);
-        gotoParkingPosition(ParkingPosition.three);
-//        lift.gotoLevel(Lift.LiftLevel.Third, false); // goes to max height of elevator
-//        drive.turn(90, 0.5);
-//        drive.goToLocation(new Location(highJunctionSafe.x, highJunctionSafe.y, 90), 0.5, 0.1, 3); // goes to high junction position
-//        lift.toggleFlip(); // changes side of flip motors
-//        lift.grabber(false); // opens grabber
-
     }
 
     public void run2() {
@@ -298,9 +213,123 @@ public class AutoFlow {
 
     public void run3() {
 
-        drive.goToLocation(new Location(0, 0.3), 0.4, 0, 0.1, 0);
+        drive.goToLocation(new Location(0, 0.3), 0.4, 0, 0.01, 0);
         opMode.sleep(300);
         drive.turnTo(0, 0.4);
 
+    }
+
+    public void placeCones() {
+        SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
+        Log.e("Sci", "camera initialization failed: " + loc);
+        opMode.telemetry.addData("camara is on", loc);
+
+        if (loc == SleevePipeline.ParkingLocation.One) {
+            opMode.telemetry.addLine("1");
+            parkingPosition = ParkingPosition.one;
+        } else if (loc == SleevePipeline.ParkingLocation.Two) {
+            opMode.telemetry.addLine("2");
+            parkingPosition = ParkingPosition.two;
+        } else if (loc == SleevePipeline.ParkingLocation.Three) {
+            opMode.telemetry.addLine("3");
+            parkingPosition = ParkingPosition.three;
+        } else {
+            opMode.telemetry.addLine("NOTHING");
+            opMode.telemetry.update();
+            parkingPosition = ParkingPosition.two;
+        }
+        placeCone(midJunction, Lift.LiftLevel.cone5);
+    }
+
+    public enum ConeJunction {
+        mid,
+        high,
+        safe
+    }
+
+//    public void placeCones() {
+//
+//        lift.gotoLevel(Lift.LiftLevel.cone5, false, null); // goes to the highest cone
+//        lift.grabber(false); // opens grabber
+//        opMode.sleep(50);
+//        drive.goToLocation(new Location(0, coneLocation.y, drive.getHeading()),
+//                0.5, 0.1, 3); // goes to robot x, and cone y
+//        drive.turnTo(-90, 0.5);
+//        drive.goToLocation(new Location(-0.2, coneLocation.y, drive.getHeading()),
+//                0.5, 0.1, 3); // goes to robot x, and cone y
+//        drive.turnTo(-90, 0.5);
+//        drive.goToLocation(new Location(-0.50, drive.getPosY(), -90), 0.5, 0.1, 3); // goes to cone x, and robot y
+////        drive.goToLocation(new Location(drive.getPosX() + 0.4, drive.getPosY(), -90), 0.5, 0.1, 3);
+//        opMode.sleep(300);
+//        lift.grabber(true); // closes grabber
+//        opMode.sleep(500);
+//        lift.gotoLevel(Lift.LiftLevel.Third, false, null);
+//        opMode.sleep(500);
+//        lift.toggleFlip(null);
+//        drive.goToLocation(new Location(drive.getPosX() + 0.5,
+//                        drive.getPosY(),
+//                        drive.getHeading()),
+//                0.5, 0.1, 3);
+//        drive.turnTo(-180, 0.5);
+//        opMode.sleep(500);
+//        drive.goToLocation(new Location(highJunction.x + 0.1,
+//                        highJunction.y,
+//                        drive.getHeading()),
+//                0.3, 0.1, 3);
+//        opMode.sleep(400);
+//        lift.grabber(false);
+//        opMode.sleep(300);
+//        gotoParkingPosition(ParkingPosition.three);
+////        lift.gotoLevel(Lift.LiftLevel.Third, false); // goes to max height of elevator
+////        drive.turn(90, 0.5);
+////        drive.goToLocation(new Location(highJunctionSafe.x, highJunctionSafe.y, 90), 0.5, 0.1, 3); // goes to high junction position
+////        lift.toggleFlip(); // changes side of flip motors
+////        lift.grabber(false); // opens grabber
+//
+//    }
+
+    public enum SIDE {
+        LEFT(-1), RIGHT(1);
+
+        public int mul;
+
+        SIDE(int mul) {
+            this.mul = mul;
+        }
+    }
+
+    public enum ParkingPosition {
+        one(new Location(-1.5, 1.52, 180)),
+        two(new Location(-0.9, 1.52, 180)),
+        three(new Location(-0.3, 1.52, 180));
+
+        public Location location;
+
+        ParkingPosition(Location location) {
+            this.location = location;
+        }
+    }
+
+    public enum StartPos {
+        LEFT(1),
+        RIGHT(-1);
+
+        int mul;
+
+        StartPos(int mul) {
+            this.mul = mul;
+        }
+    }
+
+    public enum Auto {
+        PARK(1, true), SHORT(2, true), LONG(3, true), FULL(4, true), CYCLING(5, true);
+
+        public int value;
+        public boolean _isParking;
+
+        Auto(int value, boolean isParking) {
+            this.value = value;
+            this._isParking = isParking;
+        }
     }
 }

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(group = "BLUE")
 //@Disabled
-public class TestAuto2 extends LinearOpMode {
+public class Blue_High extends LinearOpMode {
     @Override
     public void runOpMode() {
         AutoFlow auto = new AutoFlow(this, AutoFlow.StartPos.LEFT, AutoFlow.Auto.FULL); //bacl
@@ -16,8 +16,11 @@ public class TestAuto2 extends LinearOpMode {
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
-
-        auto.test();
+        auto.placeFirstCone(AutoFlow.ConeJunction.high);
+        sleep(100);
+        auto.placeCones();
+        telemetry.addData("Time ", timer.time());
+        telemetry.update();
         sleep(20_000);
     }
 }

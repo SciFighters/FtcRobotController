@@ -197,6 +197,7 @@ public class Lift {
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle) {
         if (level == LiftLevel.Floor) {
             setArmState(ArmState.Home, grabberToggle);
+            toggleFlip(grabberToggle);
         } else if (flip) setArmState(ArmState.Flip, grabberToggle);
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
