@@ -15,10 +15,17 @@ public class AutoFlow {
     private DriveClass drive = null;
     private SleevePipeline pipeline = new SleevePipeline();
 
+    public enum ConeJunction {
+        mid,
+        high,
+        safe,
+        parkingOnly
+    }
+
     //region positions
     Location coneLocation = new Location(-0.50, 1.55, 90); // also park 3
     Location highJunction = new Location(-0.58, 1.67, 180); // also park 2
-    Location medJunction = new Location(-0.58, 1.67, 0); // also park 2
+    Location midJunction = new Location(-0.58, 1.38, 0); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location conePushLocation = new Location(-0.9, 1.7);
     Location pre_highJunction = new Location(-0.9, 1.5);
@@ -179,7 +186,7 @@ public class AutoFlow {
                 final int tickDiff = 30;
                 lift.gotoLevel(Lift.LiftLevel.Second, -(i * tickDiff), true, null);
 
-                drive.goToLocation(medJunction, 1, 0.2, medJunction.angle);
+                drive.goToLocation(midJunction, 1, 0.2, midJunction.angle);
                 lift.grabber(false);
 
             }
@@ -191,18 +198,34 @@ public class AutoFlow {
         //
     }
 
-    public void placeFirstCone() {
+    public void placeFirstCone(ConeJunction coneJunction) {
         //drive.goTo(drive.getPosX(), 1,0.5, -100, 0.15, 3); // goes to high junction position
 //        drive.goTo(drive.getPosX(), 1.4,0.5, -100, 0.15, 3); // goes to high junction position
 //        opMode.sleep(500);
-
         drive.goTo(drive.getPosX(), 1.65, 0.4, drive.getHeading(), 0.07, 0);
         drive.goTo(drive.getPosX(), 1.5, 0.3, drive.getHeading(), 0.07, 0);
-        lift.gotoLevel(Lift.LiftLevel.Third, true, null);
-        opMode.sleep(300);
-        drive.goToLocation(highJunction, 0.4, 0.05, 3);
+        Location conePosition = new Location(highJunction);
+        switch (coneJunction) {
+            case mid:
+                lift.gotoLevel(Lift.LiftLevel.Second, true, null);
+                opMode.sleep(300);
+                drive.turnTo(0, 0.3);
+                conePosition = midJunction;
+                break;
+            case high:
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+                opMode.sleep(300);
+                break;
+            case safe:
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+                opMode.sleep(300);
+                conePosition = highJunctionSafe;
+                break;
+        }
+        drive.goToLocation(new Location(conePosition), 0.4, 0.05, 3);
         opMode.sleep(500);
         lift.grabber(false);
+
     }
 
     public void placeCones() {
@@ -269,12 +292,11 @@ public class AutoFlow {
             opMode.telemetry.update();
             parkingPosition = ParkingPosition.two;
         }
-        placeFirstCone();
+        placeFirstCone(ConeJunction.mid);
         // gotoParkingPosition(parkingPosition);
     }
 
     public void run3() {
-        placeFirstCone(); // places first cone
 
         drive.goToLocation(new Location(0, 0.3), 0.4, 0, 0.1, 0);
         opMode.sleep(300);

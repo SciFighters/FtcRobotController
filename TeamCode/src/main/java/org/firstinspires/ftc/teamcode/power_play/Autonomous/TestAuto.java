@@ -16,7 +16,7 @@ public class TestAuto extends LinearOpMode {
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
-        auto.placeFirstCone();
+        auto.placeFirstCone(AutoFlow.ConeJunction.high);
         auto.placeCones();
         telemetry.addData("Time ", timer.time());
         telemetry.update();
