@@ -89,7 +89,7 @@ public class AutoFlow {
         lift.grabber(true);
         drive.goToLocation(new Location(drive.getPosX(), 1.55, drive.getHeading()), 0.4, 0.01, 0);
         drive.turnTo(-90, 0.3);
-        lift.gotoLevel(height, true, null);
+        lift.gotoLevel(height, true, null, false);
         opMode.sleep(300);
         drive.goToLocation(new Location(-1.3, drive.getPosY(), drive.getHeading()), 0.4, 0.01, 0);
         opMode.sleep(300);
@@ -112,34 +112,34 @@ public class AutoFlow {
         else if (loc == SleevePipeline.ParkingLocation.Three) opMode.telemetry.addLine("3");
         opMode.telemetry.update();
         if (auto == Auto.FULL) {
-            lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+            lift.gotoLevel(Lift.LiftLevel.Third, true, null, false);
             for (int i = 0; i < 4; i++) { // Going to put 4 cones
                 drive.goToLocation(highJunction, 1, 0.06, 0);
                 opMode.sleep((int) (2 * 1000));
                 lift.grabber(false); // opens grabber
                 opMode.sleep((int) (2 * 1000));
-                lift.gotoLevel(Lift.LiftLevel.Floor, true, null); // TODO: check if the height right? (cone pile)
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, null, false); // TODO: check if the height right? (cone pile)
                 opMode.sleep((int) (2 * 1000));
                 drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
                 opMode.sleep((int) (2 * 1000));
                 lift.grabber(true); //(Changed to true) TODO: check validity of grabber ability
                 opMode.sleep((int) (2 * 1000));
-                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null, false);
                 opMode.sleep((int) (2 * 1000));
             }
         }
         //TODO: DO NOT DELETE CODE
         if (auto == auto.LONG) { //backup, less points
-            lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+            lift.gotoLevel(Lift.LiftLevel.Third, true, null, false);
             drive.goToLocation(highJunctionSafe, 1, 0.2, highJunctionSafe.angle);
 
             lift.grabber(false); //(Changed to false) TODO: check
             for (int i = 0; i < 3; i++) {
-                lift.gotoLevel(Lift.LiftLevel.Floor, true, null);
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, null, false);
                 drive.goToLocation(coneLocation, 1, 0.2, coneLocation.angle);
                 lift.grabber(true); //(Changed to true)
                 final int tickDiff = 30;
-                lift.gotoLevel(Lift.LiftLevel.Second, -(i * tickDiff), true, null);
+                lift.gotoLevel(Lift.LiftLevel.Second, -(i * tickDiff), true, null, false);
 
                 drive.goToLocation(midJunction, 1, 0.2, midJunction.angle);
                 lift.grabber(false);
@@ -149,7 +149,7 @@ public class AutoFlow {
 
         // TODO: Parking in the right place... (OpenCV)
         if (auto._isParking) gotoParkingPosition(parkingPosition);
-        if (auto == Auto.PARK) drive.turn(-179, 0.5);
+//        if (auto == Auto.PARK) drive.turn(-179, 0.5); // TODO: when flip grabber is fixed, flip & turn 180 degrees at the end of parking (for each autonomous plan).
         //
     }
 
@@ -157,22 +157,22 @@ public class AutoFlow {
         //drive.goTo(drive.getPosX(), 1,0.5, -100, 0.15, 3); // goes to high junction position
 //        drive.goTo(drive.getPosX(), 1.4,0.5, -100, 0.15, 3); // goes to high junction position
 //        opMode.sleep(500);
-        drive.goTo(drive.getPosX(), 1.65, 0.4, drive.getHeading(), 0.07, 0);
-        drive.goTo(drive.getPosX(), 1.5, 0.3, drive.getHeading(), 0.07, 0);
         Location conePosition = new Location(highJunction);
         switch (coneJunction) {
             case mid:
-                lift.gotoLevel(Lift.LiftLevel.Second, true, null);
+                lift.gotoLevel(Lift.LiftLevel.Second, true, null, false);
                 opMode.sleep(300);
                 drive.turnTo(0, 0.3);
                 conePosition = midJunction;
                 break;
             case high:
-                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+                drive.goTo(drive.getPosX(), 1.65, 0.5, drive.getHeading(), 0.07, 0);
+                drive.goTo(drive.getPosX(), 1.5, 0.3, drive.getHeading(), 0.07, 0);
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null, false);
                 opMode.sleep(300);
                 break;
             case safe:
-                lift.gotoLevel(Lift.LiftLevel.Third, true, null);
+                lift.gotoLevel(Lift.LiftLevel.Third, true, null, false);
                 opMode.sleep(300);
                 conePosition = highJunctionSafe;
                 break;
@@ -180,6 +180,7 @@ public class AutoFlow {
         drive.goToLocation(conePosition, 0.4, 0.01, 0);
         opMode.sleep(300);
         lift.grabber(false);
+        opMode.sleep(500);
         drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() - 0.1, drive.getHeading()), 0.4, 0.01, 0);
         opMode.sleep(300);
     }

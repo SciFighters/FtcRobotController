@@ -190,15 +190,18 @@ public class Lift {
 //        }
 //    }
 
-    public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
-        gotoLevel(level, 0, flip, grabberToggle);
+    public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle, boolean grab) {
+        gotoLevel(level, 0, flip, grabberToggle, grab);
     }
 
-    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle) {
+    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
+        if(grab) this.grabber(true); // TODO: check and fix accordingly (grabber level change -> grabber close).
         if (level == LiftLevel.Floor) {
             setArmState(ArmState.Home, grabberToggle);
             toggleFlip(grabberToggle);
+
         } else if (flip) setArmState(ArmState.Flip, grabberToggle);
+
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
         this.setLiftState(LiftState.Goto);

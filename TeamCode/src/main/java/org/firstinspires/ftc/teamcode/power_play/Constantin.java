@@ -105,14 +105,14 @@ public class Constantin extends LinearOpMode {
             rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
 
             if (Level0.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber);
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber, true);
             }
             if (Level1.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.First, true, grabber);
+                lift.gotoLevel(Lift.LiftLevel.First, true, grabber, true);
             }
-            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true, grabber);
-            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true, grabber);
-            if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, grabber);
+            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true, grabber, true);
+            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true, grabber, true);
+            if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, grabber, true);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
             if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
             if (flipGrabber.isClicked()) lift.toggleFlip(grabber);

@@ -17,7 +17,7 @@ public class Blue_High extends LinearOpMode {
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
         auto.placeFirstCone(AutoFlow.ConeJunction.high);
-        sleep(100);
+        sleep(200);
         auto.placeCones();
         telemetry.addData("Time ", timer.time());
         telemetry.update();
