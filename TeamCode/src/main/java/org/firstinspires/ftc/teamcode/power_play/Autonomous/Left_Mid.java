@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(group = "BLUE")
 //@Disabled
-public class Blue_Mid extends LinearOpMode {
+public class Left_Mid extends LinearOpMode {
     @Override
     public void runOpMode() {
         AutoFlow auto = new AutoFlow(this, AutoFlow.StartPos.LEFT, AutoFlow.Auto.FULL); //bacl

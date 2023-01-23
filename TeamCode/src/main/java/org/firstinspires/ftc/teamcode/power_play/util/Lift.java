@@ -144,6 +144,7 @@ public class Lift {
         First(810),
         Second(1660),
         Third(2500),
+        ThirdAUTO(2400),
         ThirdFront(3000);
 
         final int position;
@@ -193,7 +194,9 @@ public class Lift {
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle, boolean grab) {
         gotoLevel(level, 0, flip, grabberToggle, grab);
     }
-
+    public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
+        gotoLevel(level, 0, flip, grabberToggle, false);
+    }
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
         if(grab) this.grabber(true); // TODO: check and fix accordingly (grabber level change -> grabber close).
         if (level == LiftLevel.Floor) {

@@ -92,9 +92,11 @@ public class Constantin extends LinearOpMode {
 
             lift.setLiftPower(-gamepad2.right_stick_y);
 
+            double hoverboardPower = 0;
             if (gamepad1.back) {
-                drive.hoverBoardMode(); // TODO:
+                hoverboardPower = drive.hoverBoardMode(); // TODO:
             }
+
             Level0.update(gamepad2.a);
             Level1.update(gamepad2.x);
             Level2.update(gamepad2.b);

@@ -2,12 +2,9 @@
 // Power Play 2022 - 2023
 package org.firstinspires.ftc.teamcode.power_play.util;
 
-import android.util.Log;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -16,7 +13,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvPipeline;
 
 public class DriveClass {
     final double tile = 0.6;
@@ -502,7 +507,7 @@ public class DriveClass {
             double dx = lastX - currentX;
             double dy = lastY - currentY;
             double velocity = Math.hypot(dx, dy) / timeDelta;
-            Log.d("velocity", String.valueOf(velocity));
+            //Log.d("velocity", String.valueOf(velocity));
             if (remainDist < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
             lastX = currentX;
             lastY = currentY;
@@ -641,12 +646,14 @@ public class DriveClass {
         opMode.telemetry.addData("Third angle", heading.thirdAngle);
     }
 
-    public void hoverBoardMode() {
-        float angle = imu.getAngularOrientation().thirdAngle;
-        final float k = 0.01f;
-        if (Math.abs(angle) > 0.3)
-            setPower(k * angle, 0, 0);
+    public double hoverBoardMode() {
+        float angle = imu.getAngularOrientation().secondAngle;
+        if (Math.abs(angle) > 1) {
+            double power =  -angle / 20;
+            setPower(power, 0, 0);
+            return power;
+        } else {
+            return 0;
+        }
     }
-
-
 }

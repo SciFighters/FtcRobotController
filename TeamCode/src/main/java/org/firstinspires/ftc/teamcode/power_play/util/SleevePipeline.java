@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Config
 public class SleevePipeline extends OpenCvPipeline {
 	//    public static volatile int minh1, maxh1, minh2, maxh2, minh3, maxh3;
-	public static volatile int ming = 40, maxg = 75; // Green
+	public static volatile int ming = 24, maxg = 40; // Green
 	public static volatile int minp = 145, maxp = 175; // Pink
 	public static volatile int minb = 90, maxb = 115; // Blue
 
