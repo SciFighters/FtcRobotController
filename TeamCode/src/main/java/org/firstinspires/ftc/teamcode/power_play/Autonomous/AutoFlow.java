@@ -124,11 +124,6 @@ public class AutoFlow {
     public void run() {
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
         opMode.telemetry.addData("camara is on", loc);
-        if (loc == SleevePipeline.ParkingLocation.One) this.parkingPosition = ParkingPosition.one;
-        else if (loc == SleevePipeline.ParkingLocation.Two)
-            this.parkingPosition = ParkingPosition.two;
-        else this.parkingPosition = ParkingPosition.three;
-        opMode.telemetry.update();
 
         if (loc == SleevePipeline.ParkingLocation.One) opMode.telemetry.addLine("1");
         else if (loc == SleevePipeline.ParkingLocation.Two) opMode.telemetry.addLine("2");
@@ -231,9 +226,11 @@ public class AutoFlow {
         lift.grabber(false);
         opMode.sleep(500);
     }
-    public void goToParkingPosition(){
-        gotoParkingPosition(parkingPosition);
+
+    public void goToParkingPosition() {
+        gotoParkingPosition(this.parkingPosition);
     }
+
     public void run2() {
         gotoParkingPosition(parkingPosition);
     }
