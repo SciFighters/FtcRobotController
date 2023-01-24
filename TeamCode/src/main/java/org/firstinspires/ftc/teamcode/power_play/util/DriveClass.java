@@ -83,7 +83,7 @@ public class DriveClass {
     }
 
     DriveMode mode;
-    
+
     ElapsedTime timer = new ElapsedTime();
 
     public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags, DriveMode mode) {
@@ -145,15 +145,14 @@ public class DriveClass {
         fr = hw.get(DcMotorEx.class, "fr");
         bl = hw.get(DcMotorEx.class, "bl");
         br = hw.get(DcMotorEx.class, "br");
-        //endregion get from hw
+        //endregion
 
         //region setDirection
         fl.setDirection(DcMotorEx.Direction.REVERSE);
         fr.setDirection(DcMotorEx.Direction.FORWARD);
         bl.setDirection(DcMotorEx.Direction.REVERSE);
         br.setDirection(DcMotorEx.Direction.FORWARD);
-        //endregion setDirection
-
+        //endregion
         fl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         fr.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         bl.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -171,8 +170,7 @@ public class DriveClass {
             bl.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
             br.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         }
-        //endregion setMode
-
+        //endregion
         //region setZeroPowerBehavior
         if (useBrake) {
             fl.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -180,7 +178,7 @@ public class DriveClass {
             bl.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
             br.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         }
-        //endregion setZeroPowerBehavior
+        //endregion
 
         opMode.telemetry.addData("use encoders", this.useEncoders);
         opMode.telemetry.addData("use brake", this.useBrake);
@@ -649,7 +647,7 @@ public class DriveClass {
     public double hoverBoardMode() {
         float angle = imu.getAngularOrientation().secondAngle;
         if (Math.abs(angle) > 1) {
-            double power =  -angle / 20;
+            double power = -angle / 20;
             setPower(power, 0, 0);
             return power;
         } else {

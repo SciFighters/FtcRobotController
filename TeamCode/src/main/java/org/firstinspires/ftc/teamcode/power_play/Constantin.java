@@ -65,10 +65,15 @@ public class Constantin extends LinearOpMode {
 
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
-            double y = pow(-gamepad1.left_stick_y) * boost;
-            double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
-
+            double x, y;
+            if(!gamepad1.dpad_up) {
+                y = pow(-gamepad1.left_stick_y) * boost;
+                x = pow(gamepad1.left_stick_x) * boost;
+            } else {
+                y = pow(-gamepad1.left_stick_y) / 3;
+                x = pow(gamepad1.left_stick_x) / 3;
+            }
             //region angle correction
 
             turningToggle.update(Math.abs(turn) > 0.02);
@@ -118,6 +123,7 @@ public class Constantin extends LinearOpMode {
             if (grabber.isClicked()) lift.grabber(grabber.getState());
             if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
             if (flipGrabber.isClicked()) lift.toggleFlip(grabber);
+
 //            for (Levels level : levels) {
 //                level.update(this);
 //

@@ -238,8 +238,8 @@ public class Lift {
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(0.5);
-                leftElevator.setPower(0.5);
+                rightElevator.setPower(0.6);
+                leftElevator.setPower(0.6);
                 break;
             default:
                 break;
