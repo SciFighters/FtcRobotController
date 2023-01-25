@@ -18,7 +18,9 @@ public class Left_High extends LinearOpMode {
         timer.startTime();
         auto.placeFirstHighCone();
         sleep(200);
-        //auto.placeCone(auto.highJunction, 5);
+        auto.initiateConeCycling();
+        auto.placeCone(auto.highJunction);
+
         auto.goToParkingPosition();
         //auto.placeCones();
         telemetry.addData("Time ", timer.time());

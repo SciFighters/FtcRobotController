@@ -25,6 +25,8 @@ public class Constantin extends LinearOpMode {
     Toggle flipGrabber = new Toggle();
     Toggle rotateGrabber = new Toggle();
     Toggle Level3_1 = new Toggle();
+    Toggle cancelFlip = new Toggle();
+    Toggle liftDescent = new Toggle();
     private Toggle turningToggle = new Toggle();
     //endregion
 
@@ -65,15 +67,10 @@ public class Constantin extends LinearOpMode {
 
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
+            double y = pow(-gamepad1.left_stick_y) * boost;
+            double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
-            double x, y;
-            if(!gamepad1.dpad_up) {
-                y = pow(-gamepad1.left_stick_y) * boost;
-                x = pow(gamepad1.left_stick_x) * boost;
-            } else {
-                y = pow(-gamepad1.left_stick_y) / 3;
-                x = pow(gamepad1.left_stick_x) / 3;
-            }
+
             //region angle correction
 
             turningToggle.update(Math.abs(turn) > 0.02);
@@ -106,24 +103,35 @@ public class Constantin extends LinearOpMode {
             Level1.update(gamepad2.x);
             Level2.update(gamepad2.b);
             Level3.update(gamepad2.y);
+            liftDescent.update(gamepad2.left_bumper);
             Level3_1.update(gamepad2.back);
             grabber.update(gamepad2.right_bumper);
             flipGrabber.update(gamepad2.dpad_up || gamepad2.dpad_down);
             rotateGrabber.update(gamepad2.dpad_right || gamepad2.dpad_left);
+            cancelFlip.update(gamepad2.left_trigger < 0.4);
+
 
             if (Level0.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber, true);
+                lift.grabber(false);
+                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber);
             }
+            final int tickRaise = 275;
             if (Level1.isClicked()) {
-                lift.gotoLevel(Lift.LiftLevel.First, true, grabber, true);
+                lift.gotoLevelSleep(Lift.LiftLevel.First, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
             }
-            if (Level2.isClicked()) lift.gotoLevel(Lift.LiftLevel.Second, true, grabber, true);
-            if (Level3.isClicked()) lift.gotoLevel(Lift.LiftLevel.Third, true, grabber, true);
+            if (Level2.isClicked()) {
+                lift.gotoLevelSleep(Lift.LiftLevel.Second, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+            }
+            if (Level3.isClicked()) {
+
+                lift.gotoLevelSleep(Lift.LiftLevel.Third, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+
+            }
             if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, grabber, true);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
             if (rotateGrabber.isClicked()) lift.rotate(rotateGrabber.getState());
             if (flipGrabber.isClicked()) lift.toggleFlip(grabber);
-
+            if(liftDescent.isClicked()) lift.gotoDescentLevel(grabber);
 //            for (Levels level : levels) {
 //                level.update(this);
 //
@@ -162,6 +170,7 @@ public class Constantin extends LinearOpMode {
             telemetry.addData("Position x", drive.getPosX());
             telemetry.addData("Position y", drive.getPosY());
             telemetry.addData("Heading", drive.getHeading());
+            telemetry.addData("Grabber position", lift.getGrabberPosition());
             telemetry.update();
         }
     }

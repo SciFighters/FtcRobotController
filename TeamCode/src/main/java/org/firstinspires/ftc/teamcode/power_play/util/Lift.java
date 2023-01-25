@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -10,12 +12,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //DON'T DELETE 1194 2013
 public class Lift {
     public static final int LIFT_RANGE = 3050, LIFT_MIN = 10; // max amount of ticks in the lift..
-    public final int FLIP_POSITION = 138; //flip motor max count of 180 degrees
+    public final int FLIP_POSITION = 139; //flip motor max count of 180 degrees
     public DcMotorEx rightElevator = null, leftElevator = null;
     public DigitalChannel touchDown = null;
     public DigitalChannel flipTouchSwitch = null;
     public DcMotor jointMotor = null;
     private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
+    public int liftDescentLevel = 0;
 
     public void init(HardwareMap hw) {
         jointMotor = hw.get(DcMotor.class, "JM");
@@ -99,6 +102,24 @@ public class Lift {
         grabberRight.setPosition(grab ? 1 : 0);
     }
 
+    public double getGrabberPosition() {
+        return grabberLeft.getPosition();
+    }
+
+    public boolean isGrabberClosed() {
+        return this.getGrabberPosition() > 0.93;
+    }
+
+    public void gotoDescentLevel(Toggle grabberToggle) {
+        final int descentGain = 90;
+        gotoLevel(LiftLevel.coneStack, -getLiftDescentLevel(1) * descentGain,true, grabberToggle, false);
+
+    }
+    public int getLiftDescentLevel(int increase) { // Increase in descent = decrease in height
+        this.liftDescentLevel = (this.liftDescentLevel + increase) % 5;
+        return this.liftDescentLevel;
+    }
+
 
     public void rotate(boolean rotated) {
         rotateServo.setPosition(rotated ? 1 : 0);
@@ -135,17 +156,13 @@ public class Lift {
     ArmState armState;
 
     public enum LiftLevel {
-        cone1(0),
-        cone2(134),
-        cone3(218),
-        cone4(302),
-        cone5(386), // previously 336
         Floor(0),
         First(810),
         Second(1660),
         Third(2500),
         ThirdAUTO(2400),
-        ThirdFront(3000);
+        ThirdFront(3000),
+        coneStack(385);
 
         final int position;
 
@@ -155,13 +172,18 @@ public class Lift {
     }
 
     public void setLiftPower(double pow) {
+        if(this.elevatorTouchSwitch() && pow < 0)
+        {
+            setLiftState(LiftState.Idle);
+            pow = 0;
+        }
         if (Math.abs(pow) > 0.2) {
             if (pow < 0) { // If negative
                 //pow /= 9;
                 //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
                 pow = -0.5;
 
-            }
+        }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
             leftElevator.setPower(pow);
@@ -169,6 +191,8 @@ public class Lift {
             this.setLiftState(LiftState.Maintain); // Keep current position
         }
     }
+
+
 //    public void update() {
 ////        if (!rightElevator.isBusy() || !leftElevator.isBusy()) { // Stick is 0 and right_elevator isn't busy.
 ////            this.setLiftState(LiftState.Maintain); // Keep current position
@@ -197,13 +221,20 @@ public class Lift {
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
         gotoLevel(level, 0, flip, grabberToggle, false);
     }
-    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
-        if(grab) this.grabber(true); // TODO: check and fix accordingly (grabber level change -> grabber close).
-        if (level == LiftLevel.Floor) {
-            setArmState(ArmState.Home, grabberToggle);
-            toggleFlip(grabberToggle);
+    public void gotoLevelSleep(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, int milliseconds, LinearOpMode opMode) {
+        this.grabber(true);
+        opMode.sleep(milliseconds);
+        gotoLevel(level, positionDiff, flip, grabberToggle, false);
+    }
 
-        } else if (flip) setArmState(ArmState.Flip, grabberToggle);
+    public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
+        if(grab) {
+            this.grabber(true);
+        } // TODO: check and fix accordingly (grabber level change -> grabber close).
+        if (level == LiftLevel.Floor || level == LiftLevel.coneStack) {
+            setArmState(ArmState.Flip, grabberToggle);
+//            toggleFlip(grabberToggle);
+        } else if (flip) setArmState(ArmState.Home, grabberToggle);
 
         rightElevator.setTargetPosition(level.position + positionDiff);
         leftElevator.setTargetPosition(level.position + positionDiff);
@@ -238,8 +269,8 @@ public class Lift {
             case Goto:
                 rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rightElevator.setPower(0.6);
-                leftElevator.setPower(0.6);
+                rightElevator.setPower(0.5);
+                leftElevator.setPower(0.5);
                 break;
             default:
                 break;
@@ -251,18 +282,18 @@ public class Lift {
         if (newState == this.armState) return;
         switch (newState) {
             case Home:
-                jointMotor.setTargetPosition(FLIP_POSITION);
+                jointMotor.setTargetPosition(0);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.9);
-                rotateServo.setPosition(0);
+                rotateServo.setPosition(1);
                 grabber(true);
                 if (grabberToggle != null) grabberToggle.set(true);
                 break;
             case Flip:
-                jointMotor.setTargetPosition(0);
+                jointMotor.setTargetPosition(FLIP_POSITION);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 jointMotor.setPower(0.6);
-                rotateServo.setPosition(1);
+                rotateServo.setPosition(0);
                 grabber(true);
                 if (grabberToggle != null) grabberToggle.set(true);
                 break;

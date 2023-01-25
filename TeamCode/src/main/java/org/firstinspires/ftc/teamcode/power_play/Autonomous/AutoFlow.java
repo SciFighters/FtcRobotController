@@ -16,7 +16,7 @@ public class AutoFlow {
     final int screenWidth = 640;
     final int screenHeight = 360;
     //region positions
-    Location coneLocation = new Location(-1.4, 1.5, -90); // also park 3
+    Location coneLocation = new Location(-1.6, 1.49, -90); // also park 3
     Location highJunction = new Location(-0.589, 1.66, 180); // also park 2
     Location midJunction = new Location(-0.583, 1.38, 0); // also park 2
     Location highJunctionSafe = new Location(0.3, 1.2);
@@ -85,45 +85,41 @@ public class AutoFlow {
 
     }
 
-    public void placeCone(Location junction, int heightIndex) {
-        Lift.LiftLevel height = Lift.LiftLevel.cone5;
-        switch (heightIndex) {
-            case 1:
-                height = Lift.LiftLevel.cone1;
-                break;
-            case 2:
-                height = Lift.LiftLevel.cone2;
-                break;
-            case 3:
-                height = Lift.LiftLevel.cone3;
-                break;
-            case 4:
-                height = Lift.LiftLevel.cone4;
-                break;
-            case 5:
-                break;
-        }
+    public void initiateConeCycling() {
+        drive.goToLocationOnAxis(ParkingPosition.two.location, 0.6, 0.06, 0, DriveClass.Axis.x);
+        drive.goToLocationOnAxis(ParkingPosition.two.location, 0.6, 0.06, 0, DriveClass.Axis.y);
+        drive.turnTo(-90, 0.5);
+    }
+
+    public void placeCone(Location junction) {
+//        lift.grabber(true);
+        lift.gotoDescentLevel(null);
+        lift.grabber(false);
+        drive.goToLocation(coneLocation, 0.5, 0.01, 0); // TODO: fix cone location - inaccurate
+        opMode.sleep(700); // TODO:
         lift.grabber(true);
-        drive.goToLocation(new Location(drive.getPosX(),
-                drive.getPosY() - 0.05, drive.getHeading()), 0.5, 0.01, 0);
-        lift.gotoLevel(height, true, null);
-        opMode.sleep(300);
-        drive.turnTo(-90, 0.4);
 //        drive.goToLocation(new Location(-1, drive.getPosY(), drive.getHeading()),
 //                0.5, 0.01, 0);
 //        opMode.sleep(300);
 //        drive.goToLocation(new Location(drive.getPosX(), coneLocation.y - 0.05,
 //                        drive.getHeading()), 0.5, 0.01, 0);
 //        drive.goToLocation(coneLocation, 0.5, 0.01, 0);
-        drive.goToLocation(coneLocation, 0.5, 0.01, 0);
-        lift.grabber(false);
-        opMode.sleep(200);
+        opMode.sleep(400);
+
         drive.goToLocation(junction, 0.5, 0.01, 0);
+        //TODO: continue autonomous (set lift level to third, then go down, then release grabber, then go to parkposition two, goto cone location,repeat....
+        opMode.sleep(500);
+        lift.grabber(false);
     }
 
     public void run() {
         SleevePipeline.ParkingLocation loc = pipeline.getParkingLocation();
         opMode.telemetry.addData("camara is on", loc);
+        if (loc == SleevePipeline.ParkingLocation.One) this.parkingPosition = ParkingPosition.one;
+        else if (loc == SleevePipeline.ParkingLocation.Two)
+            this.parkingPosition = ParkingPosition.two;
+        else this.parkingPosition = ParkingPosition.three;
+        opMode.telemetry.update();
 
         if (loc == SleevePipeline.ParkingLocation.One) opMode.telemetry.addLine("1");
         else if (loc == SleevePipeline.ParkingLocation.Two) opMode.telemetry.addLine("2");
@@ -226,11 +222,9 @@ public class AutoFlow {
         lift.grabber(false);
         opMode.sleep(500);
     }
-
-    public void goToParkingPosition() {
-        gotoParkingPosition(this.parkingPosition);
+    public void goToParkingPosition(){
+        gotoParkingPosition(parkingPosition);
     }
-
     public void run2() {
         gotoParkingPosition(parkingPosition);
     }
@@ -286,7 +280,10 @@ public class AutoFlow {
             opMode.telemetry.update();
             parkingPosition = ParkingPosition.two;
         }
-        placeCone(highJunction, 5);
+        for(int i = 0; i < 5; i++) {
+            placeCone(highJunction);
+        }
+
     }
 
     public enum ConeJunction {
