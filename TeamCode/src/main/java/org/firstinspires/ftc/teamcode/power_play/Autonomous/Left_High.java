@@ -19,7 +19,7 @@ public class Left_High extends LinearOpMode {
         auto.placeFirstHighCone();
         sleep(200);
         auto.initiateConeCycling();
-        auto.placeCone(auto.highJunction);
+        auto.placeCones();
 
         auto.goToParkingPosition();
         //auto.placeCones();

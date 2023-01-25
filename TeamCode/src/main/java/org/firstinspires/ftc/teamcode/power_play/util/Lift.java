@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.power_play.util;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -83,7 +82,7 @@ public class Lift {
         ElapsedTime timer = new ElapsedTime();
 
         jointMotor.setPower(-0.2);
-        while (!this.jointTouchSwitch() && timer.seconds() < 5);
+        while (!this.jointTouchSwitch() && timer.seconds() < 5) ;
         jointMotor.setPower(0);
         jointMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         jointMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -112,9 +111,10 @@ public class Lift {
 
     public void gotoDescentLevel(Toggle grabberToggle) {
         final int descentGain = 90;
-        gotoLevel(LiftLevel.coneStack, -getLiftDescentLevel(1) * descentGain,true, grabberToggle, false);
+        gotoLevel(LiftLevel.coneStack, -getLiftDescentLevel(1) * descentGain, true, grabberToggle, true);
 
     }
+
     public int getLiftDescentLevel(int increase) { // Increase in descent = decrease in height
         this.liftDescentLevel = (this.liftDescentLevel + increase) % 5;
         return this.liftDescentLevel;
@@ -172,8 +172,7 @@ public class Lift {
     }
 
     public void setLiftPower(double pow) {
-        if(this.elevatorTouchSwitch() && pow < 0)
-        {
+        if (this.elevatorTouchSwitch() && pow < 0) {
             setLiftState(LiftState.Idle);
             pow = 0;
         }
@@ -183,7 +182,7 @@ public class Lift {
                 //pow = 0.3 * (double) (leftElevator.getCurrentPosition() - 400) / LIFT_RANGE + pow / 3;
                 pow = -0.5;
 
-        }
+            }
             this.setLiftState(LiftState.Manual);
             rightElevator.setPower(pow);
             leftElevator.setPower(pow);
@@ -221,6 +220,7 @@ public class Lift {
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
         gotoLevel(level, 0, flip, grabberToggle, false);
     }
+
     public void gotoLevelSleep(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, int milliseconds, LinearOpMode opMode) {
         this.grabber(true);
         opMode.sleep(milliseconds);
@@ -228,7 +228,7 @@ public class Lift {
     }
 
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
-        if(grab) {
+        if (grab) {
             this.grabber(true);
         } // TODO: check and fix accordingly (grabber level change -> grabber close).
         if (level == LiftLevel.Floor || level == LiftLevel.coneStack) {

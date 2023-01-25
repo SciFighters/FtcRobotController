@@ -16,7 +16,7 @@ public class Left_Mid extends LinearOpMode {
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
-        auto.placeFirstCone(AutoFlow.ConeJunction.mid);
+        //auto.placeFirstMidCone();
         auto.placeCones();
         sleep(20_000);
     }
