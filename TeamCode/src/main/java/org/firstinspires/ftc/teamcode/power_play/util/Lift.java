@@ -19,6 +19,7 @@ public class Lift {
     private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
     public int liftDescentLevel = 0;
 
+
     public void init(HardwareMap hw) {
         jointMotor = hw.get(DcMotor.class, "JM");
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
@@ -217,6 +218,7 @@ public class Lift {
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle, boolean grab) {
         gotoLevel(level, 0, flip, grabberToggle, grab);
     }
+
     public void gotoLevel(LiftLevel level, boolean flip, Toggle grabberToggle) {
         gotoLevel(level, 0, flip, grabberToggle, false);
     }
@@ -244,6 +246,24 @@ public class Lift {
         this.setLiftState(LiftState.Goto);
 
     }
+
+    public void controlledGotoLevel(LiftLevel level, int positionDiff, double targetPower, int tolerance) {
+        final int deltaPosition = (level.position + positionDiff) - this.leftElevator.getCurrentPosition();
+        final float sign = Math.signum(deltaPosition);
+        final int decelerationRange = 300;
+        final float decelerationGain = (decelerationRange < Math.abs(deltaPosition)) ? sign : (((float)deltaPosition) / ((float)decelerationRange));
+        targetPower = Math.min(targetPower, 1); // Checks power isn't larger than 1
+        final double powerGain = 0.7 * decelerationGain;
+        final int tickDeltaMax = 35;
+        final double deltaPower = (((this.leftElevator.getCurrentPosition() - this.rightElevator.getCurrentPosition()) * powerGain ) / tickDeltaMax);
+
+        this.rightElevator.setPower(targetPower * powerGain + deltaPower);
+        this.leftElevator.setPower(targetPower * powerGain);
+
+
+    }
+
+
 
     public void setLiftState(LiftState newLiftState) {
         if (newLiftState == this.liftState) return; // State unchanged => do nothing
@@ -324,3 +344,37 @@ public class Lift {
         return this.armState;
     }
 }
+//    public static class liftGotoThread extends Thread {
+//        public boolean isRunning = true, reachedTarget = true;
+//        private final DcMotorEx liftLeft, liftRight;
+//        private double targetPower = 0.5;
+//        private int tolerance;
+//        private int finalTarget = 0;
+//
+//        public liftGotoThread(DcMotorEx liftRight, DcMotorEx liftLeft, double targetPower, int tolerance, int finalTarget) {
+//            this.liftLeft = liftLeft;
+//            this.liftRight = liftRight;
+//            this.tolerance = tolerance;
+//            this.targetPower = targetPower;
+//            this.finalTarget = finalTarget;
+//        }
+//
+//        @Override
+//        public synchronized void start() {
+//            super.start();
+//            liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        }
+//
+//        @Override
+//        public void run() {
+//            super.run();
+//            while(isRunning) {
+//
+//
+//                liftMotor.setPower(targetPower);
+//
+//            }
+//
+//        }
+//    }
+//}
