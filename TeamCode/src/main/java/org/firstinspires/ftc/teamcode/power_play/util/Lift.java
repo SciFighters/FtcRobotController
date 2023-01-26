@@ -162,7 +162,7 @@ public class Lift {
         Third(2500),
         ThirdAUTO(2400),
         ThirdFront(3000),
-        coneStack(385);
+        coneStack(324);
 
         final int position;
 
@@ -223,6 +223,7 @@ public class Lift {
 
     public void gotoLevelSleep(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, int milliseconds, LinearOpMode opMode) {
         this.grabber(true);
+        if (grabberToggle != null) grabberToggle.set(true);
         opMode.sleep(milliseconds);
         gotoLevel(level, positionDiff, flip, grabberToggle, false);
     }
@@ -230,6 +231,7 @@ public class Lift {
     public void gotoLevel(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, boolean grab) {
         if (grab) {
             this.grabber(true);
+            if (grabberToggle != null) grabberToggle.set(true);
         } // TODO: check and fix accordingly (grabber level change -> grabber close).
         if (level == LiftLevel.Floor || level == LiftLevel.coneStack) {
             setArmState(ArmState.Flip, grabberToggle);
@@ -292,7 +294,7 @@ public class Lift {
             case Flip:
                 jointMotor.setTargetPosition(FLIP_POSITION);
                 jointMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                jointMotor.setPower(0.6);
+                jointMotor.setPower(0.9);
                 rotateServo.setPosition(0);
                 grabber(true);
                 if (grabberToggle != null) grabberToggle.set(true);

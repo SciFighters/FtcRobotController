@@ -169,8 +169,9 @@ public class AutoFlow {
 
         // TODO: Parking in the right place... (OpenCV)
         if (auto._isParking) gotoParkingPosition(parkingPosition);
-        if (auto == Auto.PARK) drive.turn(-179, 0.5);
-        //
+//        if (auto == Auto.PARK) drive.turn(-179, 0.5);
+
+        lift.resetJoint();
     }
 
     public void placeFirstCone(ConeJunction coneJunction) {
