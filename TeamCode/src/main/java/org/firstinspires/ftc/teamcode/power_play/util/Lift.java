@@ -162,7 +162,7 @@ public class Lift {
         Third(2400),
         ThirdAUTO(2400),
         ThirdFront(3000),
-        coneStack(324);
+        coneStack(465);
 
         final int position;
 

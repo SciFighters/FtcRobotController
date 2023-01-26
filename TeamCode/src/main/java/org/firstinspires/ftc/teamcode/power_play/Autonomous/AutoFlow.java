@@ -93,27 +93,32 @@ public class AutoFlow {
 
     public void placeCone(Location junction) {
         lift.gotoDescentLevel(null);
-//        lift.grabber(true);
-        lift.grabber(true);
+        lift.grabber(false);
         drive.goToLocation(new Location(drive.getPosX(), coneLocation.y, drive.getHeading()), 0.5, 0.01, 0);
         drive.goToLocation(new Location(coneLocation.x, coneLocation.y, drive.getHeading()), 0.5, 0.01, 0);
-        lift.grabber(false);
-        opMode.sleep(700);
-//        drive.goToLocation(new Location(-1, drive.getPosY(), drive.getHeading()),
+        opMode.sleep(200);
+        lift.grabber(true);
+        opMode.sleep(300);
+        lift.gotoLevel(Lift.LiftLevel.ThirdAUTO, false, null);
+        opMode.sleep(300);
+        lift.toggleFlip(null);
+        //        drive.goToLocation(new Location(-1, drive.getPosY(), drive.getHeading()),
 //                0.5, 0.01, 0);
 //        opMode.sleep(300);
 //        drive.goToLocation(new Location(drive.getPosX(), coneLocation.y - 0.05,
 //                        drive.getHeading()), 0.5, 0.01, 0);
 //        drive.goToLocation(coneLocation, 0.5, 0.01, 0);
+        drive.goToLocation(new Location(ParkingPosition.two.location.x, ParkingPosition.two.location.y,
+                drive.getHeading()), 0.5, 0.01, 0);
+        drive.turnTo(180, 0.3);
 
         drive.goToLocation(new Location(drive.getPosX(), junction.y, drive.getHeading()), 0.5, 0.01, 0);
+        drive.goToLocation(new Location(drive.getPosX(), junction.y, junction.angle), 0.5, 0.01, 0);
         drive.goToLocation(junction, 0.5, 0.01, 0);
         /*TODO: continue autonomous (set lift level to third, then go down, then release grabber,
         then go to parkposition two, goto cone location,repeat....
         */
         opMode.sleep(500);
-        lift.gotoLevel(Lift.LiftLevel.ThirdAUTO, false, null);
-        opMode.sleep(200);
         lift.gotoLevel(Lift.LiftLevel.Second, false, null);
         lift.grabber(false);
     }
@@ -316,10 +321,10 @@ public class AutoFlow {
             opMode.telemetry.update();
             parkingPosition = ParkingPosition.two;
         }
-        for (int i = 0; i < 5; i++) {
-            placeCone(highJunction);
-        }
-
+//        for (int i = 0; i < 5; i++) {
+//            placeCone(highJunction);
+//        }
+        placeCone(highJunction);
     }
 
     public enum ConeJunction {

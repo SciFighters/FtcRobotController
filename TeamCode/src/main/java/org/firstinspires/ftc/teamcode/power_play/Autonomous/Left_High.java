@@ -16,7 +16,7 @@ public class Left_High extends LinearOpMode {
         waitForStart();
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.startTime();
-        auto.placeFirstHighCone();
+        //auto.placeFirstHighCone();
         sleep(200);
         auto.initiateConeCycling();
         auto.placeCones();
