@@ -158,8 +158,8 @@ public class Lift {
     public enum LiftLevel {
         Floor(0),
         First(810),
-        Second(1660),
-        Third(2500),
+        Second(1560),
+        Third(2400),
         ThirdAUTO(2400),
         ThirdFront(3000),
         coneStack(324);
@@ -224,7 +224,8 @@ public class Lift {
     public void gotoLevelSleep(LiftLevel level, int positionDiff, boolean flip, Toggle grabberToggle, int milliseconds, LinearOpMode opMode) {
         this.grabber(true);
         if (grabberToggle != null) grabberToggle.set(true);
-        opMode.sleep(milliseconds);
+        if (grabberLeft.getPosition() == 0 || grabberRight.getPosition() == 0)
+            opMode.sleep(milliseconds);
         gotoLevel(level, positionDiff, flip, grabberToggle, false);
     }
 
