@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Lift;
@@ -28,6 +29,8 @@ public class Constantin extends LinearOpMode {
     Toggle cancelFlip = new Toggle();
     Toggle liftDescent = new Toggle();
     private Toggle turningToggle = new Toggle();
+    Lift.LiftLevel currentLevel = null;
+
     //endregion
 
     @Override
@@ -92,7 +95,7 @@ public class Constantin extends LinearOpMode {
             if (gamepad1.dpad_right) x = 0.3;
             drive.setPowerOriented(y, x, turn, true);
 
-            lift.setLiftPower(-gamepad2.right_stick_y);
+//            lift.setLiftPower(-gamepad2.right_stick_y);
 
             double hoverboardPower = 0;
             if (gamepad1.back) {
@@ -112,20 +115,28 @@ public class Constantin extends LinearOpMode {
 
 
             if (Level0.isClicked()) {
-                lift.grabber(false);
-                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber);
+//                lift.grabber(false);
+//                lift.gotoLevel(Lift.LiftLevel.Floor, true, grabber);
+                lift.autoLevelFunction(true, grabber, Lift.LiftLevel.Floor, true);
+                currentLevel = Lift.LiftLevel.Floor;
             }
             final int tickRaise = 275;
             if (Level1.isClicked()) {
-                lift.gotoLevelSleep(Lift.LiftLevel.First, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+//                lift.gotoLevelSleep(Lift.LiftLevel.First, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+                lift.autoLevelFunction(true, grabber, Lift.LiftLevel.First, true);
+                currentLevel = Lift.LiftLevel.First;
+
             }
             if (Level2.isClicked()) {
-                lift.gotoLevelSleep(Lift.LiftLevel.Second, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+//                lift.gotoLevelSleep(Lift.LiftLevel.Second, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+                lift.autoLevelFunction(true, grabber, Lift.LiftLevel.Second, true);
+                currentLevel = Lift.LiftLevel.Second;
             }
             if (Level3.isClicked()) {
 
-                lift.gotoLevelSleep(Lift.LiftLevel.Third, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
-
+//                lift.gotoLevelSleep(Lift.LiftLevel.Third, (!cancelFlip.isPressed()) ? tickRaise : 0, cancelFlip.isPressed(), grabber, 500, this);
+                lift.autoLevelFunction(true, grabber, Lift.LiftLevel.Third, true);
+                currentLevel = Lift.LiftLevel.Third;
             }
             if (Level3_1.isClicked()) lift.gotoLevel(Lift.LiftLevel.ThirdFront, false, grabber, true);
             if (grabber.isClicked()) lift.grabber(grabber.getState());
@@ -172,8 +183,18 @@ public class Constantin extends LinearOpMode {
             telemetry.addData("Heading", drive.getHeading());
             telemetry.addData("Grabber position", lift.getGrabberPosition());
             telemetry.update();
+
+            final float liftPower = -gamepad2.right_stick_y;
+            if(Math.abs(liftPower) > 0.3 || currentLevel == null) {
+                lift.setLiftPower(liftPower);
+                currentLevel = null;
+            } else if(lift.controlledGotoLevel(currentLevel, 0, 0.9, 30)) currentLevel = null;
+
+
         }
     }
+
+
 
     public double pow(double x) {
         return Math.pow(x, 2) * Math.signum(x);

@@ -18,7 +18,7 @@ public class Lift {
     public DcMotor jointMotor = null;
     private Servo grabberRight = null, grabberLeft = null, rotateServo = null;
     public int liftDescentLevel = 0;
-
+    public LiftLevel currentLevelTarget = null;
 
     public void init(HardwareMap hw) {
         jointMotor = hw.get(DcMotor.class, "JM");
@@ -112,7 +112,7 @@ public class Lift {
 
     public void gotoDescentLevel(Toggle grabberToggle) {
         final int descentGain = 90;
-        gotoLevel(LiftLevel.coneStack, -getLiftDescentLevel(1) * descentGain, true, grabberToggle, true);
+        gotoLevel(LiftLevel.coneStack, -getLiftDescentLevel(1) * descentGain, true, grabberToggle, false);
 
     }
 
@@ -135,7 +135,8 @@ public class Lift {
         Idle,
         Maintain, // (pos: int),
         Manual,
-        Goto;
+        Goto,
+        ControlledGoto;
     }
 
     private LiftState liftState;
@@ -247,22 +248,62 @@ public class Lift {
 
     }
 
-    public void controlledGotoLevel(LiftLevel level, int positionDiff, double targetPower, int tolerance) {
-        final int deltaPosition = (level.position + positionDiff) - this.leftElevator.getCurrentPosition();
-        final float sign = Math.signum(deltaPosition);
-        final int decelerationRange = 300;
-        final float decelerationGain = (decelerationRange < Math.abs(deltaPosition)) ? sign : (((float)deltaPosition) / ((float)decelerationRange));
-        targetPower = Math.min(targetPower, 1); // Checks power isn't larger than 1
-        final double powerGain = 0.7 * decelerationGain;
-        final int tickDeltaMax = 35;
-        final double deltaPower = (((this.leftElevator.getCurrentPosition() - this.rightElevator.getCurrentPosition()) * powerGain ) / tickDeltaMax);
-
-        this.rightElevator.setPower(targetPower * powerGain + deltaPower);
-        this.leftElevator.setPower(targetPower * powerGain);
-
-
+    public void gotoLevelOnly(LiftLevel level, int positionDiff) {
+        rightElevator.setTargetPosition(level.position + positionDiff);
+        leftElevator.setTargetPosition(level.position + positionDiff);
+        this.setLiftState(LiftState.Goto);
     }
 
+//    public void controlledGotoLevel(LiftLevel level, int positionDiff, double targetPower, int tolerance) {
+//        final int deltaPosition = (level.position + positionDiff) - this.leftElevator.getCurrentPosition();
+//        final float sign = Math.signum(deltaPosition);
+//        final int decelerationRange = 350;
+//        final float decelerationGain = (decelerationRange < Math.abs(deltaPosition)) ? sign : (((float)deltaPosition) / ((float)decelerationRange));
+//        targetPower = Math.min(targetPower, 1); // Checks power isn't larger than 1
+//        final double powerGain = 0.7 * decelerationGain;
+//        final int tickDeltaMax = 35;
+//        final double deltaPower = (((this.leftElevator.getCurrentPosition() - this.rightElevator.getCurrentPosition()) * powerGain ) / tickDeltaMax);
+//
+//        this.rightElevator.setPower(targetPower * powerGain + deltaPower);
+//        this.leftElevator.setPower(targetPower * powerGain);
+//
+//
+//    }
+    public void autoLevelFunction(boolean grab, Toggle grabberToggle, LiftLevel level, boolean flip) {; //TODO: initiate gotoControlled function
+        if (grab) {
+            this.grabber(true);
+            if (grabberToggle != null) grabberToggle.set(true);
+        } // TODO: check and fix accordingly (grabber level change -> grabber close).
+        if (level == LiftLevel.Floor || level == LiftLevel.coneStack) {
+            setArmState(ArmState.Flip, grabberToggle);
+//            toggleFlip(grabberToggle);
+        } else if (flip) setArmState(ArmState.Home, grabberToggle);
+
+        this.setLiftState(LiftState.Goto);
+    }
+
+    public boolean controlledGotoLevel(LiftLevel level, int positionDiff, double targetPower, int tolerance) {
+        final int targetPosition = level.position + positionDiff;
+        final int deltaPosition = targetPosition - this.leftElevator.getCurrentPosition();
+        final double decelerationRange = 300;
+        final double minPower = 0.2;
+        float sign = Math.signum(deltaPosition);
+        setLiftState(LiftState.ControlledGoto);
+        double power_ = 1;
+//        if(Math.abs(deltaPosition) < decelerationRange) power_ -= (Math.abs(deltaPosition) / decelerationRange);
+
+        power_ *= (1 - minPower);
+        if(sign < 0)
+            power_ *= 0.6;
+        if(Math.abs(deltaPosition) >= tolerance) {
+            setLiftPower((power_ + minPower) * sign * targetPower);
+
+        } else {
+            this.gotoLevelOnly(level, positionDiff);
+            return true;
+        }
+        return false;
+    }
 
 
     public void setLiftState(LiftState newLiftState) {
@@ -294,6 +335,10 @@ public class Lift {
                 leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 rightElevator.setPower(0.5);
                 leftElevator.setPower(0.5);
+                break;
+            case ControlledGoto:
+                rightElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // Run with power getting setPower from outside
+                leftElevator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 break;
             default:
                 break;
