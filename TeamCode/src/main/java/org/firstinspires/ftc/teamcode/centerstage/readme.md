@@ -35,4 +35,3 @@ To effectively use the `BasicTestRobot` class, follow these steps:
 
 5. **AprilTag Integration**: If the robot encounters an AprilTag, telemetry data related to the detected tag's position and orientation will be displayed. This information can aid in navigation and object tracking.
 
-6. **Termination**: The teleoperation loop continues until the program is stopped or terminated. Use the "A" button on the gamepad to halt the robot and exit the program.
