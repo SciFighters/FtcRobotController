@@ -1,4 +1,4 @@
-# [BasicTestRobot.java on GitHub](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java)
+# [BasicTestRobot.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java)
 
 ### Robot Control
 
