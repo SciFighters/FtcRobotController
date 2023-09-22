@@ -1,18 +1,16 @@
 # <a href="https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java">BasicTestRobot.java</a>
-## Features
-
-### 1. Robot Control
+### Robot Control
 
 The class enables control of the robot's movement using a gamepad. It supports the following actions:
 - Forward and backward movement.
 - Strafing left and right.
 - Rotating or turning.
 
-### 2. Orientation Tracking
+### Orientation Tracking
 
 The robot's orientation can be tracked using onboard sensors. The class provides the ability to reset the robot's orientation to a specific angle.
 
-### 3. AprilTag Integration
+### AprilTag Integration
 
 This class integrates with an AprilTag detection system, allowing the robot to detect and track AprilTags in its environment. It provides telemetry data related to the detected AprilTag's:
 - X, Y, and Z coordinates.
