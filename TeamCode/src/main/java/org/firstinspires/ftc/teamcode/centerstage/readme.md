@@ -26,7 +26,7 @@ To effectively use the `BasicTestRobot` class, follow these steps:
 
 2. **Initialization**: In the `runOpMode()` method, the robot's hardware components and vision system are initialized using the hardware map. Ensure that the hardware map correctly references your robot's components.
 
-3. **Teleoperation**: The primary teleoperation loop is where you control the robot using the gamepad. Key control features include:
+3. **TeleOperation**: The primary teleOperation loop is where you control the robot using the gamepad. Key control features include:
    - Left stick for forward/backward and left/right motion.
    - Right stick for turning.
    - D-pad for fine adjustments in orientation.
