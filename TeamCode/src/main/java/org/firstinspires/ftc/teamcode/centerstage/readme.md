@@ -30,6 +30,6 @@ To effectively use the `BasicTestRobot` class, follow these steps:
    - Right stick for turning.
    - D-pad for fine adjustments in orientation.
 
-4. **Orientation Reset**: Pressing the "X" button on the gamepad resets the robot's orientation to 0 degrees, which can be useful for aligning the robot's reference heading.
+4. [**Orientation Reset**](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L39): Pressing the "X" button on the gamepad resets the robot's orientation to 0 degrees, which can be useful for aligning the robot's reference heading.
 
 5. **AprilTag Integration**: If the robot encounters an AprilTag, telemetry data related to the detected tag's position and orientation will be displayed. This information can aid in navigation and object tracking.
