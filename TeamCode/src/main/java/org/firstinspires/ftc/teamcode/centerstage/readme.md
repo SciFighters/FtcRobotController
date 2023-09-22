@@ -1,6 +1,6 @@
 # [BasicTestRobot.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java)
 
-### [Robot Control]((https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L54))
+### [Robot Control](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L54)
 
 The class enables control of the robot's movement using a gamepad. It supports the following actions:
 - Forward and backward movement.
