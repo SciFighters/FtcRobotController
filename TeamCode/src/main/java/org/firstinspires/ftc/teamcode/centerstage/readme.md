@@ -40,7 +40,7 @@ To use the `BasicTestRobot` class, follow these steps:
 5. [**AprilTag Integration**](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L63): If the robot encounters an AprilTag, telemetry data related to the detected tag's position and orientation will be displayed. This information can aid in navigation and object tracking.
 
 # Util
-## [DriveClass.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java)
+# [DriveClass.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java)
 ## Purpose
 The primary purpose of this class is to control the movement and positioning of a robot on the field. It manages the robot's motors, sensors, and integration with an Inertial Measurement Unit (IMU) to perform precise movements and navigate the game field.
 
@@ -102,8 +102,5 @@ The primary purpose of this class is to control the movement and positioning of 
 
 ### `hoverBoardMode()`
 - Implements a "hoverboard" mode to correct the robot's orientation when it deviates from a target angle.
-
-### `zeroOnTarget()`
-- A method to zero in on a target using vision processing (detecting the position and orientation of a target object).
   
-The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field, incorporating various sensors and control algorithms to achieve precise movements and positioning.
+The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field.
