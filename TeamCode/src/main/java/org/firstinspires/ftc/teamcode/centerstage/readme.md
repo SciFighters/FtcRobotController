@@ -47,60 +47,60 @@ The primary purpose of this class is to control the movement and positioning of 
 ## Class Members
 
 ### Constants
-- `tile`: A constant representing the distance of one tile on the field (0.6 units).
+- [`tile`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L15): A constant representing the distance of one tile on the field (0.6 units).
 
 ### Flags
-- `USE_ENCODERS`, `USE_BRAKE`, `USE_DASHBOARD_FIELD`: Constants used as flags for configuring the behavior of the robot, like using encoders, enabling braking, or displaying the robot's position on a dashboard.
+- [`USE_ENCODERS`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L27), [`USE_BRAKE`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L28), [`USE_DASHBOARD_FIELD`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#29): Constants used as flags for configuring the behavior of the robot, like using encoders, enabling braking, or displaying the robot's position on a dashboard.
 
 ### Member Variables
 - Various private member variables to store information about motors, IMU, robot type, starting position, movement parameters, and more.
 
 ### Enums
-- `ROBOT`: An enum representing different robot types (e.g., SCORPION, COBALT).
-- `DriveMode`: An enum representing different drive modes (LEFT and RIGHT) with associated origin and direction vectors.
+- [`ROBOT`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#56): An enum representing different robot types (e.g., SCORPION, COBALT).
+- [`DriveMode`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#71): An enum representing different drive modes (LEFT and RIGHT) with associated origin and direction vectors.
 
-### Constructor
+### [Consturctor](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L90)
 - The class has a constructor that initializes various parameters, including the robot type, starting position, and drive mode.
 
 ## Methods
 
-### `init(HardwareMap hw)`
+### [`init(HardwareMap hw)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L149)
 - Initializes motors, sets their directions, and configures their modes and behaviors based on the specified parameters.
 
-### `initIMU(HardwareMap hw)`
+### [`initIMU(HardwareMap hw)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L200)
 - Initializes the IMU (Inertial Measurement Unit) sensor, calibrates it, and configures its integration with the robot's movement.
 
-### `setPower(double forward, double turn, double strafe)`
+### [`setPower(double forward, double turn, double strafe)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L241)
 - Sets the power levels for the robot's motors to control forward, turn, and strafe movements.
 
-### `setPowerOriented(double y, double x, double turn, boolean fieldOriented)`
+### [`setPowerOriented(double y, double x, double turn, boolean fieldOriented)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L248)
 - Sets the power levels for the robot's motors while considering field orientation if enabled.
 
-### `stopPower()`
+### [`stopPower()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L242)
 - Stops all robot motors by setting their power levels to zero.
 
-### `resetOrientation(double angle)`
+### [`resetOrientation(double angle)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L266)
 - Resets the robot's orientation to a specified angle.
 
-### `getHeading()`
+### [`getHeading()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L271)
 - Retrieves the current heading (orientation) of the robot.
 
-### `getDeltaHeading(double target)`
+### [`getDeltaHeading(double target)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L276)
 - Calculates the difference in heading between the robot's current orientation and a target orientation.
 
-### `getForwardDistance()`
+### [`getForwardDistance()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L289)
 - Calculates and returns the distance the robot has traveled in the forward direction using encoder ticks.
 
-### `getPosX()` and `getPosY()`
+### [`getPosX()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L330) and [`getPosY()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L301)
 - Retrieve the current X and Y positions of the robot on the field.
 
-### `goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout)`
+### [`goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L395)
 - Moves the robot to a specified location on the field using PID control.
 
-### `drive(double forward, double sideward, double targetPower, double targetAngle, boolean fieldOriented, double tolerance)`
+### [`drive(double forward, double sideward, double targetPower, double targetAngle, boolean fieldOriented, double tolerance)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L563)
 - Controls the robot's movement using PID control, taking into account forward, sideward, target power, target angle, field orientation, and tolerance.
 
-### `hoverBoardMode()`
+### [`hoverBoardMode()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java#L670)
 - Implements a "hoverboard" mode to correct the robot's orientation when it deviates from a target angle.
   
 The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field.
