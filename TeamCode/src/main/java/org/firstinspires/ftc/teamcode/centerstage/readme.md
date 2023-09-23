@@ -1,3 +1,8 @@
+- Robot Files
+- Autonomous
+- Util
+
+# Robot Files
 # [BasicTestRobot.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java)
 
 ### [Robot Control](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L54)
@@ -33,3 +38,72 @@ To use the `BasicTestRobot` class, follow these steps:
 4. [**Orientation Reset**](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L39): Pressing the "X" button on the gamepad resets the robot's orientation to 0 degrees, which can be useful for aligning the robot's reference heading.
 
 5. [**AprilTag Integration**](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/BasicTestRobot.java#L63): If the robot encounters an AprilTag, telemetry data related to the detected tag's position and orientation will be displayed. This information can aid in navigation and object tracking.
+
+# Util
+## [DriveClass.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java)
+## Purpose
+The primary purpose of this class is to control the movement and positioning of a robot on the field. It manages the robot's motors, sensors, and integration with an Inertial Measurement Unit (IMU) to perform precise movements and navigate the game field.
+
+## Class Members
+
+### Constants
+- `tile`: A constant representing the distance of one tile on the field (0.6 units).
+
+### Flags
+- `USE_ENCODERS`, `USE_BRAKE`, `USE_DASHBOARD_FIELD`: Constants used as flags for configuring the behavior of the robot, like using encoders, enabling braking, or displaying the robot's position on a dashboard.
+
+### Member Variables
+- Various private member variables to store information about motors, IMU, robot type, starting position, movement parameters, and more.
+
+### Enums
+- `ROBOT`: An enum representing different robot types (e.g., SCORPION, COBALT).
+- `DriveMode`: An enum representing different drive modes (LEFT and RIGHT) with associated origin and direction vectors.
+
+### Constructor
+- The class has a constructor that initializes various parameters, including the robot type, starting position, and drive mode.
+
+## Methods
+
+### `init(HardwareMap hw)`
+- Initializes motors, sets their directions, and configures their modes and behaviors based on the specified parameters.
+
+### `initIMU(HardwareMap hw)`
+- Initializes the IMU (Inertial Measurement Unit) sensor, calibrates it, and configures its integration with the robot's movement.
+
+### `setPower(double forward, double turn, double strafe)`
+- Sets the power levels for the robot's motors to control forward, turn, and strafe movements.
+
+### `setPowerOriented(double y, double x, double turn, boolean fieldOriented)`
+- Sets the power levels for the robot's motors while considering field orientation if enabled.
+
+### `stopPower()`
+- Stops all robot motors by setting their power levels to zero.
+
+### `resetOrientation(double angle)`
+- Resets the robot's orientation to a specified angle.
+
+### `getHeading()`
+- Retrieves the current heading (orientation) of the robot.
+
+### `getDeltaHeading(double target)`
+- Calculates the difference in heading between the robot's current orientation and a target orientation.
+
+### `getForwardDistance()`
+- Calculates and returns the distance the robot has traveled in the forward direction using encoder ticks.
+
+### `getPosX()` and `getPosY()`
+- Retrieve the current X and Y positions of the robot on the field.
+
+### `goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout)`
+- Moves the robot to a specified location on the field using PID control.
+
+### `drive(double forward, double sideward, double targetPower, double targetAngle, boolean fieldOriented, double tolerance)`
+- Controls the robot's movement using PID control, taking into account forward, sideward, target power, target angle, field orientation, and tolerance.
+
+### `hoverBoardMode()`
+- Implements a "hoverboard" mode to correct the robot's orientation when it deviates from a target angle.
+
+### `zeroOnTarget()`
+- A method to zero in on a target using vision processing (detecting the position and orientation of a target object).
+  
+The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field, incorporating various sensors and control algorithms to achieve precise movements and positioning.
