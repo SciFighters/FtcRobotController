@@ -164,3 +164,55 @@ toggle.toggle();
 // Check if the toggle is currently pressed
 boolean isPressed = toggle.isPressed();
 ```
+# Location.java
+## Constructors
+
+- `Location(double x, double y)`: Initializes a location with the specified x and y coordinates.
+- `Location(double x, double y, double angle)`: Initializes a location with the specified x and y coordinates and an angle.
+- `Location(Location location)`: Creates a copy of an existing location.
+- `Location(Location location, double xOffset, double yOffset, double angleOffset)`: Creates a new location based on an existing location with added offsets.
+
+## Methods
+
+### Coordinate Flipping
+
+- `flipX()`: Inverts the x-coordinate.
+- `flipY()`: Inverts the y-coordinate.
+- `flipAngle()`: Inverts the angle.
+
+### Offset Manipulation
+
+- `offsetY(double offset)`: Returns a new location with an offset added to the y-coordinate.
+- `offsetX(double offset)`: Returns a new location with an offset added to the x-coordinate.
+- `stayOnX(DriveClass drive)`: Returns a new location with the x-coordinate set to the current x-position from a `DriveClass` instance.
+- `stayOnY(DriveClass drive)`: Returns a new location with the y-coordinate set to the current y-position from a `DriveClass` instance.
+
+### Arithmetic Operations
+
+- `add(Location location)`: Adds the x and y coordinates of another location to the current location.
+- `addX(double x)`: Adds a specified value to the x-coordinate.
+- `addY(double y)`: Adds a specified value to the y-coordinate.
+- `subtract(Location location)`: Subtracts the x and y coordinates of another location from the current location.
+- `subtractX(double x)`: Subtracts a specified value from the x-coordinate.
+- `subtractY(double y)`: Subtracts a specified value from the y-coordinate.
+- `multiply(float num)`: Multiplies both the x and y coordinates by a specified value.
+- `multiplyX(double x)`: Multiplies the x-coordinate by a specified value.
+- `multiplyY(double y)`: Multiplies the y-coordinate by a specified value.
+
+## Example Usage
+
+```java
+// Create a new Location instance
+Location location = new Location(10.0, 20.0);
+
+// Flip the x-coordinate
+location.flipX();
+
+// Add an offset to the y-coordinate
+Location newLocation = location.offsetY(5.0);
+
+// Perform arithmetic operations
+Location otherLocation = new Location(5.0, 10.0);
+location.add(otherLocation);
+location.multiply(2.0);
+```
