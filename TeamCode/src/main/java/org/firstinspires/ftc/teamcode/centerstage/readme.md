@@ -164,28 +164,28 @@ toggle.toggle();
 // Check if the toggle is currently pressed
 boolean isPressed = toggle.isPressed();
 ```
-# Location.java
+# [Location.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java)
 ## Constructors
 
-- `Location(double x, double y)`: Initializes a location with the specified x and y coordinates.
-- `Location(double x, double y, double angle)`: Initializes a location with the specified x and y coordinates and an angle.
-- `Location(Location location)`: Creates a copy of an existing location.
-- `Location(Location location, double xOffset, double yOffset, double angleOffset)`: Creates a new location based on an existing location with added offsets.
+- [`Location(double x, double y)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L9): Initializes a location with the specified x and y coordinates.
+- [`Location(double x, double y, double angle)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L14): Initializes a location with the specified x and y coordinates and an angle.
+- [`Location(Location location)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L20): Creates a copy of an existing location.
+- [`Location(Location location, double xOffset, double yOffset, double angleOffset)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L26): Creates a new location based on an existing location with added offsets.
 
 ## Methods
 
 ### Coordinate Flipping
 
-- `flipX()`: Inverts the x-coordinate.
-- `flipY()`: Inverts the y-coordinate.
-- `flipAngle()`: Inverts the angle.
+- [`flipX()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L32): Inverts the x-coordinate.
+- [`flipY()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L36): Inverts the y-coordinate.
+- [`flipAngle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L40): Inverts the angle.
 
 ### Offset Manipulation
 
-- `offsetY(double offset)`: Returns a new location with an offset added to the y-coordinate.
-- `offsetX(double offset)`: Returns a new location with an offset added to the x-coordinate.
-- `stayOnX(DriveClass drive)`: Returns a new location with the x-coordinate set to the current x-position from a `DriveClass` instance.
-- `stayOnY(DriveClass drive)`: Returns a new location with the y-coordinate set to the current y-position from a `DriveClass` instance.
+- [`offsetY(double offset)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L44): Returns a new location with an offset added to the y-coordinate.
+- [`offsetX(double offset)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L96): Returns a new location with an offset added to the x-coordinate.
+- [`stayOnX(DriveClass drive)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L100): Returns a new location with the x-coordinate set to the current x-position from a `DriveClass` instance.
+- [`stayOnY(DriveClass drive)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Location.java#L104): Returns a new location with the y-coordinate set to the current y-position from a `DriveClass` instance.
 
 ### Arithmetic Operations
 
