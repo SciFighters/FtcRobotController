@@ -104,3 +104,61 @@ The primary purpose of this class is to control the movement and positioning of 
 - Implements a "hoverboard" mode to correct the robot's orientation when it deviates from a target angle.
   
 The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field.
+# [Toggle.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java)
+## Constructor
+
+- [`Toggle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L7): Default constructor with no initial state.
+- [`Toggle(boolean initialState)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L8): Constructor with an initial state parameter.
+
+## Methods
+
+### [`update(boolean input)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L10)
+
+This method updates the toggle based on the given input. It is designed for handling toggles where the state changes only when the input is pressed and not when released.
+
+### [`set(boolean input)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L21)
+
+Sets the toggle state explicitly. It can be used to directly set the state without relying on input changes.
+
+### [`toggle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#27)
+
+Toggles the current state of the toggle and returns the new state.
+
+### [`isPressed()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L33)
+
+Checks if the toggle is currently pressed.
+
+### [`isChanged()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L37)
+
+Checks if the toggle state has changed since the last update.
+
+### [`getState()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L41)
+
+Returns the current state of the toggle.
+
+### [`isClicked()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L43)
+
+Checks if the toggle has changed and is currently pressed (clicked).
+
+### [`isReleased()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L47)
+
+Checks if the toggle has changed and is not currently pressed (released).
+
+## Example Usage
+
+```java
+// Create a new Toggle instance with an initial state of false
+Toggle toggle = new Toggle(false);
+
+// Update the toggle based on input
+toggle.update(someInput);
+
+// Check the current state of the toggle
+boolean currentState = toggle.getState();
+
+// Toggle the state of the toggle
+toggle.toggle();
+
+// Check if the toggle is currently pressed
+boolean isPressed = toggle.isPressed();
+```
