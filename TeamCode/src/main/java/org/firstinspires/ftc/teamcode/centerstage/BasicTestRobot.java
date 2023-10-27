@@ -2,28 +2,21 @@ package org.firstinspires.ftc.teamcode.centerstage;
 
 import android.util.Size;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.centerstage.util.CameraPipeline;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.CameraPipeline;
 import org.firstinspires.ftc.teamcode.centerstage.util.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input;
-import org.firstinspires.ftc.teamcode.centerstage.util.KeyCode;
 import org.firstinspires.ftc.teamcode.centerstage.util.Toggle;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
-import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.opencv.core.Point;
 
 @TeleOp(group = "Linear Opmode")
 public class BasicTestRobot extends LinearOpMode {
     DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
     boolean allowMovement = true; // Flag to control movement
-    Toggle rotateToggle = new Toggle(); // toggle to check rotation fix
+    Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
     double angle = 0;
     final double maxTagSize = 239;
     CameraPipeline cameraPipeline;
@@ -31,8 +24,7 @@ public class BasicTestRobot extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        drive.init(hardwareMap);
-        cameraPipeline = new CameraPipeline("cam", new Size(640, 480), hardwareMap, this.telemetry);
+        initSystems();
         // april tag identification initiator
         waitForStart();
 
@@ -40,7 +32,7 @@ public class BasicTestRobot extends LinearOpMode {
         drive.resetOrientation(0);
 
         while (!isStopRequested() && opModeIsActive()) {
-            rotateToggle.update(gamepad1.a);
+            rotateToggle.update();
             if (gamepad1.start) {
                 if (gamepad1.x) {
                     drive.resetOrientation(0);
@@ -83,6 +75,11 @@ public class BasicTestRobot extends LinearOpMode {
             }
             Input.updateControls(gamepad1, gamepad2);
         }
+    }
+
+    void initSystems() {
+        drive.init(hardwareMap);
+        cameraPipeline = new CameraPipeline("cam", new Size(640, 480), hardwareMap, this.telemetry);
     }
 
     public double pow(double x) {
