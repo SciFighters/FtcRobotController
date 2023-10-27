@@ -43,6 +43,7 @@ To use the `BasicTestRobot` class, follow these steps:
 - [`DriveClass.java`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/readme.md#driveclassjava)
 - [`Toggle.java`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/readme.md#togglejava)
 - [`Location.java`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/readme.md#locationjava)
+- [`Input.java`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/readme.md#inputjava)
 # [DriveClass.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/DriveClass.java)
 ## Purpose
 The primary purpose of this class is to control the movement and positioning of a robot on the field. It manages the robot's motors, sensors, and integration with an Inertial Measurement Unit (IMU) to perform precise movements and navigate the game field.
@@ -216,4 +217,42 @@ Location newLocation = location.offsetY(5.0);
 Location otherLocation = new Location(5.0, 10.0);
 location.add(otherLocation);
 location.multiply(2.0);
+```
+## [Input.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Input.java)
+#### Class Structure
+
+- `Input` class contains the following fields:
+    - `private static Gamepad gamepad1, gamepad2`: These are instances of the `Gamepad` class, representing two game controllers. These objects will store the input from the physical game controllers.
+    - `private static Toggle[] toggles`: An array of `Toggle` objects that represent toggle switches for various buttons on the game controllers. This array is initially set to `null`.
+
+#### Methods
+
+- `public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_)`: This method updates the references to the `gamepad1` and `gamepad2` objects with new instances passed as arguments.
+
+- `private static Toggle[] getToggles()`: This method returns the `toggles` array. If it's `null`, it initializes the array with `Toggle` objects representing various button mappings and then returns it.
+
+- `public static boolean GetKeyPressed(KeyCode key)`: This method checks if a specific `KeyCode` is currently pressed and returns a boolean value.
+
+- `public static boolean GetKeyClicked(KeyCode key)`: This method checks if a specific `KeyCode` has been clicked (pressed and released) and returns a boolean value.
+
+- `public static boolean GetKeyReleased(KeyCode key)`: This method checks if a specific `KeyCode` has been released and returns a boolean value.
+
+#### Inner Class `KeyCode`
+
+The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
+
+- It has a private field `returnFunc` of type `Func<Boolean>`, which is a functional interface used to retrieve the button state.
+
+- The constructor of `KeyCode` takes a `Func<Boolean>` as an argument to initialize `returnFunc`.
+
+- The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button state to the corresponding `KeyCode` constant.
+
+#### Example Usage
+
+- You can use this `Input` class to check the state of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
+e.g :
+```java
+  if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){
+      // Do Something
+  }
 ```
