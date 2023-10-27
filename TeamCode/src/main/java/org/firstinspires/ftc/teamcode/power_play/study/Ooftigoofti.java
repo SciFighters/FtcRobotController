@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.power_play.study;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.teamcode.power_play.util.Toggle;
 
 @TeleOp(name = "Oofti goofti", group = "Linear Opmode")
+@Disabled
 public class Ooftigoofti extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

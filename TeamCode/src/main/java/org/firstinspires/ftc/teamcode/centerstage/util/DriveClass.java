@@ -23,7 +23,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 public class DriveClass {
     final double tile = 0.6;
-
+    public boolean busy;
     public static final int USE_ENCODERS = 1 << 0;
     public static final int USE_BRAKE = 1 << 1;
     public static final int USE_DASHBOARD_FIELD = 1 << 2;
@@ -261,6 +261,7 @@ public class DriveClass {
 
     public void stopPower() {
         setPower(0, 0, 0);
+        busy = false;
     }
 
     public void resetOrientation(double angle) {
@@ -366,6 +367,7 @@ public class DriveClass {
 
 
     public void turn(double deg, double power) {
+        busy  = true;
         double targetAngle = getHeading() + deg; // zeroAngle
         turnTo(targetAngle, power);
     }
