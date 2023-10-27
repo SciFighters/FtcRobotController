@@ -250,3 +250,8 @@ The `KeyCode` class is an inner class of `Input` and is used to represent indivi
 #### Example Usage
 
 - You can use this `Input` class to check the state of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
+e.g : ```java
+  if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){
+      // Do Something
+  }
+```
