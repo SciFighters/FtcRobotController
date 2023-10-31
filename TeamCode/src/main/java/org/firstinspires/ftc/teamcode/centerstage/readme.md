@@ -111,22 +111,22 @@ The `DriveClass` is a crucial component of a robotics program, providing control
 # [Toggle.java](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java)
 ## Constructor
 
-- [`Toggle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L7): Default constructor with no initial state.
-- [`Toggle(boolean initialState)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L8): Constructor with an initial state parameter.
+- [`Toggle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L7): Default constructor with no initial gatherSystemState.
+- [`Toggle(boolean initialState)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L8): Constructor with an initial gatherSystemState parameter.
 
 ## Methods
 
 ### [`update(boolean input)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L10)
 
-This method updates the toggle based on the given input. It is designed for handling toggles where the state changes only when the input is pressed and not when released.
+This method updates the toggle based on the given input. It is designed for handling toggles where the gatherSystemState changes only when the input is pressed and not when released.
 
 ### [`set(boolean input)`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L21)
 
-Sets the toggle state explicitly. It can be used to directly set the state without relying on input changes.
+Sets the toggle gatherSystemState explicitly. It can be used to directly set the gatherSystemState without relying on input changes.
 
 ### [`toggle()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#27)
 
-Toggles the current state of the toggle and returns the new state.
+Toggles the current gatherSystemState of the toggle and returns the new gatherSystemState.
 
 ### [`isPressed()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L33)
 
@@ -134,11 +134,11 @@ Checks if the toggle is currently pressed.
 
 ### [`isChanged()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L37)
 
-Checks if the toggle state has changed since the last update.
+Checks if the toggle gatherSystemState has changed since the last update.
 
 ### [`getState()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L41)
 
-Returns the current state of the toggle.
+Returns the current gatherSystemState of the toggle.
 
 ### [`isClicked()`](https://github.com/SciFighters/FtcRobotController/blob/dev/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/centerstage/util/Toggle.java#L43)
 
@@ -151,16 +151,16 @@ Checks if the toggle has changed and is not currently pressed (released).
 ## Example Usage
 
 ```java
-// Create a new Toggle instance with an initial state of false
+// Create a new Toggle instance with an initial gatherSystemState of false
 Toggle toggle = new Toggle(false);
 
 // Update the toggle based on input
 toggle.update(someInput);
 
-// Check the current state of the toggle
+// Check the current gatherSystemState of the toggle
 boolean currentState = toggle.getState();
 
-// Toggle the state of the toggle
+// Toggle the gatherSystemState of the toggle
 toggle.toggle();
 
 // Check if the toggle is currently pressed
@@ -241,15 +241,15 @@ location.multiply(2.0);
 
 The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
 
-- It has a private field `returnFunc` of type `Func<Boolean>`, which is a functional interface used to retrieve the button state.
+- It has a private field `returnFunc` of type `Func<Boolean>`, which is a functional interface used to retrieve the button gatherSystemState.
 
 - The constructor of `KeyCode` takes a `Func<Boolean>` as an argument to initialize `returnFunc`.
 
-- The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button state to the corresponding `KeyCode` constant.
+- The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button gatherSystemState to the corresponding `KeyCode` constant.
 
 #### Example Usage
 
-- You can use this `Input` class to check the state of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
+- You can use this `Input` class to check the gatherSystemState of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
 e.g :
 ```java
   if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){

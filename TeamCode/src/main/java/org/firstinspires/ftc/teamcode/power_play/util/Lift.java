@@ -20,7 +20,7 @@ public class Lift {
     public int liftDescentLevel = 0;
     public LiftLevel currentLevelTarget = null;
     //endregion
-    //region Referencesa
+    //region References
     private LinearOpMode opMode;
 
     public DcMotorEx rightElevator = null, leftElevator = null;
@@ -378,8 +378,7 @@ public class Lift {
             armGotoPosition(ArmPos.Middle, false);
         }
     }
-
-    public void runLift(double liftManualPower, LiftLevel setLiftLevel) {
+   public void runLift(double liftManualPower, LiftLevel setLiftLevel) {
         final double gotoTargetPower = 1;
         final int gotoTolerance = 70;
         if (setLiftLevel != null) this.currentLevelTarget = setLiftLevel;

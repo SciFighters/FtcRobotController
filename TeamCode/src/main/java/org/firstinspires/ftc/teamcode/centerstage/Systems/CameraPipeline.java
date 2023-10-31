@@ -13,6 +13,9 @@ import org.opencv.core.Point;
 
 import java.util.List;
 
+/**
+ * This class represents a camera pipeline for processing AprilTag detections.
+ */
 public class CameraPipeline {
     private String cameraName;
     private Size viewSize;
@@ -20,6 +23,14 @@ public class CameraPipeline {
     AprilTagProcessor tagProcessor;
     VisionPortal visionPortal;
 
+    /**
+     * Initializes the CameraPipeline with the specified parameters.
+     *
+     * @param cameraName  The name of the camera.
+     * @param viewSize    The size of the camera view.
+     * @param hardwareMap The HardwareMap for accessing the camera.
+     * @param telemetry   The telemetry object for displaying information.
+     */
     public CameraPipeline(String cameraName, Size viewSize, HardwareMap hardwareMap, Telemetry telemetry) {
         this.cameraName = cameraName;
         this.viewSize = viewSize;
@@ -27,7 +38,7 @@ public class CameraPipeline {
         initialize(hardwareMap);
     }
 
-    void initialize(HardwareMap hardwareMap) {
+    private void initialize(HardwareMap hardwareMap) {
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
@@ -41,14 +52,19 @@ public class CameraPipeline {
                 .build();
     }
 
+    /**
+     * Get a list of AprilTag detections.
+     *
+     * @return A list of AprilTagDetection objects.
+     */
     public List<AprilTagDetection> getDetections() {
         return tagProcessor.getDetections();
     }
 
     /**
-     * Prints the telemetry data of a specific tag (Doesn't update the telemetry)
+     * Prints the telemetry data of a specific tag (Doesn't update the telemetry).
      *
-     * @param tag Tag detection reference
+     * @param tag The AprilTagDetection object to display telemetry data for.
      */
     public void printTelemetryData(AprilTagDetection tag) {
         double tagSize = calculateTagSize(tag.corners); // in pixels
@@ -63,9 +79,14 @@ public class CameraPipeline {
                 "\n\troll: " + tag.ftcPose.roll);
     }
 
+    /**
+     * Get a specific AprilTag by its ID.
+     *
+     * @param id The ID of the AprilTag to retrieve.
+     * @return The AprilTagDetection object with the specified ID, or null if not found.
+     */
     public AprilTagDetection getSpecificTag(int id) {
-        for (AprilTagDetection tag :
-                getDetections()) {
+        for (AprilTagDetection tag : getDetections()) {
             if (tag.id == id) {
                 return tag;
             }
@@ -74,10 +95,10 @@ public class CameraPipeline {
     }
 
     /**
-     * Calculate the size of the tag based on its corner points
+     * Calculate the size of the tag based on its corner points.
      *
-     * @param corners
-     * @return Tag size (On the camera) in pixels
+     * @param corners The corner points of the tag.
+     * @return Tag size (On the camera) in pixels.
      */
     private double calculateTagSize(Point[] corners) {
         if (corners.length != 4) {

@@ -31,7 +31,10 @@ public class ArmClass extends Thread {
     volatile private double power = 1;
     volatile private double speed_boost = 0.5;
 
-    public enum Mode {IDLE, MANUAL, HOME, PICK, STRAIGHT, BUILD, DROP, SKY1_STRETCH, SKY2_FOLD, SKY3_READY, SKY4_DROP,  SKY5_DROP_BACK}
+    public enum Mode {
+        IDLE, MANUAL, HOME, PICK, STRAIGHT, BUILD, DROP,
+        SKY1_STRETCH, SKY2_FOLD, SKY3_READY, SKY4_DROP, SKY5_DROP_BACK
+    }
 
     volatile private Mode mode = Mode.IDLE;
 
@@ -184,11 +187,10 @@ public class ArmClass extends Thread {
             speed = Math.max(0, speed);
         } else {
             // prevent arm from dropping under high moment when rest.
-            if (Math.abs(speed) <= 0.01  && arm1.getCurrentPosition() > 500 ) {
+            if (Math.abs(speed) <= 0.01 && arm1.getCurrentPosition() > 500) {
                 if (arm0.getCurrentPosition() < 2600) {
                     speed = 0.01; // give arm some minimal speed to hold up its position.
-                }
-                else if (arm0.getCurrentPosition() > 3800) {
+                } else if (arm0.getCurrentPosition() > 3800) {
                     speed = -0.01; // give arm some minimal speed to hold up its position.
                 }
             }
@@ -251,7 +253,7 @@ public class ArmClass extends Thread {
         arm1.setTargetPosition(pos1);
 
         //RobotLog.d("Arm goto start to: Arm0:(%d)->(%d), Arm1(%d)->(%d)  ", arm0.getCurrentPosition(), arm0.getTargetPosition(), arm1.getCurrentPosition(), arm1.getTargetPosition());
-        while ( (arm0.isBusy() || arm1.isBusy()) && opMode.opModeIsActive()) {
+        while ((arm0.isBusy() || arm1.isBusy()) && opMode.opModeIsActive()) {
             sleep(50);
             //RobotLog.d("Arm goto run at: Arm0:(%d), Arm1(%d)", arm0.getCurrentPosition(), arm1.getCurrentPosition());
             checkups();
@@ -308,7 +310,7 @@ public class ArmClass extends Thread {
             switch (mode) {
                 case HOME:
                     RobotLog.d("Arm do: HOME");
-                    gootoo(500,0);
+                    gootoo(500, 0);
                     rotateClamps(false);
                     openClamps(false);
                     driveClass.rollers(true);
@@ -393,7 +395,7 @@ public class ArmClass extends Thread {
                             RobotLog.d("Arm do: BUILD - floor 7");
                             gootoo(3040, 890);
                             sleep(100);
-                            gootoo(3470,770);
+                            gootoo(3470, 770);
                             break;
                     }
 
@@ -419,18 +421,18 @@ public class ArmClass extends Thread {
                     break;
 
                 case SKY3_READY: // get ready to catch
-                    gootoo(630,430);
+                    gootoo(630, 430);
                     gootoo(480, 380);
                     break;
 
                 case SKY4_DROP:
                     timer.reset();
-                    gootoo(ArmClass.STAY,800, 0.5);
+                    gootoo(ArmClass.STAY, 800, 0.5);
                     sleep(50);
                     openClamps(true);
                     sleep(400);
                     openClamps(false);
-                    gootoo(ArmClass.STAY,0);
+                    gootoo(ArmClass.STAY, 0);
                     RobotLog.d("SKY4_DROP time: %f", timer.seconds());
                     break;
 

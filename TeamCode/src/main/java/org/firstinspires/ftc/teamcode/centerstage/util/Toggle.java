@@ -2,12 +2,20 @@ package org.firstinspires.ftc.teamcode.centerstage.util;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 
+/**
+ * Toggles of the KeyCode type are updated automatically and there's no need to call the update function on them
+ */
 public class Toggle {
 
     private boolean lastInput = false, pressed = false, changed = false, state = false;
-    private Input.KeyCode mapping;
+    private Input.KeyCode mapping = null;
+    private Func<Boolean> returnVal;
 
     public Toggle() {
+    }
+
+    public Toggle(Func<Boolean> returnVal) {
+        this.returnVal = returnVal;
     }
 
     public Toggle(boolean initialState) {
@@ -31,7 +39,12 @@ public class Toggle {
     }
 
     public void update() {
-        boolean input = Input.GetKeyPressed(mapping);
+        boolean input;
+        if (mapping != null) {
+            input = Input.GetKeyPressed(mapping);
+        } else {
+            input = returnVal.value();
+        }
         if (lastInput != input) { // if the input has changed,
             changed = true; // (it has changed)
             pressed = input;

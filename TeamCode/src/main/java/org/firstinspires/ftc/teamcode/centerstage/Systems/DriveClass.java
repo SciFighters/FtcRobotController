@@ -1,6 +1,6 @@
 // Drive Class
-// Power Play 2022 - 2023
-package org.firstinspires.ftc.teamcode.centerstage.util;
+// CENTERSTAGE 2023 - 2024
+package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
 import android.util.Log;
 
@@ -367,7 +367,7 @@ public class DriveClass {
 
 
     public void turn(double deg, double power) {
-        busy  = true;
+        busy = true;
         double targetAngle = getHeading() + deg; // zeroAngle
         turnTo(targetAngle, power);
     }

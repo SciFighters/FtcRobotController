@@ -1,68 +1,165 @@
 package org.firstinspires.ftc.teamcode.centerstage.util;
 
+import androidx.annotation.NonNull;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+/**
+ * This class provides utility methods for handling gamepad input and toggle controls.
+ */
 public class Input {
     private static Gamepad gamepad1, gamepad2;
-    private static Toggle[] toggles = null;
+    private static Map<KeyCode, Toggle> toggles = null;
+    private static LinearOpMode opMode;
+    private static List<Toggle> existingTogglesInOpMode;
+    private static Executor executor;
 
+    /**
+     * Get the Gamepad1 object.
+     *
+     * @return The Gamepad1 object.
+     */
+    public static Gamepad getGamepad1() {
+        return gamepad1;
+    }
+
+    /**
+     * Get the Gamepad2 object.
+     *
+     * @return The Gamepad2 object.
+     */
+    public static Gamepad getGamepad2() {
+        return gamepad2;
+    }
+
+    /**
+     * Initialize the Input class with the LinearOpMode instance.
+     *
+     * @param opMode_ The LinearOpMode instance.
+     */
+    public static void init(LinearOpMode opMode_) {
+        existingTogglesInOpMode = new ArrayList<>();
+        opMode = opMode_;
+        Field[] allFields = opMode.getClass().getDeclaredFields();
+        for (Field field : allFields) {
+            if (field.getType() == Toggle.class) {
+                field.setAccessible(true);
+                try {
+                    Toggle value = (Toggle) field.get(opMode);
+                    if (value != null && value.getMapping() != null)
+                        existingTogglesInOpMode.add(value);
+                } catch (IllegalAccessException e) {
+                    // Handle the exception if necessary
+                }
+            }
+        }
+
+        // Create a thread pool with a single thread for updating controls
+        executor = Executors.newSingleThreadExecutor();
+    }
+
+    /**
+     * Update the gamepad controls in a separate thread.
+     *
+     * @param gamepad1_ The Gamepad1 object.
+     * @param gamepad2_ The Gamepad2 object.
+     */
     public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_) {
         gamepad1 = gamepad1_;
         gamepad2 = gamepad2_;
+
+        // Run the update controls task in a separate thread
+        executor.execute(new UpdateControlsTask());
     }
 
-    private static Toggle[] getToggles() {
+    private static class UpdateControlsTask implements Runnable {
+        @Override
+        public void run() {
+            for (Toggle t : existingTogglesInOpMode) {
+                if (t.getMapping() != null)
+                    t.update();
+            }
+        }
+    }
+
+    /**
+     * Get the list of Toggle instances.
+     *
+     * @return An array of Toggle instances.
+     */
+    private static Map<KeyCode, Toggle> getToggles() {
         if (toggles == null) {
-            toggles = new Toggle[]{
-                    new Toggle(KeyCode.Gamepad1A),
-                    new Toggle(KeyCode.Gamepad1B),
-                    new Toggle(KeyCode.Gamepad1X),
-                    new Toggle(KeyCode.Gamepad1Y),
-                    new Toggle(KeyCode.Gamepad1DpadUp),
-                    new Toggle(KeyCode.Gamepad1DpadDown),
-                    new Toggle(KeyCode.Gamepad1DpadLeft),
-                    new Toggle(KeyCode.Gamepad1DpadRight),
-                    new Toggle(KeyCode.Gamepad1Start),
-                    new Toggle(KeyCode.Gamepad2A),
-                    new Toggle(KeyCode.Gamepad2B),
-                    new Toggle(KeyCode.Gamepad2X),
-                    new Toggle(KeyCode.Gamepad2Y),
-                    new Toggle(KeyCode.Gamepad2DpadUp),
-                    new Toggle(KeyCode.Gamepad2DpadDown),
-                    new Toggle(KeyCode.Gamepad2DpadLeft),
-                    new Toggle(KeyCode.Gamepad2DpadRight),
-                    new Toggle(KeyCode.Gamepad2Start)
-            };
+            toggles = new HashMap<>();
+            toggles.put(KeyCode.Gamepad1A, new Toggle(KeyCode.Gamepad1A));
         }
         return toggles;
     }
 
+    /**
+     * Check if a specific KeyCode is pressed.
+     *
+     * @param key The KeyCode to check.
+     * @return True if the KeyCode is pressed, false otherwise.
+     */
     public static boolean GetKeyPressed(KeyCode key) {
-        return key.get();
+        return key.getValue();
     }
 
+    /**
+     * Check if a specific KeyCode is clicked.
+     *
+     * @param key The KeyCode to check.
+     * @return True if the KeyCode is clicked, false otherwise.
+     */
     public static boolean GetKeyClicked(KeyCode key) {
-        Toggle[] toggles = getToggles();
-        for (Toggle t : toggles) {
-            if (t.getMapping() == key) {
-                return t.isClicked();
-            }
-        }
-        return false;
+        if (toggles.isEmpty() || toggles.containsKey(key)) return false;
+        return Objects.requireNonNull(toggles.get(key)).isClicked();
     }
 
+    /**
+     * Check if a specific KeyCode is released.
+     *
+     * @param key The KeyCode to check.
+     * @return True if the KeyCode is released, false otherwise.
+     */
     public static boolean GetKeyReleased(KeyCode key) {
-        Toggle[] toggles = getToggles();
-        for (Toggle t : toggles) {
-            if (t.getMapping() == key) {
-                return t.isReleased();
-            }
-        }
-        return false;
+        if (toggles.isEmpty() || toggles.containsKey(key)) return false;
+        return Objects.requireNonNull(toggles.get(key)).isReleased();
     }
 
+    /**
+     *  Returns the value of a chosen axis from the gamepad
+     * @param axis What axis to get
+     * @return Value of the axis on the gamepad
+     */
+    public static double GetAxis(@NonNull Axis axis) {
+        return axis.getValue();
+    }
+
+    /**
+     *  Returns the power used on the axis (unsigned)
+     * @param axis What axis to use
+     * @return The magnitude (unsigned value) of the axis
+     */
+    public static double GetAxisMagnitude(Axis axis) {
+        return Math.abs(axis.getValue());
+    }
+
+    /**
+     * This class represents a keycode for gamepad button checks.
+     */
     public static class KeyCode {
         private final Func<Boolean> returnFunc;
 
@@ -70,11 +167,16 @@ public class Input {
             this.returnFunc = returnFunc;
         }
 
-        public boolean get() {
+        /**
+         * Check if the keycode is pressed.
+         *
+         * @return True if the keycode is pressed, false otherwise.
+         */
+        public boolean getValue() {
             return returnFunc.value();
         }
 
-        // Define button constants
+        // Button constants
         public static final KeyCode Gamepad1A = new KeyCode(() -> gamepad1.a);
         public static final KeyCode Gamepad1B = new KeyCode(() -> gamepad1.b);
         public static final KeyCode Gamepad1X = new KeyCode(() -> gamepad1.x);
@@ -94,5 +196,27 @@ public class Input {
         public static final KeyCode Gamepad2DpadLeft = new KeyCode(() -> gamepad2.dpad_left);
         public static final KeyCode Gamepad2DpadRight = new KeyCode(() -> gamepad2.dpad_right);
         public static final KeyCode Gamepad2Start = new KeyCode(() -> gamepad2.start);
+    }
+
+    public static class Axis {
+        private final Func<Double> returnFunc;
+
+        private Axis(Func<Double> returnFunc) {
+            this.returnFunc = returnFunc;
+        }
+
+        public double getValue() {
+            return returnFunc.value();
+        }
+
+        public static final Axis Gamepad1RightStickX = new Axis(() -> (double) gamepad1.right_stick_x);
+        public static final Axis Gamepad1RightStickY = new Axis(() -> (double) gamepad1.right_stick_y);
+        public static final Axis Gamepad1LeftStickY = new Axis(() -> (double) gamepad1.left_stick_y);
+        public static final Axis Gamepad1LeftStickX = new Axis(() -> (double) gamepad1.left_stick_x);
+        public static final Axis Gamepad2RightStickX = new Axis(() -> (double) gamepad2.right_stick_x);
+        public static final Axis Gamepad2RightStickY = new Axis(() -> (double) gamepad2.right_stick_y);
+        public static final Axis Gamepad2LeftStickY = new Axis(() -> (double) gamepad2.left_stick_y);
+        public static final Axis Gamepad2LeftStickX = new Axis(() -> (double) gamepad2.left_stick_x);
+
     }
 }
