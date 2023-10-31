@@ -91,13 +91,13 @@ The `DriveClass` is a crucial component of a robotics program, providing control
 
 - `Input` class contains the following fields:
     - `private static Gamepad gamepad1, gamepad2`: These are instances of the `Gamepad` class, representing two game controllers. These objects will store the input from the physical game controllers.
-    - `private static Toggle[] toggles`: An array of `Toggle` objects that represent toggle switches for various buttons on the game controllers. This array is initially set to `null`.
+    - `private static Map<> toggles`: A map of `Toggle` objects with the keys being `KeyCode`s that represent toggle switches for various buttons on the game controllers..
 
 ## **Methods**
 
 - `public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_)`: This method updates the references to the `gamepad1` and `gamepad2` objects with new instances passed as arguments.
 
-- `private static Toggle[] getToggles()`: This method returns the `toggles` array. If it's `null`, it initializes the array with `Toggle` objects representing various button mappings and then returns it.
+- `private static Map<> getToggles()`: This method returns the `toggles` map. If it's `null`, it initializes the map with `Toggle` objects representing various button mappings and then returns it.
 
 - `public static boolean GetKeyPressed(KeyCode key)`: This method checks if a specific `KeyCode` is currently pressed and returns a boolean value.
 
@@ -105,7 +105,8 @@ The `DriveClass` is a crucial component of a robotics program, providing control
 
 - `public static boolean GetKeyReleased(KeyCode key)`: This method checks if a specific `KeyCode` has been released and returns a boolean value.
 
-## **Inner Class `KeyCode`**
+## **Inner Classes**
+## **`KeyCode`**
 
 The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
 
