@@ -161,7 +161,7 @@ The `Axis` inner class is used to represent the controller axis (Joysticks, Trig
 
 - `isReleased()`: Checks if the toggle has changed and is not currently pressed (released).
 
-## **Location**
+# **Location**
 
 ## **Constructors**
 
