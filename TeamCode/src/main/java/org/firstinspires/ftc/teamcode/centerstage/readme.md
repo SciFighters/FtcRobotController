@@ -116,13 +116,24 @@ The `KeyCode` class is an inner class of `Input` and is used to represent indivi
 
 - The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button value to the corresponding `KeyCode` constant.
 
-## **Example Usage**
+### **Example Usage**
 
-- You can use this `Input` class to check the value of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
+- You can use this `Input` class to check the value of gamepad buttons and toggle switches to control your robot.
 ```java
   if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){
       // Do Something
   }
+```
+# **`Axis`**
+The `Axis` inner class is used to represent the controller axis (Joysticks, Triggers, etc)
+- It has a private field `returnFunc` of type `Func<Double>`, which returns the value of the axis
+- The `Axis` class defines constants for varoius axis on both `gamepad1` and `gamepad2`, using lambdas to map the button value to the corresponding axis constant.
+### **Example Usage**
+- You can use the `Axis` class to check the value of gamepad axis to control your robot, for an example to get the drive power.
+```java
+    if (Input.GetAxis(Input.Axis.Gamepad1LeftStickX) > deadZone){ // Check if the first gamepad's left stick x value is greater than the deadZone var
+        // Do Something
+    }
 ```
 # **Toggle**
 
