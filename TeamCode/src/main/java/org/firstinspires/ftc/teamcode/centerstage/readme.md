@@ -106,7 +106,7 @@ The `DriveClass` is a crucial component of a robotics program, providing control
 - `public static boolean GetKeyReleased(KeyCode key)`: This method checks if a specific `KeyCode` has been released and returns a boolean value.
 
 ## **Inner Classes**
-## **`KeyCode`**
+### **`KeyCode`**
 
 The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
 
@@ -116,7 +116,7 @@ The `KeyCode` class is an inner class of `Input` and is used to represent indivi
 
 - The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button value to the corresponding `KeyCode` constant.
 
-### **Example Usage**
+#### **Example Usage**
 
 - You can use this `Input` class to check the value of gamepad buttons and toggle switches to control your robot.
 ```java
@@ -124,11 +124,11 @@ The `KeyCode` class is an inner class of `Input` and is used to represent indivi
       // Do Something
   }
 ```
-# **`Axis`**
+### **`Axis`**
 The `Axis` inner class is used to represent the controller axis (Joysticks, Triggers, etc)
 - It has a private field `returnFunc` of type `Func<Double>`, which returns the value of the axis
 - The `Axis` class defines constants for varoius axis on both `gamepad1` and `gamepad2`, using lambdas to map the button value to the corresponding axis constant.
-### **Example Usage**
+#### **Example Usage**
 - You can use the `Axis` class to check the value of gamepad axis to control your robot, for an example to get the drive power.
 ```java
     if (Input.GetAxis(Input.Axis.Gamepad1LeftStickX) > deadZone){ // Check if the first gamepad's left stick x value is greater than the deadZone var
