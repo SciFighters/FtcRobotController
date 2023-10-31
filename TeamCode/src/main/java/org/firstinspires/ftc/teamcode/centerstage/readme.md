@@ -85,27 +85,65 @@ The primary purpose of this class is to control the movement and positioning of 
 - `hoverBoardMode()`: Implements a "hoverboard" mode to correct the robot's orientation when it deviates from a target angle.
 
 The `DriveClass` is a crucial component of a robotics program, providing control and navigation capabilities for a robot on the game field.
+# **Input**
 
+## **Class Structure**
+
+- `Input` class contains the following fields:
+    - `private static Gamepad gamepad1, gamepad2`: These are instances of the `Gamepad` class, representing two game controllers. These objects will store the input from the physical game controllers.
+    - `private static Toggle[] toggles`: An array of `Toggle` objects that represent toggle switches for various buttons on the game controllers. This array is initially set to `null`.
+
+## **Methods**
+
+- `public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_)`: This method updates the references to the `gamepad1` and `gamepad2` objects with new instances passed as arguments.
+
+- `private static Toggle[] getToggles()`: This method returns the `toggles` array. If it's `null`, it initializes the array with `Toggle` objects representing various button mappings and then returns it.
+
+- `public static boolean GetKeyPressed(KeyCode key)`: This method checks if a specific `KeyCode` is currently pressed and returns a boolean value.
+
+- `public static boolean GetKeyClicked(KeyCode key)`: This method checks if a specific `KeyCode` has been clicked (pressed and released) and returns a boolean value.
+
+- `public static boolean GetKeyReleased(KeyCode key)`: This method checks if a specific `KeyCode` has been released and returns a boolean value.
+
+## **Inner Class `KeyCode`**
+
+The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
+
+- It has a private field `returnFunc` of type `Func<Boolean>`, which is a functional interface used to retrieve the button value.
+
+- The constructor of `KeyCode` takes a `Func<Boolean>` as an argument to initialize `returnFunc`.
+
+- The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button value to the corresponding `KeyCode` constant.
+
+## **Example Usage**
+
+- You can use this `Input` class to check the value of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
+```java
+  if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){
+      // Do Something
+  }
+```
 # **Toggle**
 
 ## **Constructor**
 
-- `Toggle()`: Default constructor with no initial gatherSystemState.
-- `Toggle(boolean initialState)`: Constructor with an initial gatherSystemState parameter.
-
+- `Toggle()`: Default constructor with no initial value.
+- `Toggle(boolean initialState)`: Constructor with an initial value parameter.
+- `Toggle(Func<Boolean>)`: Constructor with a func arg to tell it what logic will mean it's pressed.
+- `Toggle(KeyCode)`: Constructor with a KeyCode value to tell it what gamepad button it's mapped to.
 ## **Methods**
 
-- `update(boolean input)`: This method updates the toggle based on the given input. It is designed for handling toggles where the gatherSystemState changes only when the input is pressed and not when released.
+- `update(boolean input)`: This method updates the toggle based on the given input.
+- `update()`: This method updates the toggle based on the KeyCode mapping or the Func it was given in the constructor.
+- `set(boolean input)`: Sets the toggle value. It can be used to directly set the value without relying on input changes.
 
-- `set(boolean input)`: Sets the toggle gatherSystemState explicitly. It can be used to directly set the gatherSystemState without relying on input changes.
-
-- `toggle()`: Toggles the current gatherSystemState of the toggle and returns the new gatherSystemState.
+- `toggle()`: Toggles the current value of the toggle and returns the new value.
 
 - `isPressed()`: Checks if the toggle is currently pressed.
 
-- `isChanged()`: Checks if the toggle gatherSystemState has changed since the last update.
+- `isChanged()`: Checks if the toggle value has changed since the last update.
 
-- `getState()`: Returns the current gatherSystemState of the toggle.
+- `getState()`: Returns the current value of the toggle.
 
 - `isClicked()`: Checks if the toggle has changed and is currently pressed (clicked).
 
@@ -163,40 +201,3 @@ The `DriveClass` is a crucial component of a robotics program, providing control
 
 - `multiplyY(double y)`: Multiplies the y-coordinate by a specified value.
 
-# **Input**
-
-## **Class Structure**
-
-- `Input` class contains the following fields:
-    - `private static Gamepad gamepad1, gamepad2`: These are instances of the `Gamepad` class, representing two game controllers. These objects will store the input from the physical game controllers.
-    - `private static Toggle[] toggles`: An array of `Toggle` objects that represent toggle switches for various buttons on the game controllers. This array is initially set to `null`.
-
-## **Methods**
-
-- `public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_)`: This method updates the references to the `gamepad1` and `gamepad2` objects with new instances passed as arguments.
-
-- `private static Toggle[] getToggles()`: This method returns the `toggles` array. If it's `null`, it initializes the array with `Toggle` objects representing various button mappings and then returns it.
-
-- `public static boolean GetKeyPressed(KeyCode key)`: This method checks if a specific `KeyCode` is currently pressed and returns a boolean value.
-
-- `public static boolean GetKeyClicked(KeyCode key)`: This method checks if a specific `KeyCode` has been clicked (pressed and released) and returns a boolean value.
-
-- `public static boolean GetKeyReleased(KeyCode key)`: This method checks if a specific `KeyCode` has been released and returns a boolean value.
-
-## **Inner Class `KeyCode`**
-
-The `KeyCode` class is an inner class of `Input` and is used to represent individual buttons on the game controllers.
-
-- It has a private field `returnFunc` of type `Func<Boolean>`, which is a functional interface used to retrieve the button gatherSystemState.
-
-- The constructor of `KeyCode` takes a `Func<Boolean>` as an argument to initialize `returnFunc`.
-
-- The `KeyCode` class defines constants for various buttons on both `gamepad1` and `gamepad2`, using lambdas to map the button gatherSystemState to the corresponding `KeyCode` constant.
-
-## **Example Usage**
-
-- You can use this `Input` class to check the gatherSystemState of gamepad buttons and toggle switches to control your robot in a FIRST Tech Challenge competition.
-```java
-  if (Input.GetKeyPressed(Input.KeyCode.Gamepad1A)){
-      // Do Something
-  }
