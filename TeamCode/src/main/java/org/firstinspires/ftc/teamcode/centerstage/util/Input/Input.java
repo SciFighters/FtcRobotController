@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.util;
+package org.firstinspires.ftc.teamcode.centerstage.util.Input;
 
 import androidx.annotation.NonNull;
 
@@ -52,17 +52,23 @@ public class Input {
     public static void init(LinearOpMode opMode_) {
         existingTogglesInOpMode = new ArrayList<>();
         opMode = opMode_;
-        Field[] allFields = opMode.getClass().getDeclaredFields();
-        for (Field field : allFields) {
-            if (field.getType() == Toggle.class) {
+        Field[] allFields = opMode.getClass().getDeclaredFields(); // Get declared fields in the opMode
+        for (Field field : allFields) { // Loop through the existing field in the OpMode
+            if (field.getType() == Toggle.class) { // Check whether its a toggle
                 field.setAccessible(true);
                 try {
-                    Toggle value = (Toggle) field.get(opMode);
-                    if (value != null && value.getMapping() != null)
-                        existingTogglesInOpMode.add(value);
+                    Toggle toggle = (Toggle) field.get(opMode);
+                    if (toggle != null && toggle.getMapping() != null) { // Make sure its not null and has a mapping
+                        if (field.isAnnotationPresent(UpdateAutomatically.class)) {
+                            existingTogglesInOpMode.add(toggle); // add the toggle to the list
+                        }
+                    }
                 } catch (IllegalAccessException e) {
                     // Handle the exception if necessary
+                    opMode.telemetry.addData("Something went wrong", "at Input class init");
                 }
+            } else if (field.isAnnotationPresent(UpdateAutomatically.class)){
+                throw new RuntimeException("Invalid field for UpdateAutomatically annotation");
             }
         }
 
@@ -140,7 +146,8 @@ public class Input {
     }
 
     /**
-     *  Returns the value of a chosen axis from the gamepad
+     * Returns the value of a chosen axis from the gamepad
+     *
      * @param axis What axis to get
      * @return Value of the axis on the gamepad
      */
@@ -149,7 +156,8 @@ public class Input {
     }
 
     /**
-     *  Returns the power used on the axis (unsigned)
+     * Returns the power used on the axis (unsigned)
+     *
      * @param axis What axis to use
      * @return The magnitude (unsigned value) of the axis
      */

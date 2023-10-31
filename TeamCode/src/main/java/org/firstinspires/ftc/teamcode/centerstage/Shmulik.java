@@ -9,8 +9,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.CameraPipeline;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.util.Input;
-import org.firstinspires.ftc.teamcode.centerstage.util.Toggle;
+import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
+import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
+import org.firstinspires.ftc.teamcode.centerstage.util.Input.UpdateAutomatically;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
@@ -22,6 +23,7 @@ public class Shmulik extends LinearOpMode {
             DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE,
             DriveClass.DriveMode.LEFT);
     boolean allowMovement = true; // Flag to control movement
+    @UpdateAutomatically
     Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
     double angle = 0;
     final double maxTagSize = 239;

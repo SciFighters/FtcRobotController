@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.centerstage.util;
+package org.firstinspires.ftc.teamcode.centerstage.util.Input;
 
 import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 
 /**
- * Toggles of the KeyCode type are updated automatically and there's no need to call the update function on them
+ * Toggles of the KeyCode type are updated automatically if the UpdateAutomatically annotation is present and there's no need to call the update function on them
  */
 public class Toggle {
 
