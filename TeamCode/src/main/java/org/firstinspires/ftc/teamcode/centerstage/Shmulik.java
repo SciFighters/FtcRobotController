@@ -45,7 +45,6 @@ public class Shmulik extends LinearOpMode {
         drive.resetOrientation(0);
         while (!isStopRequested() && opModeIsActive()) {
             Input.updateControls(gamepad1, gamepad2);
-            telemetry.addData("Rotate Toggle", rotateToggle.getState() + " " + rotateToggle.getMapping());
             if (gamepad1.start) {
                 gamepad1.runRumbleEffect(rumbleEffect);
                 if (gamepad1.x) {
@@ -54,12 +53,21 @@ public class Shmulik extends LinearOpMode {
                 }
                 continue;
             }
-            arm.setArmPower(0, gamepad2.right_stick_y);
+            arm.setArmPower(gamepad2.left_stick_y, gamepad2.right_stick_y);
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK);
             double y = pow(gamepad1.left_stick_y) * boost;
             double x = pow(-gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
+            if (gamepad2.a) {
+                arm.goToPos(Arm.Position.One);
+            }
+            if (gamepad2.b) {
+                arm.goToPos(Arm.Position.Two);
+            }
+            if (gamepad2.y) {
+                arm.goToPos(Arm.Position.Three);
+            }
 
             if (gamepad1.dpad_left) drive.setPower(0, 0, 0.1);
             else if (gamepad1.dpad_right) drive.setPower(0, 0, -0.1);
@@ -73,7 +81,7 @@ public class Shmulik extends LinearOpMode {
                     if (tag == null) {
                         continue;
                     }
-                    if (rotateToggle.isPressed()) {
+                    if (rotateToggle.isClicked()) {
                         if (!drive.busy)
                             zeroOnTarget();
                     }
@@ -85,6 +93,9 @@ public class Shmulik extends LinearOpMode {
                 }
                 telemetry.addData("tags detected ", (int) cameraPipeline.getDetections().size());
                 telemetry.addData("Allow Movement", allowMovement);
+                telemetry.addData("Hand Pos", arm.getHandPos());
+                telemetry.addData("Timer", arm.timer.seconds());
+                telemetry.addData("State", arm.getState());
                 telemetry.update();
             }
         }

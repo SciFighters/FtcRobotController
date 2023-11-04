@@ -8,8 +8,18 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class Arm extends Thread {
+import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.GoToState;
+import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.GraceHoldTimeState;
+import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.IdleState;
+import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.ManualState;
+import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+
+import java.util.Objects;
+
+public class Arm {
     DcMotorEx rail = null, hand = null;
 
     private CRServo grabber_right = null;
@@ -24,23 +34,23 @@ public class Arm extends Thread {
     private DigitalChannel rail_limit_F = null;
 
     private AnalogInput potentiometer = null;
-    private int potentiometer_offset;
-
     private DcMotorEx carousel = null;
-
-    private int railRange = 1470;
-    public int handRange = 3935; // 6000; // 5968;
-    private LinearOpMode opMode;
-    private double deadZone = 0.05;
-    volatile private double power = 1;
+    private final int handMin = -1200;
+    private final int handMax = 0;
+    private final LinearOpMode opMode;
+    private final double deadZone = 0.05;
+    private final double holdPower = 0.2;
     int handTargetPos, railTargetPos;
+    public ElapsedTime timer;
+    public double graceTimeLimit = 0.25;
 
-    public enum State {
-        Idle, Hold, Manual, Goto,
+    public double getHoldPower() {
+        return holdPower;
     }
 
+
     public enum Position {
-        One(1, 2), Two(2, 2), Three(3, 2); // Todo : put actual values
+        One(-500, 2), Two(-900, 2), Three(-1200, 2); // Todo : put actual values
         final int handPos, railPos;
 
         Position(int hanPos, int railPos) {
@@ -49,13 +59,14 @@ public class Arm extends Thread {
         }
     }
 
-    State state;
+    public StateMachine<Arm> stateMachine;
 
     public Arm(LinearOpMode opMode) {
         this.opMode = opMode;
     }
 
     public void init(HardwareMap hw) {
+        timer = new ElapsedTime();
         opMode.telemetry.addLine("Head Rail Init");
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
@@ -94,6 +105,7 @@ public class Arm extends Thread {
         carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
+        stateMachine.changeState(new IdleState());
 
 
 //        hand.setTargetPositionTolerance(60);
@@ -105,43 +117,25 @@ public class Arm extends Thread {
 
     public void goToPos(Position pos) {
         setTargetPositions(pos.handPos, pos.railPos);
-        setState(State.Goto);
+        stateMachine.changeState(new GoToState());
     }
 
-    public void setState(State newState) {
-        if (newState == state) return;
-
-        switch (newState) {
-            case Idle: {
-
-                break;
-            }
-            case Manual: {
-                // Controller
-                setArmDriveMode(true);
-                break;
-            }
-            case Hold: {
-                setTargetPositions(hand.getCurrentPosition(), rail.getCurrentPosition());
-                setArmDriveMode(false);
-                break;
-            }
-            case Goto: {
-                setArmDriveMode(false);
-                break;
-            }
-        }
-
-        this.state = newState;
+    public int getCurrentHandPos() {
+        return hand.getCurrentPosition();
     }
+
+    public int getCurrentRailPos() {
+        return rail.getCurrentPosition();
+    }
+
 
     public void setTargetPositions(int handPos, int railPos) {
-        handTargetPos = handPos;
+        handTargetPos = MathUtil.clamp(handPos, handMin, handMax);
         railTargetPos = railPos;
     }
 
-    public void setArmDriveMode(boolean drive) {
-        if (drive) {
+    public void setManualMode(boolean manual, double power) {
+        if (manual) {
             hand.setPower(0);
             hand.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
             rail.setPower(0);
@@ -157,19 +151,7 @@ public class Arm extends Thread {
     }
 
     public void handleStates() {
-        switch (state) {
-            case Hold: {
-                if (areMotorsBusy()) {
-                    setArmDriveMode(false);
-                }
-                break;
-            }
-            case Goto: {
-                if (areMotorsBusy()) {
-                    setState(State.Hold);
-                }
-            }
-        }
+        stateMachine.execute();
     }
 
     public boolean areMotorsBusy() {
@@ -178,10 +160,12 @@ public class Arm extends Thread {
 
     public void setArmPower(double railPower, double handPower) {
         if (outOfDeadZone(handPower)) {
-            setState(State.Manual);
+            stateMachine.changeState(new ManualState());
             handSetPower(handPower);
         } else {
-            setState(State.Hold);
+            if (stateMachine.getCurrentState().equals(new ManualState())) {
+                stateMachine.changeState(new GraceHoldTimeState());
+            }
         }
 
         handleStates();
@@ -193,5 +177,9 @@ public class Arm extends Thread {
 
     public boolean outOfDeadZone(double power) {
         return Math.abs(power) > deadZone;
+    }
+
+    public int getHandPos() {
+        return hand.getCurrentPosition();
     }
 }

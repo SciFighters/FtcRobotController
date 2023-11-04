@@ -67,7 +67,7 @@ public class Input {
                     // Handle the exception if necessary
                     opMode.telemetry.addData("Something went wrong", "at Input class init");
                 }
-            } else if (field.isAnnotationPresent(UpdateAutomatically.class)){
+            } else if (field.isAnnotationPresent(UpdateAutomatically.class)) {
                 throw new RuntimeException("Invalid field for UpdateAutomatically annotation");
             }
         }
@@ -105,13 +105,40 @@ public class Input {
      *
      * @return An array of Toggle instances.
      */
-    private static Map<KeyCode, Toggle> getToggles() {
+    public static Map<KeyCode, Toggle> getToggles() {
         if (toggles == null) {
             toggles = new HashMap<>();
+
+            //region Gamepad1 toggles
             toggles.put(KeyCode.Gamepad1A, new Toggle(KeyCode.Gamepad1A));
+            toggles.put(KeyCode.Gamepad1B, new Toggle(KeyCode.Gamepad1B));
+            toggles.put(KeyCode.Gamepad1X, new Toggle(KeyCode.Gamepad1X));
+            toggles.put(KeyCode.Gamepad1Y, new Toggle(KeyCode.Gamepad1Y));
+            toggles.put(KeyCode.Gamepad1DpadUp, new Toggle(KeyCode.Gamepad1DpadUp));
+            toggles.put(KeyCode.Gamepad1DpadDown, new Toggle(KeyCode.Gamepad1DpadDown));
+            toggles.put(KeyCode.Gamepad1DpadLeft, new Toggle(KeyCode.Gamepad1DpadLeft));
+            toggles.put(KeyCode.Gamepad1DpadRight, new Toggle(KeyCode.Gamepad1DpadRight));
+            toggles.put(KeyCode.Gamepad1Start, new Toggle(KeyCode.Gamepad1Start));
+            toggles.put(KeyCode.Gamepad1LeftBumper, new Toggle(KeyCode.Gamepad1LeftBumper));
+            toggles.put(KeyCode.Gamepad1RightBumper, new Toggle(KeyCode.Gamepad1RightBumper));
+            //endregion
+            //region Gamepad2 toggles
+            toggles.put(KeyCode.Gamepad2A, new Toggle(KeyCode.Gamepad2A));
+            toggles.put(KeyCode.Gamepad2B, new Toggle(KeyCode.Gamepad2B));
+            toggles.put(KeyCode.Gamepad2X, new Toggle(KeyCode.Gamepad2X));
+            toggles.put(KeyCode.Gamepad2Y, new Toggle(KeyCode.Gamepad2Y));
+            toggles.put(KeyCode.Gamepad2DpadUp, new Toggle(KeyCode.Gamepad2DpadUp));
+            toggles.put(KeyCode.Gamepad2DpadDown, new Toggle(KeyCode.Gamepad2DpadDown));
+            toggles.put(KeyCode.Gamepad2DpadLeft, new Toggle(KeyCode.Gamepad2DpadLeft));
+            toggles.put(KeyCode.Gamepad2DpadRight, new Toggle(KeyCode.Gamepad2DpadRight));
+            toggles.put(KeyCode.Gamepad2Start, new Toggle(KeyCode.Gamepad2Start));
+            toggles.put(KeyCode.Gamepad2LeftBumper, new Toggle(KeyCode.Gamepad2LeftBumper));
+            toggles.put(KeyCode.Gamepad2RightBumper, new Toggle(KeyCode.Gamepad2RightBumper));
+            //endregion
         }
         return toggles;
     }
+
 
     /**
      * Check if a specific KeyCode is pressed.
@@ -194,6 +221,8 @@ public class Input {
         public static final KeyCode Gamepad1DpadLeft = new KeyCode(() -> gamepad1.dpad_left);
         public static final KeyCode Gamepad1DpadRight = new KeyCode(() -> gamepad1.dpad_right);
         public static final KeyCode Gamepad1Start = new KeyCode(() -> gamepad1.start);
+        public static final KeyCode Gamepad1LeftBumper = new KeyCode(() -> gamepad1.left_bumper);
+        public static final KeyCode Gamepad1RightBumper = new KeyCode(() -> gamepad1.right_bumper);
 
         public static final KeyCode Gamepad2A = new KeyCode(() -> gamepad2.a);
         public static final KeyCode Gamepad2B = new KeyCode(() -> gamepad2.b);
@@ -204,6 +233,8 @@ public class Input {
         public static final KeyCode Gamepad2DpadLeft = new KeyCode(() -> gamepad2.dpad_left);
         public static final KeyCode Gamepad2DpadRight = new KeyCode(() -> gamepad2.dpad_right);
         public static final KeyCode Gamepad2Start = new KeyCode(() -> gamepad2.start);
+        public static final KeyCode Gamepad2LeftBumper = new KeyCode(() -> gamepad2.left_bumper);
+        public static final KeyCode Gamepad2RightBumper = new KeyCode(() -> gamepad2.right_bumper);
     }
 
     public static class Axis {
@@ -221,10 +252,15 @@ public class Input {
         public static final Axis Gamepad1RightStickY = new Axis(() -> (double) gamepad1.right_stick_y);
         public static final Axis Gamepad1LeftStickY = new Axis(() -> (double) gamepad1.left_stick_y);
         public static final Axis Gamepad1LeftStickX = new Axis(() -> (double) gamepad1.left_stick_x);
+        public static final Axis Gamepad1RightTrigger = new Axis(() -> (double) gamepad1.right_trigger);
+        public static final Axis Gamepad1LeftTrigger = new Axis(() -> (double) gamepad1.left_trigger);
+
         public static final Axis Gamepad2RightStickX = new Axis(() -> (double) gamepad2.right_stick_x);
         public static final Axis Gamepad2RightStickY = new Axis(() -> (double) gamepad2.right_stick_y);
         public static final Axis Gamepad2LeftStickY = new Axis(() -> (double) gamepad2.left_stick_y);
         public static final Axis Gamepad2LeftStickX = new Axis(() -> (double) gamepad2.left_stick_x);
+        public static final Axis Gamepad2RightTrigger = new Axis(() -> (double) gamepad2.right_trigger);
+        public static final Axis Gamepad2LeftTrigger = new Axis(() -> (double) gamepad2.left_trigger);
 
     }
 }
