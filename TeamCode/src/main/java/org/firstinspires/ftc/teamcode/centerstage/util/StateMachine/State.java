@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.util.StateMachine;
 
+import androidx.annotation.NonNull;
+
 public class State<OwnerClass> {
     OwnerClass owner;
 
@@ -11,5 +13,10 @@ public class State<OwnerClass> {
     }
 
     public void exit() {
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getName();
     }
 }

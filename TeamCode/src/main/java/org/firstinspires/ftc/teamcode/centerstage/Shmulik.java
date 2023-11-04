@@ -95,7 +95,7 @@ public class Shmulik extends LinearOpMode {
                 telemetry.addData("Allow Movement", allowMovement);
                 telemetry.addData("Hand Pos", arm.getHandPos());
                 telemetry.addData("Timer", arm.timer.seconds());
-                telemetry.addData("State", arm.getState());
+                telemetry.addData("State", arm.stateMachine.getCurrentState().toString());
                 telemetry.update();
             }
         }
