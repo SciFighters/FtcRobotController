@@ -12,8 +12,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.GoToState;
 import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.GraceHoldTimeState;
+import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.HoldState;
 import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.IdleState;
 import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States.ManualState;
+import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
@@ -43,6 +45,7 @@ public class Arm {
     int handTargetPos, railTargetPos;
     public ElapsedTime timer;
     public double graceTimeLimit = 0.25;
+    public State<Arm> gotoState, graceHoldTimeState, holdState, idleState, manualState;
 
     public double getHoldPower() {
         return holdPower;
@@ -66,7 +69,13 @@ public class Arm {
     }
 
     public void init(HardwareMap hw) {
+        gotoState = new GoToState();
+        graceHoldTimeState = new GraceHoldTimeState();
+        holdState = new HoldState();
+        idleState = new IdleState();
+        manualState = new ManualState();
         timer = new ElapsedTime();
+        stateMachine = new StateMachine<>(this);
         opMode.telemetry.addLine("Head Rail Init");
         rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
         hand = hw.get(DcMotorEx.class, "hand");
@@ -105,7 +114,7 @@ public class Arm {
         carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         potentiometer = hw.get(AnalogInput.class, "potentiometer");
-        stateMachine.changeState(new IdleState());
+        stateMachine.changeState(idleState);
 
 
 //        hand.setTargetPositionTolerance(60);
@@ -117,7 +126,7 @@ public class Arm {
 
     public void goToPos(Position pos) {
         setTargetPositions(pos.handPos, pos.railPos);
-        stateMachine.changeState(new GoToState());
+        stateMachine.changeState(gotoState);
     }
 
     public int getCurrentHandPos() {
@@ -130,7 +139,7 @@ public class Arm {
 
 
     public void setTargetPositions(int handPos, int railPos) {
-        handTargetPos = MathUtil.clamp(handPos, handMin, handMax);
+        handTargetPos = handPos;
         railTargetPos = railPos;
     }
 
@@ -160,12 +169,11 @@ public class Arm {
 
     public void setArmPower(double railPower, double handPower) {
         if (outOfDeadZone(handPower)) {
-            stateMachine.changeState(new ManualState());
+            stateMachine.changeState(manualState);
             handSetPower(handPower);
         } else {
-            if (stateMachine.getCurrentState().equals(new ManualState())) {
-                stateMachine.changeState(new GraceHoldTimeState());
-            }
+            if (stateMachine.getCurrentState() != gotoState)
+                stateMachine.changeState(holdState);
         }
 
         handleStates();

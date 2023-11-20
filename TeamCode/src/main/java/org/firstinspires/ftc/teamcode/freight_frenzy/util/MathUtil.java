@@ -38,7 +38,7 @@ public class MathUtil {
         return value <= min || value >= max;
     }
 
-    public boolean approximately(double value, double valuedAt, double approximation) {
-        return value > (valuedAt - approximation) && value < (valuedAt + approximation);
+    public static boolean approximately(double value, double targetValue, double approximation) {
+        return value > (targetValue - approximation) && value < (targetValue + approximation);
     }
 }

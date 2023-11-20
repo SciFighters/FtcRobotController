@@ -49,7 +49,9 @@ public class Input {
      *
      * @param opMode_ The LinearOpMode instance.
      */
-    public static void init(LinearOpMode opMode_) {
+    public static void init(LinearOpMode opMode_, Gamepad gamepad1_, Gamepad gamepad2_) {
+        gamepad1 = gamepad1_;
+        gamepad2 = gamepad2_;
         existingTogglesInOpMode = new ArrayList<>();
         opMode = opMode_;
         Field[] allFields = opMode.getClass().getDeclaredFields(); // Get declared fields in the opMode
@@ -78,14 +80,8 @@ public class Input {
 
     /**
      * Update the gamepad controls in a separate thread.
-     *
-     * @param gamepad1_ The Gamepad1 object.
-     * @param gamepad2_ The Gamepad2 object.
      */
-    public static void updateControls(Gamepad gamepad1_, Gamepad gamepad2_) {
-        gamepad1 = gamepad1_;
-        gamepad2 = gamepad2_;
-
+    public static void updateControls() {
         // Run the update controls task in a separate thread
         executor.execute(new UpdateControlsTask());
     }
@@ -119,6 +115,7 @@ public class Input {
             toggles.put(KeyCode.Gamepad1DpadLeft, new Toggle(KeyCode.Gamepad1DpadLeft));
             toggles.put(KeyCode.Gamepad1DpadRight, new Toggle(KeyCode.Gamepad1DpadRight));
             toggles.put(KeyCode.Gamepad1Start, new Toggle(KeyCode.Gamepad1Start));
+            toggles.put(KeyCode.Gamepad1Options, new Toggle(KeyCode.Gamepad1Options));
             toggles.put(KeyCode.Gamepad1LeftBumper, new Toggle(KeyCode.Gamepad1LeftBumper));
             toggles.put(KeyCode.Gamepad1RightBumper, new Toggle(KeyCode.Gamepad1RightBumper));
             //endregion
@@ -134,6 +131,7 @@ public class Input {
             toggles.put(KeyCode.Gamepad2Start, new Toggle(KeyCode.Gamepad2Start));
             toggles.put(KeyCode.Gamepad2LeftBumper, new Toggle(KeyCode.Gamepad2LeftBumper));
             toggles.put(KeyCode.Gamepad2RightBumper, new Toggle(KeyCode.Gamepad2RightBumper));
+            toggles.put(KeyCode.Gamepad2Options, new Toggle(KeyCode.Gamepad2Options));
             //endregion
         }
         return toggles;
@@ -221,6 +219,7 @@ public class Input {
         public static final KeyCode Gamepad1DpadLeft = new KeyCode(() -> gamepad1.dpad_left);
         public static final KeyCode Gamepad1DpadRight = new KeyCode(() -> gamepad1.dpad_right);
         public static final KeyCode Gamepad1Start = new KeyCode(() -> gamepad1.start);
+        public static final KeyCode Gamepad1Options = new KeyCode(() -> gamepad1.options);
         public static final KeyCode Gamepad1LeftBumper = new KeyCode(() -> gamepad1.left_bumper);
         public static final KeyCode Gamepad1RightBumper = new KeyCode(() -> gamepad1.right_bumper);
 
@@ -235,6 +234,8 @@ public class Input {
         public static final KeyCode Gamepad2Start = new KeyCode(() -> gamepad2.start);
         public static final KeyCode Gamepad2LeftBumper = new KeyCode(() -> gamepad2.left_bumper);
         public static final KeyCode Gamepad2RightBumper = new KeyCode(() -> gamepad2.right_bumper);
+        public static final KeyCode Gamepad2Options = new KeyCode(() -> gamepad2.options);
+
     }
 
     public static class Axis {

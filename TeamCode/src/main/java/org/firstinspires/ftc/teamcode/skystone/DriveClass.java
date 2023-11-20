@@ -434,7 +434,7 @@ public class DriveClass {
     /*
      * rotate
      * right rounds > 0, left rounds < 0
-     * direction LEFT or RIGHT
+     * direction PIXEL_STACK or BACKSTAGE
      * speed between 0 and 1
      * timeout maximum time in seconds for operation*/
     public void rotate(double rounds, Direction direction, double speed, double timeout) {
@@ -782,7 +782,7 @@ public class DriveClass {
             while (timer.seconds() < 20 && opMode.opModeIsActive()) {
                 opMode.sleep(100);
             }
-            //strafe(1.5 * mul, Direction.LEFT, 0.7, 3, 0);
+            //strafe(1.5 * mul, Direction.PIXEL_STACK, 0.7, 3, 0);
             driveToLine(team, false, 10);
         }
         else {
@@ -923,7 +923,7 @@ public class DriveClass {
     }
 
     private void driveToLine(Alliance team, boolean skystone, double timeout) {
-        // drive LEFT : back to line.
+        // drive PIXEL_STACK : back to line.
         int mul = (team == Alliance.RED) ? 1 : -1;
         if (skystone) mul *= -1;
 
@@ -971,13 +971,13 @@ public class DriveClass {
 
         try {
             RobotLog.d("First Skystone");
-            //robot.strafe(0.6, DriveClass.Direction.RIGHT, 1, 3, 0);
+            //robot.strafe(0.6, DriveClass.Direction.BACKSTAGE, 1, 3, 0);
             arm.pleaseDo(ArmClass.Mode.SKY1_STRETCH);
             straight(0.9, Direction.FORWARD, 1, 4, 0,false);
 
             // find skystone
             approachStones(location);     // drive straight close to stones
-            double skyDist = searchSkystone(location,mul); // drive LEFT : search for SkyStone
+            double skyDist = searchSkystone(location,mul); // drive PIXEL_STACK : search for SkyStone
             RobotLog.d("skyDist: %f", skyDist);
 
             if (skyDist<0.4)
@@ -994,7 +994,7 @@ public class DriveClass {
             // drive backwards
             straight(backDist, Direction.REVERSE, 0.8, 1, 0,false);
 
-            // slide RIGHT to put stone
+            // slide BACKSTAGE to put stone
             strafe((2.3 + skyDist) * mul, Direction.RIGHT, 1, 8, 0);
             // robot.stop();
 
@@ -1011,7 +1011,7 @@ public class DriveClass {
 
             // find skystone
             approachStones(location);     // drive straight close to stones
-            searchSkystone(location,mul); // drive LEFT : search for SkyStone
+            searchSkystone(location,mul); // drive PIXEL_STACK : search for SkyStone
 
             // pickup STONE
             arm.openClamps(false);
@@ -1028,7 +1028,7 @@ public class DriveClass {
                 strafe((4.5 + skyDist) * mul, Direction.RIGHT, 1, 8, 0); // slide toward foundation line
 
                 rotateTo(180 * mul,1,3, 1);      // rotate 180
-                // rotate(0.5, Direction.RIGHT, 1,3);
+                // rotate(0.5, Direction.BACKSTAGE, 1,3);
 
                 // straight(0.4, Direction.REVERSE,1,3, 180, true);    // drive to foundation
                 arm.pleaseDo(ArmClass.Mode.SKY5_DROP_BACK);                          // drop the stone backwards and HOME the arm while moving the foundation.
@@ -1061,7 +1061,7 @@ public class DriveClass {
                 }
             }
             else { // BRIDGE
-                // slide RIGHT to put stone after bridge
+                // slide BACKSTAGE to put stone after bridge
                 strafe(3.8 * mul, Direction.RIGHT, 0.9, 8, 0); // TODO: stoneDist
 
                 arm.openClamps(true);

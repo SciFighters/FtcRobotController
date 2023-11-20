@@ -15,7 +15,7 @@ public class GoToState extends State<Arm> {
     @Override
     public void execute() {
         if (owner.areMotorsBusy()) {
-            owner.stateMachine.changeState(new HoldState());
+            owner.stateMachine.changeState(owner.holdState);
         }
     }
 

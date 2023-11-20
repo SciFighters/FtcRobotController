@@ -41,9 +41,10 @@ public class CameraPipeline {
     private void initialize(HardwareMap hardwareMap) {
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
-                .setDrawCubeProjection(true)
+                .setDrawCubeProjection(false)
                 .setDrawTagID(true)
                 .setDrawTagOutline(true)
+                .setNumThreads(2)
                 .build();
         visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
@@ -110,5 +111,19 @@ public class CameraPipeline {
         double dy = corners[0].y - corners[2].y;
 
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public enum AprilTags {
+        BlueLeft(0),
+        BlueMiddle(1),
+        BlueRight(2),
+        RedLeft(3),
+        RedMiddle(4),
+        RedRight(5);
+        public final int ID;
+
+        AprilTags(int ID) {
+            this.ID = ID;
+        }
     }
 }

@@ -15,9 +15,9 @@ public class GraceHoldTimeState extends State<Arm> {
 
     @Override
     public void execute() {
-        if (owner.timer.seconds() >= owner.graceTimeLimit) {
-            owner.stateMachine.changeState(new HoldState());
-        }
+//        if (owner.timer.seconds() >= owner.graceTimeLimit) {
+        owner.stateMachine.changeState(owner.holdState);
+//        }
     }
 
     @Override

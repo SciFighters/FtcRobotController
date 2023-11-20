@@ -40,7 +40,7 @@ public class AutoFlow {
     Location highJunctionSafe = new Location(0.3, 1.2);
     Location conePushLocation = new Location(-0.9, 1.7);
     Location pre_highJunction = new Location(-0.9, 1.5);
-    Location startLocation = new Location(-0.9, robotLength / 2, 180); // LEFT
+    Location startLocation = new Location(-0.9, robotLength / 2, 180); // PIXEL_STACK
     Auto auto;
 
     public enum StartPos {
