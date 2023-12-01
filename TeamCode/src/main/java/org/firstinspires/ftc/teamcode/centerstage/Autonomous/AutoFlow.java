@@ -5,11 +5,17 @@ import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.CameraPipeline;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
     private DriveClass drive;
@@ -19,6 +25,10 @@ public class AutoFlow {
     Location startLocation = new Location(0.9, robotLength / 2, 0); // PIXEL_STACK
     CameraPipeline cameraPipeline;
     Alliance alliance;
+    public DuckLine duckLine;
+    final int screenWidth = 640;
+    final int screenHeight = 360;
+    int beaconPos = 0;
 
     public enum StartPos {
         PIXEL_STACK(1),
@@ -59,45 +69,44 @@ public class AutoFlow {
                 );
     }
 
+    void initWebcam() {
+        int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+
+        WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "cam");
+        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
+
+        this.duckLine = new DuckLine(this.alliance);
+        webcam.setPipeline(this.duckLine);
+
+        // Remove the camera monitor view ID from here
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                // Use a different camera monitor view ID here or don't use it if you don't need it
+                webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                opMode.telemetry.addData("camera initialization failed", errorCode);
+            }
+        });
+    }
+
+
     public void init() {
-        cameraPipeline = new CameraPipeline("cam", new Size(800, 448), opMode.hardwareMap, opMode.telemetry);
+        initWebcam();
+
+//        cameraPipeline = new CameraPipeline("cam", new Size(800, 448), opMode.hardwareMap, opMode.telemetry, new CameraPipeline.PortalConfiguration());
         drive.init(opMode.hardwareMap);
     }
 
     public void test() {
-        drive.goToLocation(new Location(drive.getPosX(), tile * 3 + 0.4), 1, 0, 0.15, 0);
-        drive.goToLocation(new Location(drive.getPosX() - tile * 3, drive.getPosY()), 1, -90, 0.15, 0);
+        drive.goToLocation(new Location(0.9, tile * 3 + 0.4), 1, 0, 0.15, 0, true);
+        drive.goToLocation(new Location(0.9 - tile * 3, drive.getPosY()), 1, -90, 0.15, 0, true);
         drive.goToLocation(new Location(drive.getPosX() - tile * 2, tile * 2), 1, -90, 0.05, 0);
-        lockOnTag(CameraPipeline.AprilTags.BlueLeft, 0.3, 3);
+        opMode.sleep(300);
+//        cameraPipeline.lockOnTag(CameraPipeline.AprilTags.BlueCenter, 0.3, drive);
     }
 
-    /**
-     * Moves the robot to a tag in the y axis
-     **/
-    public void lockOnTag(int tagID, double power, double timeout) {
-        double initialX = drive.getPosX(), initialY = drive.getPosY(), initialHeading = drive.getHeading();
-        double distance = 0;
-        ElapsedTime time = new ElapsedTime(); // A timer to have a timeout
-        time.reset();
-        do {
-            AprilTagDetection tag = cameraPipeline.getSpecificTag(tagID);
-            distance = tag.ftcPose.x;
-
-            if (!MathUtil.approximately(distance, 0.1, 0.1)) {
-                // Adjust robot position based on the distance
-                drive.goToLocation(
-                        new Location(
-                                initialX, drive.getPosY() + distance
-                        ), 1, drive.getHeading(), 0.05, 0);
-
-                // Update tag and distance after movement
-                tag = cameraPipeline.getSpecificTag(tagID);
-                distance = tag.ftcPose.x;
-            }
-        } while (MathUtil.approximately(distance, 0.1, 0.1) && time.seconds() < timeout);
-    }
-
-    public void lockOnTag(CameraPipeline.AprilTags tag, double power, double timeout) {
-        lockOnTag(tag.ID, power, timeout);
-    }
 }

@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States;
 
-import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.Arm;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 
 public class HoldState extends State<Arm> {
@@ -9,7 +9,7 @@ public class HoldState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
         this.owner = owner;
-        owner.setTargetPositions(owner.getCurrentHandPos(), owner.getCurrentRailPos());
+        owner.setTargetPositions(owner.getPos());
         owner.setManualMode(false, owner.getHoldPower());
     }
 

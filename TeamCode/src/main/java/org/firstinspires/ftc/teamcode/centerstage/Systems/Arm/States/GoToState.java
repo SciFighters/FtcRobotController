@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.States;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States;
 
-import org.firstinspires.ftc.teamcode.centerstage.ArmPIDTesting.Arm;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 
 public class GoToState extends State<Arm> {

@@ -4,6 +4,9 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
 import android.util.Log;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -398,6 +401,10 @@ public class DriveClass {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, false);
     }
 
+    public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout, boolean superSpeed) {
+        return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, superSpeed);
+    }
+
     public enum Axis {
         x, y;
     }
@@ -629,6 +636,12 @@ public class DriveClass {
             opMode.telemetry.update();
         }
         stopPower();
+    }
+
+    void updateDashboardField() {
+        TelemetryPacket packet = new TelemetryPacket();
+        Canvas field = packet.fieldOverlay();
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
 //    public void update_dashboard_field() {
