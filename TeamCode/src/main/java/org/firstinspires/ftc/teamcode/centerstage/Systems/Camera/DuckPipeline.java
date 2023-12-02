@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.Systems;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.opencv.core.Core;

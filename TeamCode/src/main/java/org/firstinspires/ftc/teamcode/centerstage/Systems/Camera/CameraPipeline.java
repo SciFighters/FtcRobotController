@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.Systems;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import android.util.Size;
 
@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -29,9 +30,9 @@ import java.util.List;
  */
 public class CameraPipeline {
 
-    private String cameraName;
-    private Size viewSize;
-    private Telemetry telemetry;
+    private final String cameraName;
+    private final Size viewSize;
+    private final Telemetry telemetry;
     private AprilTagProcessor tagProcessor;
     private VisionPortal visionPortal;
     private Mat previousFrame;

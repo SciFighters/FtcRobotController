@@ -67,6 +67,8 @@ public class Input {
             if (field.getType() == Toggle.class) {
                 field.setAccessible(true);
                 try {
+                    opMode.telemetry.addData("Input init", field.getName());
+                    opMode.telemetry.update();
                     Toggle toggle = (Toggle) field.get(opMode);
                     if (toggle != null && toggle.getMapping() != null) {
                         if (field.isAnnotationPresent(UpdateAutomatically.class)) {

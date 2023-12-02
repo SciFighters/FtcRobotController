@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.Systems;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;

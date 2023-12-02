@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.Systems;
+package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import com.acmerobotics.dashboard.config.Config;
 
@@ -112,7 +112,7 @@ public class DuckLine extends OpenCvPipeline {
 
         Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ?
                 min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
-       
+
         Core.inRange(hsv, min_, max_, mask);   // Mask all orange
 //        Scalar min_yellow = new Scalar(8, 130, 160);
 //        Scalar max_yellow = new Scalar(60, 255, 255);
@@ -127,7 +127,7 @@ public class DuckLine extends OpenCvPipeline {
         Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         ArrayList<Rect> rects = new ArrayList<>();
-        Rect rect = null;
+        Rect rect;
         double minArea = 300;
 
         // Find and store rectangles

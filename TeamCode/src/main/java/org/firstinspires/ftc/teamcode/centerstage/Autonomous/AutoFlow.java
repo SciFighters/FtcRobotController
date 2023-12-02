@@ -1,17 +1,12 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
-import android.util.Size;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.CameraPipeline;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.CameraPipeline;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.DuckLine;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
