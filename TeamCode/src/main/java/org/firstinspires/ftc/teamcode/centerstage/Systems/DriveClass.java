@@ -37,7 +37,7 @@ public class DriveClass {
 
     private LinearOpMode opMode; // First I declared it as OpMode now its LinearOpMode
 
-    volatile private DcMotorEx fl = null;
+    volatile public DcMotorEx fl = null;
     volatile private DcMotorEx fr = null;
     volatile private DcMotorEx bl = null;
     volatile private DcMotorEx br = null;
@@ -60,7 +60,8 @@ public class DriveClass {
         SCORPION,
         COBALT,
         JACCOUSE,
-        CONSTANTIN;
+        CONSTANTIN,
+        GLADOS;
     }
 
     private ROBOT robot;
@@ -106,6 +107,9 @@ public class DriveClass {
         } else if (robot == ROBOT.COBALT) {
             this.forwardTicksPerMeter = 1753;
             this.strafeTicksPerMeter = 2006;
+        } else if (robot == ROBOT.GLADOS) {
+            this.forwardTicksPerMeter = 1000;
+            this.strafeTicksPerMeter = 1110;
         }
         switch (robot) {
             case JACCOUSE:
@@ -124,6 +128,9 @@ public class DriveClass {
                 this.forwardTicksPerMeter = 1753;
                 this.strafeTicksPerMeter = 2006;
                 break;
+            case GLADOS:
+                this.forwardTicksPerMeter = 1000;
+                this.strafeTicksPerMeter = 1110;
             default:
                 this.forwardTicksPerMeter = 1753;
                 this.strafeTicksPerMeter = 2006;
@@ -150,6 +157,8 @@ public class DriveClass {
     }
 
     public void init(HardwareMap hw) {
+        RobotLog.d("motors init start");
+
         //region get from hw
         fl = hw.get(DcMotorEx.class, "fl");
         fr = hw.get(DcMotorEx.class, "fr");
@@ -195,7 +204,8 @@ public class DriveClass {
         opMode.telemetry.addData("use encoders", this.useEncoders);
         opMode.telemetry.addData("use brake", this.useBrake);
         opMode.telemetry.addData("use dash", this.useDashboardField);
-
+        opMode.telemetry.update();
+        RobotLog.d("imu init start");
 
         initIMU(hw);
     }
@@ -205,10 +215,11 @@ public class DriveClass {
 
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-
-        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, this.useDashboardField, this.mode.origin, this.mode.direciton, startingPosition.angle);
-
+        RobotLog.d("imu params init start");
+        parameters.accelerationIntegrationAlgorithm = new IMU_Integrator(imu, hw, forwardTicksPerMeter, strafeTicksPerMeter, !this.useDashboardField, this.mode.origin, this.mode.direciton, startingPosition.angle);
+        RobotLog.d("imu init");
         imu.initialize(parameters);
+        RobotLog.d("imu init finished");
 
         opMode.telemetry.addData("Gyro", "calibrating...");
         opMode.telemetry.addData("Integrator dashboard", this.useDashboardField);
@@ -221,8 +232,11 @@ public class DriveClass {
         }
         if (imu.isGyroCalibrated()) {
             opMode.telemetry.addData("Gyro", "Done Calibrating");
+            RobotLog.d("Gyro done init");
+
         } else {
             opMode.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
+            RobotLog.d("Gyro failed init" + " " + imu.isGyroCalibrated() + " " + imu.isAccelerometerCalibrated() + " " + imu.isMagnetometerCalibrated());
         }
 
         imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 2);

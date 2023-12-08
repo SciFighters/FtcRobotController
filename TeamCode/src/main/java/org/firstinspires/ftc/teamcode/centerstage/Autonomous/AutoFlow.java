@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.CameraPipeline;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
@@ -24,10 +27,12 @@ public class AutoFlow {
     final int screenWidth = 640;
     final int screenHeight = 360;
     int beaconPos = 0;
+    MultipleTelemetry telemetry;
+    FtcDashboard dashboard;
+    Telemetry dashboardTelemetry;
 
     public enum StartPos {
-        PIXEL_STACK(1),
-        BACKSTAGE(-1);
+        PIXEL_STACK(1), BACKSTAGE(-1);
 
         int mul;
 
@@ -55,13 +60,7 @@ public class AutoFlow {
     public AutoFlow(LinearOpMode opMode, Alliance alliance, StartPos startPos, Auto auto) {
         this.alliance = alliance;
         this.opMode = opMode;
-        this.drive = new DriveClass
-                (
-                        opMode, DriveClass.ROBOT.CONSTANTIN,
-                        startLocation,
-                        DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD,
-                        DriveClass.DriveMode.LEFT
-                );
+
     }
 
     void initWebcam() {
@@ -70,7 +69,7 @@ public class AutoFlow {
         WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "cam");
         OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
-        this.duckLine = new DuckLine(this.alliance);
+        this.duckLine = new DuckLine(this.alliance, telemetry);
         webcam.setPipeline(this.duckLine);
 
         // Remove the camera monitor view ID from here
@@ -83,22 +82,27 @@ public class AutoFlow {
 
             @Override
             public void onError(int errorCode) {
-                opMode.telemetry.addData("camera initialization failed", errorCode);
+                telemetry.addData("camera initialization failed", errorCode);
             }
         });
     }
 
 
     public void init() {
-        initWebcam();
+        this.drive = new DriveClass(opMode, DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
 
-//        cameraPipeline = new CameraPipeline("cam", new Size(800, 448), opMode.hardwareMap, opMode.telemetry, new CameraPipeline.PortalConfiguration());
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
+        telemetry = new MultipleTelemetry(dashboardTelemetry, opMode.telemetry);
+
+        initWebcam();
+//        cameraPipeline = new CameraPipeline("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new CameraPipeline.PortalConfiguration());
         drive.init(opMode.hardwareMap);
     }
 
     public void test() {
-        drive.goToLocation(new Location(0.9, tile * 3 + 0.4), 1, 0, 0.15, 0, true);
-        drive.goToLocation(new Location(0.9 - tile * 3, drive.getPosY()), 1, -90, 0.15, 0, true);
+        drive.goToLocation(new Location(0.9, tile * 2 + 0.4), 1, 0, 0.15, 0, true);
+        drive.goToLocation(new Location(0.9 - tile * 2, drive.getPosY()), 1, -90, 0.15, 0, true);
         drive.goToLocation(new Location(drive.getPosX() - tile * 2, tile * 2), 1, -90, 0.05, 0);
         opMode.sleep(300);
 //        cameraPipeline.lockOnTag(CameraPipeline.AprilTags.BlueCenter, 0.3, drive);

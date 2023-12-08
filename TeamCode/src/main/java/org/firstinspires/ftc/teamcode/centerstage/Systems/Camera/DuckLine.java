@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -24,6 +26,7 @@ public class DuckLine extends OpenCvPipeline {
     public int width;
     public int height;
     AutoFlow.Alliance alliance;
+    Telemetry telemetry;
     volatile private Point targetPos = null;
     //Rect(x, y, width, height)             x, y - position. width, height - dimensions.
     volatile private Rect targetRect = null;
@@ -38,8 +41,9 @@ public class DuckLine extends OpenCvPipeline {
         return targetPos;
     }
 
-    public DuckLine(AutoFlow.Alliance alliance) {
+    public DuckLine(AutoFlow.Alliance alliance, Telemetry telemetry) {
         this.alliance = alliance;
+        this.telemetry = telemetry;
     }
 
     public Rect getTargetRect() {

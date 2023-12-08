@@ -7,9 +7,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
@@ -25,7 +28,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 @TeleOp(group = "CENTERSTAGE")
 public class Shmulik extends LinearOpMode {
     FtcDashboard dashboard;
-    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.JACCOUSE, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
+    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
     boolean allowMovement = true; // Flag to control movement
     double angle = 0;
     //region Camera
@@ -38,12 +41,10 @@ public class Shmulik extends LinearOpMode {
     Telemetry dashboardTelemetry;
     @UpdateAutomatically
     Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
-    Arm arm;
+//    Arm arm;
 
     @Override
     public void runOpMode() {
-
-
         initSystems();
         waitForStart();
         double targetHeading = drive.getHeading();
@@ -102,6 +103,7 @@ public class Shmulik extends LinearOpMode {
                 }
                 multipleTelemetry.addData("tags detected ", (int) cameraPipeline.getDetections().size());
                 multipleTelemetry.addData("Allow Movement", allowMovement);
+                multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
 //                telemetry.addData("Timer", arm.timer.seconds());
 //                telemetry.addData("State", arm.stateMachine.getCurrentState().toString());
                 multipleTelemetry.update();
@@ -115,15 +117,20 @@ public class Shmulik extends LinearOpMode {
     }
 
     void initSystems() {
+        RobotLog.d("Init start");
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
         multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
+        RobotLog.d("dashboard init");
+
 //        arm = new Arm(this);
 //        arm.init(hardwareMap);
         telemetry.addData(">", "Init in progress...");
         telemetry.update();
-
+        RobotLog.d("drive init start");
         drive.init(hardwareMap);
+        RobotLog.d("cam init start");
+
         cameraPipeline = new CameraPipeline("cam", new Size(800, 448), hardwareMap, multipleTelemetry, portalConfiguration);
         Input.init(this, gamepad1, gamepad2);
         telemetry.addData(">", "Init finished. Press START");
