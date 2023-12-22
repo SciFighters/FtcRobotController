@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.CameraPipeline;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
@@ -21,7 +23,7 @@ public class AutoFlow {
     final double robotLength = 0.4404;
     final double tile = 0.6;
     Location startLocation = new Location(0.9, robotLength / 2, 0); // PIXEL_STACK
-    CameraPipeline cameraPipeline;
+    AprilTagDetector aprilTagDetector;
     Alliance alliance;
     public DuckLine duckLine;
     final int screenWidth = 640;
@@ -96,7 +98,7 @@ public class AutoFlow {
         telemetry = new MultipleTelemetry(dashboardTelemetry, opMode.telemetry);
 
         initWebcam();
-//        cameraPipeline = new CameraPipeline("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new CameraPipeline.PortalConfiguration());
+//        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
         drive.init(opMode.hardwareMap);
     }
 

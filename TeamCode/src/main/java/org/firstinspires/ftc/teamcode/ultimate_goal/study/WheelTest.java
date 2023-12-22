@@ -1,8 +1,13 @@
 package org.firstinspires.ftc.teamcode.ultimate_goal.study;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @TeleOp(group = "Cobalt")
 public class WheelTest extends LinearOpMode {
@@ -10,9 +15,15 @@ public class WheelTest extends LinearOpMode {
     private DcMotorEx fr = null;
     private DcMotorEx bl = null;
     private DcMotorEx br = null;
+    FtcDashboard dashboard;
+    Telemetry dashboardTelemetry;
+    MultipleTelemetry multipleTelemetry;
 
     @Override
     public void runOpMode() {
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
+        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
         fl = hardwareMap.get(DcMotorEx.class, "fl");
         fr = hardwareMap.get(DcMotorEx.class, "fr");
         bl = hardwareMap.get(DcMotorEx.class, "bl");
@@ -58,12 +69,12 @@ public class WheelTest extends LinearOpMode {
                 state = "WITHOUT ENCODER";
             }
 
-            telemetry.addData("front left:", fl.getCurrentPosition());
-            telemetry.addData("front right:", fr.getCurrentPosition());
-            telemetry.addData("back left:", bl.getCurrentPosition());
-            telemetry.addData("back right:", br.getCurrentPosition());
-            telemetry.addData("state: ", state);
-            telemetry.update();
+            multipleTelemetry.addData("front left:", String.format("\tPos: %d \n\tCurrent: %f", fl.getCurrentPosition(), fl.getCurrent(CurrentUnit.AMPS)));
+            multipleTelemetry.addData("front right:", String.format("\tPos: %d \n\tCurrent: %f", fr.getCurrentPosition(), fr.getCurrent(CurrentUnit.AMPS)));
+            multipleTelemetry.addData("back left:", String.format("\tPos: %d \n\tCurrent: %f", bl.getCurrentPosition(), bl.getCurrent(CurrentUnit.AMPS)));
+            multipleTelemetry.addData("back right:", String.format("\tPos: %d \n\tCurrent: %f", br.getCurrentPosition(), br.getCurrent(CurrentUnit.AMPS)));
+            multipleTelemetry.addData("state: ", state);
+            multipleTelemetry.update();
         }
     }
 }

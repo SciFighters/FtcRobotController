@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * This class represents a camera pipeline for processing AprilTag detections with image stabilization.
  */
-public class CameraPipeline {
+public class AprilTagDetector {
 
     private final String cameraName;
     private final Size viewSize;
@@ -46,7 +46,7 @@ public class CameraPipeline {
      * @param telemetry     The telemetry object for displaying information.
      * @param configuration The portal configuration.
      */
-    public CameraPipeline(String cameraName, Size viewSize, HardwareMap hardwareMap, Telemetry telemetry, PortalConfiguration configuration) {
+    public AprilTagDetector(String cameraName, Size viewSize, HardwareMap hardwareMap, Telemetry telemetry, PortalConfiguration configuration) {
         this.cameraName = cameraName;
         this.viewSize = viewSize;
         this.telemetry = telemetry;
@@ -217,7 +217,7 @@ public class CameraPipeline {
     }
 
 
-    public void lockOnTag(CameraPipeline.AprilTags tag, double power, DriveClass drive) {
+    public void lockOnTag(AprilTagDetector.AprilTags tag, double power, DriveClass drive) {
         lockOnTag(tag.ID, power, drive);
     }
 

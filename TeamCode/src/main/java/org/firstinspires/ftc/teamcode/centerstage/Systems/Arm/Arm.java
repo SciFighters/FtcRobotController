@@ -68,26 +68,26 @@ public class Arm implements Runnable {
         lift2 = hw.get(DcMotorEx.class, "lift2");
         lift1.setDirection(DcMotorEx.Direction.FORWARD);
         lift2.setDirection(DcMotorSimple.Direction.REVERSE);
-        lift1.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        lift2.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
         lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         stateMachine.changeState(idleState);
 
-//        while (opMode.hardwareMap.voltageSensor.get("Control Hub").getVoltage() > 12) {
-//            setMotorsPower(0.3);
-////            opMode.sleep(200);
-//            opMode.telemetry.update();
-//        }
-//        setMotorsPower(0);
+        resetArm();
 
 
     }
 
+    public void resetArm() {
+        // TODO: Make initialization sequence
+    }
+
     public void run() {
         while (opMode.opModeIsActive() && !opMode.isStopRequested()) {
-            handleStates();
+//            handleStates();
             opMode.idle();
         }
     }
@@ -127,7 +127,7 @@ public class Arm implements Runnable {
         }
     }
 
-    public void handleStates() {
+    public synchronized void handleStates() {
         stateMachine.execute();
     }
 
@@ -143,8 +143,6 @@ public class Arm implements Runnable {
             if (stateMachine.getCurrentState() != gotoState)
                 stateMachine.changeState(holdState);
         }
-
-        handleStates();
     }
 
     public void setMotorsPower(double power) {

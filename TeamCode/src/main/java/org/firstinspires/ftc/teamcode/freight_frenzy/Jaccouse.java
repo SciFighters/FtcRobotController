@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.freight_frenzy;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DriveClass;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.DuckLine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.HandRailClass;
@@ -20,11 +24,11 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.autonomous.AutoFlow;
 // TODO: drive heading correction - reduce game
 
 @TeleOp(group = "Jaccouse")
-@Disabled
 public class Jaccouse extends LinearOpMode {
     final double tile = 0.6;
-
-
+    FtcDashboard dashboard;
+    MultipleTelemetry multipleTelemetry;
+    Telemetry dashboardTelemetry;
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private AutoFlow.ALLIANCE alliance = AutoFlow.ALLIANCE.BLUE;
@@ -72,7 +76,11 @@ public class Jaccouse extends LinearOpMode {
 
 
         telemetry.update();
-
+        RobotLog.d("Init start");
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
+        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
+        RobotLog.d("dashboard init");
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -259,12 +267,15 @@ public class Jaccouse extends LinearOpMode {
             drive.setPowerOriented(y, x, turn, fieldOriented);
 
             this.handRail.telemetry_handRail();
-            telemetry.addData("Pos", "X: %2.2f, \t Y: %2.2f", drive.getPosX(), drive.getPosY());
-            telemetry.addData("Heading", drive.getHeading());
-            telemetry.addData("Target", targetHeading);
-            telemetry.addData("pressed", freightIn.isPressed());
-            telemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
-            telemetry.update();
+            multipleTelemetry.addData("Arm power: ", armPower);
+            multipleTelemetry.addData("Rail power: ", railPower);
+            multipleTelemetry.addData("Arm supposed power: ", gamepad2.right_stick_y);
+            multipleTelemetry.addData("Pos", "X: %2.2f, \t Y: %2.2f", drive.getPosX(), drive.getPosY());
+            multipleTelemetry.addData("Heading", drive.getHeading());
+            multipleTelemetry.addData("Target", targetHeading);
+            multipleTelemetry.addData("pressed", freightIn.isPressed());
+            multipleTelemetry.addData("Delta", drive.getDeltaHeading(targetHeading));
+            multipleTelemetry.update();
 
 //			drive.update_dashboard_field();
         }

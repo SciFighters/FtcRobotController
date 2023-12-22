@@ -41,7 +41,6 @@ captures/
 
 # IntelliJ
 *.iml
-.idea/
 
 # For Mac users
 .DS_Store
