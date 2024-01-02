@@ -9,13 +9,12 @@ public class HoldState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
         this.owner = owner;
-        owner.setTargetPositions(owner.getPos());
-        owner.setManualMode(false, owner.getHoldPower());
+        owner.setManualMode(false, 0.12);
     }
 
     @Override
     public void execute() {
-        owner.setManualMode(false, owner.getHoldPower());
+        owner.setManualMode(false, 0.12);
     }
 
     @Override

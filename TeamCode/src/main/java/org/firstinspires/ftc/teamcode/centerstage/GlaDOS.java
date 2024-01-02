@@ -23,6 +23,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 @Config
 @TeleOp(group = "CENTERSTAGE")
 public class GlaDOS extends LinearOpMode {
+    boolean fieldOriented = false;
     FtcDashboard dashboard;
     DriveClass drive = new DriveClass(
             this,
@@ -42,7 +43,7 @@ public class GlaDOS extends LinearOpMode {
     Telemetry dashboardTelemetry;
     @UpdateAutomatically
     Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
-    Arm arm;
+//    Arm arm;
     GatherSystem gatherSystem;
 
     @Override
@@ -50,7 +51,7 @@ public class GlaDOS extends LinearOpMode {
         initSystems();
         waitForStart();
         double targetHeading = drive.getHeading();
-        drive.resetOrientation(0);
+        drive.resetOrientation(180);
         while (!isStopRequested() && opModeIsActive()) {
             Input.updateControls();
 
@@ -58,33 +59,29 @@ public class GlaDOS extends LinearOpMode {
 
             if (gamepad1.start) {
                 if (gamepad1.x) {
-                    drive.resetOrientation(0);
+                    drive.resetOrientation(180);
                     targetHeading = drive.getHeading();
                 }
                 continue;
             }
-            arm.setPower(gamepad2.left_stick_y);
+//            arm.setPower(gamepad2.left_stick_y);
 
-            boolean fieldOriented = !gamepad1.y;
             final double boostK = 0.5;
             double boost = gamepad1.right_trigger * boostK + (1 - boostK) * 2;
-            double y = pow(gamepad1.left_stick_y) * boost;
-            double x = pow(-gamepad1.left_stick_x) * boost;
+            double y = pow(-gamepad1.left_stick_y) * boost;
+            double x = pow(gamepad1.left_stick_x) * boost;
             double turn = pow(gamepad1.right_stick_x * boost);
-            if (gamepad2.a) {
-                arm.goToPos(Arm.Position.One);
-            }
-            if (gamepad2.b) {
-                arm.goToPos(Arm.Position.Two);
-            }
-            if (gamepad2.y) {
-                arm.goToPos(Arm.Position.Three);
-            }
-            if (gamepad1.left_bumper) {
+//            if (gamepad2.b) {
+//                arm.goToPos(Arm.Position.Two);
+//            }
+//            if (gamepad2.y) {
+//                arm.goToPos(Arm.Position.Three);
+//            }
+            if (gamepad2.left_bumper) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Idle);
-            } else if (gamepad1.right_bumper) {
+            } else if (gamepad2.right_bumper) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Collect);
-            } else if (gamepad1.right_stick_button) {
+            } else if (gamepad2.right_stick_button) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Spit);
             }
             gatherSystem.spinMotor();
@@ -116,7 +113,9 @@ public class GlaDOS extends LinearOpMode {
                 multipleTelemetry.addData("Gather state", gatherSystem.getIntakeWheelsState().toString());
                 multipleTelemetry.addData("Field Oriented state", fieldOriented);
 //                telemetry.addData("Timer", arm.timer.seconds());
-//                telemetry.addData("State", arm.stateMachine.getCurrentState().toString());
+//                multipleTelemetry.addData("Arm State", arm.stateMachine.getCurrentState().toString());
+//                multipleTelemetry.addData("Arm pos: ", arm.getPos());
+//                multipleTelemetry.addData("Arm target pos: ", arm.getTargetPos());
                 multipleTelemetry.update();
             }
         }
@@ -136,7 +135,7 @@ public class GlaDOS extends LinearOpMode {
         multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
         RobotLog.d("dashboard init");
 
-        arm = new Arm(this, multipleTelemetry);
+//        arm = new Arm(this, multipleTelemetry);
         telemetry.addData(">", "Init in progress...");
         telemetry.update();
         RobotLog.d("drive init start");

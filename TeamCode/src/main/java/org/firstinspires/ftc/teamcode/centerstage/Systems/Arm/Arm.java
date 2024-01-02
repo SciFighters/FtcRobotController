@@ -38,7 +38,7 @@ public class Arm implements Runnable {
 
 
     public enum Position {
-        One(-500), Two(-900), Three(-1200); // Todo : put actual values
+        One(500), Two(900), Three(1200); // Todo : put actual values
         final int liftPos;
 
         Position(int liftPos) {
@@ -62,12 +62,15 @@ public class Arm implements Runnable {
         manualState = new ManualState();
         timer = new ElapsedTime();
         stateMachine = new StateMachine<>(this);
-        telemetry.addLine("Lift Init");
+        telemetry.addData("Lift Init", "In progress");
         telemetry.update();
         lift1 = hw.get(DcMotorEx.class, "lift1");
         lift2 = hw.get(DcMotorEx.class, "lift2");
         lift1.setDirection(DcMotorEx.Direction.FORWARD);
         lift2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -75,7 +78,8 @@ public class Arm implements Runnable {
         lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         stateMachine.changeState(idleState);
-
+        telemetry.addData("Lift Init", "Finished");
+        telemetry.update();
         resetArm();
 
 
@@ -87,7 +91,7 @@ public class Arm implements Runnable {
 
     public void run() {
         while (opMode.opModeIsActive() && !opMode.isStopRequested()) {
-//            handleStates();
+            handleStates();
             opMode.idle();
         }
     }
@@ -97,12 +101,20 @@ public class Arm implements Runnable {
     }
 
     public void goToPos(Position pos) {
-        setTargetPositions(pos.liftPos);
+        goToPos(pos.liftPos);
+    }
+
+    public void goToPos(int pos) {
+        setTargetPositions(pos);
         stateMachine.changeState(gotoState);
     }
 
     public int getPos() {
         return lift1.getCurrentPosition();
+    }
+
+    public int getTargetPos() {
+        return this.targetPos;
     }
 
     public void setTargetPositions(int pos) {
@@ -111,23 +123,19 @@ public class Arm implements Runnable {
 
     public void setManualMode(boolean manual, double power) {
         if (manual) {
-            lift1.setPower(0);
+            setMotorsPower(0);
             lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
-            lift2.setPower(0);
             lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         } else {
             lift1.setTargetPosition(targetPos);
             lift1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            lift1.setPower(power);
-
             lift2.setTargetPosition(targetPos);
             lift2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            lift2.setPower(power);
+            setMotorsPower(power);
         }
     }
 
-    public synchronized void handleStates() {
+    public void handleStates() {
         stateMachine.execute();
     }
 
@@ -135,13 +143,16 @@ public class Arm implements Runnable {
         return !lift1.isBusy() && !lift2.isBusy();
     }
 
+
     public void setPower(double power) {
         if (outOfDeadZone(power)) {
             stateMachine.changeState(manualState);
             setMotorsPower(power);
         } else {
-            if (stateMachine.getCurrentState() != gotoState)
+            if (stateMachine.getCurrentState() != gotoState && stateMachine.getCurrentState() != holdState) {
+                setTargetPositions(getPos());
                 stateMachine.changeState(holdState);
+            }
         }
     }
 
