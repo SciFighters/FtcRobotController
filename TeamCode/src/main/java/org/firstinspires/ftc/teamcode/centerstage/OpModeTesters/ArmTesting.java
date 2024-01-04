@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
-@TeleOp(group = "CENTERSTAGE")
+@TeleOp(group = "TESTER")
 public class ArmTesting extends LinearOpMode {
     Arm arm;
     FtcDashboard dashboard;

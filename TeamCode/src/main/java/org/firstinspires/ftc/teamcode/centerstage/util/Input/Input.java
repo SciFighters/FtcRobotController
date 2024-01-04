@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode.centerstage.util.Input;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Supplier;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -25,6 +28,8 @@ public class Input {
     private static LinearOpMode opMode;
     private static List<Toggle> existingTogglesInOpMode;
     private static Executor executor;
+    private static Thread inputUpdaterThread;
+    private static InputUpdater inputUpdater;
 
     static {
         toggles = new HashMap<>();
@@ -109,16 +114,27 @@ public class Input {
         toggles.put(KeyCode.Gamepad2LeftBumper, new Toggle(KeyCode.Gamepad2LeftBumper));
         toggles.put(KeyCode.Gamepad2RightBumper, new Toggle(KeyCode.Gamepad2RightBumper));
         toggles.put(KeyCode.Gamepad2Options, new Toggle(KeyCode.Gamepad2Options));
+
+
+        inputUpdater = new InputUpdater();
+        inputUpdaterThread = new Thread(inputUpdater);
+        inputUpdaterThread.start();
     }
 
     /**
      * Update the gamepad controls in a separate thread.
      */
-    public static void updateControls() {
-        executor.execute(new UpdateControlsTask());
+    public static void updateControls(OpMode opMode) {
+        executor.execute(new UpdateControlsTask(opMode));
     }
 
     private static class UpdateControlsTask implements Runnable {
+        OpMode opMode;
+
+        public UpdateControlsTask(OpMode opMode) {
+            this.opMode = opMode;
+        }
+
         @Override
         public void run() {
             for (Toggle t : existingTogglesInOpMode) {
@@ -144,6 +160,7 @@ public class Input {
      * @return True if the KeyCode is pressed, false otherwise.
      */
     public static boolean GetKeyPressed(KeyCode key) {
+        RobotLog.d(String.format("%s Key pressed: %b", key.toString(), key.getValue()));
         return key.getValue();
     }
 
@@ -175,7 +192,7 @@ public class Input {
      * @param axis What axis to get.
      * @return Value of the axis on the gamepad.
      */
-    public static double GetAxis(@NonNull Axis axis) {
+    public static double GetAxis(Axis axis) {
         return axis.getValue();
     }
 
@@ -193,9 +210,9 @@ public class Input {
      * This class represents a keycode for gamepad button checks.
      */
     public static class KeyCode {
-        private final Func<Boolean> returnFunc;
+        private final Supplier<Boolean> returnFunc;
 
-        private KeyCode(Func<Boolean> returnFunc) {
+        private KeyCode(Supplier<Boolean> returnFunc) {
             this.returnFunc = returnFunc;
         }
 
@@ -205,7 +222,7 @@ public class Input {
          * @return True if the keycode is pressed, false otherwise.
          */
         public boolean getValue() {
-            return returnFunc.value();
+            return returnFunc.get();
         }
 
         // Button constants for Gamepad1
@@ -221,6 +238,8 @@ public class Input {
         public static final KeyCode Gamepad1Options = new KeyCode(() -> gamepad1.back);
         public static final KeyCode Gamepad1LeftBumper = new KeyCode(() -> gamepad1.left_bumper);
         public static final KeyCode Gamepad1RightBumper = new KeyCode(() -> gamepad1.right_bumper);
+        public static final KeyCode Gamepad1LeftStickButton = new KeyCode(() -> gamepad1.left_stick_button);
+        public static final KeyCode Gamepad1RightStickButton = new KeyCode(() -> gamepad1.right_stick_button);
 
         // Button constants for Gamepad2
         public static final KeyCode Gamepad2A = new KeyCode(() -> gamepad2.a);
@@ -235,6 +254,8 @@ public class Input {
         public static final KeyCode Gamepad2LeftBumper = new KeyCode(() -> gamepad2.left_bumper);
         public static final KeyCode Gamepad2RightBumper = new KeyCode(() -> gamepad2.right_bumper);
         public static final KeyCode Gamepad2Options = new KeyCode(() -> gamepad2.back);
+        public static final KeyCode Gamepad2LeftStickButton = new KeyCode(() -> gamepad2.left_stick_button);
+        public static final KeyCode Gamepad2RightStickButton = new KeyCode(() -> gamepad2.right_stick_button);
     }
 
     /**
@@ -271,5 +292,17 @@ public class Input {
         public static final Axis Gamepad2LeftStickX = new Axis(() -> (double) gamepad2.left_stick_x);
         public static final Axis Gamepad2RightTrigger = new Axis(() -> (double) gamepad2.right_trigger);
         public static final Axis Gamepad2LeftTrigger = new Axis(() -> (double) gamepad2.left_trigger);
+    }
+
+    private static class InputUpdater implements Runnable {
+
+        @Override
+        public void run() {
+            while (opMode.opModeIsActive() && !opMode.isStopRequested()) {
+                Input.updateControls(opMode);
+                opMode.idle();
+            }
+            inputUpdaterThread.interrupt();
+        }
     }
 }

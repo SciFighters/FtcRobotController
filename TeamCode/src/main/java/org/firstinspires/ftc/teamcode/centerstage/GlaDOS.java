@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.centerstage;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.RobotStatus;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -43,18 +44,17 @@ public class GlaDOS extends LinearOpMode {
     Telemetry dashboardTelemetry;
     @UpdateAutomatically
     Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
-//    Arm arm;
+    //    Arm arm;
     GatherSystem gatherSystem;
 
     @Override
     public void runOpMode() {
         initSystems();
         waitForStart();
+        Input.init(this, gamepad1, gamepad2);
         double targetHeading = drive.getHeading();
         drive.resetOrientation(180);
         while (!isStopRequested() && opModeIsActive()) {
-            Input.updateControls();
-
             handleForceQuit();
 
             if (gamepad1.start) {
@@ -62,6 +62,7 @@ public class GlaDOS extends LinearOpMode {
                     drive.resetOrientation(180);
                     targetHeading = drive.getHeading();
                 }
+                multipleTelemetry.addData("START PRESSED", "");
                 continue;
             }
 //            arm.setPower(gamepad2.left_stick_y);
@@ -77,11 +78,11 @@ public class GlaDOS extends LinearOpMode {
 //            if (gamepad2.y) {
 //                arm.goToPos(Arm.Position.Three);
 //            }
-            if (gamepad2.left_bumper) {
+            if (Input.GetKeyPressed(Input.KeyCode.Gamepad2LeftBumper)) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Idle);
-            } else if (gamepad2.right_bumper) {
+            } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightBumper)) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Collect);
-            } else if (gamepad2.right_stick_button) {
+            } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightStickButton)) {
                 gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Spit);
             }
             gatherSystem.spinMotor();
@@ -143,7 +144,6 @@ public class GlaDOS extends LinearOpMode {
         RobotLog.d("cam init start");
 
         aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), hardwareMap, multipleTelemetry, portalConfiguration);
-        Input.init(this, gamepad1, gamepad2);
         telemetry.addData(">", "Init finished. Press START");
         telemetry.update();
     }

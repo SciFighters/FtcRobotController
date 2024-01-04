@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp(group = "Cobalt")
+@TeleOp(group = "TESTER")
 public class WheelTest extends LinearOpMode {
     private DcMotorEx fl = null;
     private DcMotorEx fr = null;

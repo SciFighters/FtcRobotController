@@ -23,6 +23,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine
 
 public class Arm implements Runnable {
     DcMotorEx lift1 = null, lift2 = null;
+    Servo leftClawServo = null, rightClawServo = null;
     private final LinearOpMode opMode;
     private final double deadZone = 0.05;
     private final double holdPower = 0.2;
@@ -55,13 +56,16 @@ public class Arm implements Runnable {
     }
 
     public void init(HardwareMap hw) {
+        //region States Init
         gotoState = new GoToState();
         graceHoldTimeState = new GraceHoldTimeState();
         holdState = new HoldState();
         idleState = new IdleState();
         manualState = new ManualState();
-        timer = new ElapsedTime();
         stateMachine = new StateMachine<>(this);
+        //endregion
+        timer = new ElapsedTime();
+        //region Motors Init
         telemetry.addData("Lift Init", "In progress");
         telemetry.update();
         lift1 = hw.get(DcMotorEx.class, "lift1");
@@ -77,16 +81,22 @@ public class Arm implements Runnable {
 
         lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        stateMachine.changeState(idleState);
+        //endregion
+        //region Claw Init
+        leftClawServo = hw.get(Servo.class, "leftClawServo");
+        leftClawServo = hw.get(Servo.class, "rightClawServo");
+        setClawPosition(false);
+        //endregion
         telemetry.addData("Lift Init", "Finished");
         telemetry.update();
         resetArm();
-
-
+        stateMachine.changeState(idleState);
     }
 
     public void resetArm() {
         // TODO: Make initialization sequence
+        leftClawServo.setPosition(0);
+        leftClawServo.setPosition(0);
     }
 
     public void run() {
@@ -169,4 +179,12 @@ public class Arm implements Runnable {
         return Math.abs(power) > deadZone;
     }
 
+    public void setClawPosition(double position) {
+        leftClawServo.setPosition(position);
+        leftClawServo.setPosition(position);
+    }
+
+    public void setClawPosition(boolean open) {
+        setClawPosition(open ? 1 : 0);
+    }
 }
