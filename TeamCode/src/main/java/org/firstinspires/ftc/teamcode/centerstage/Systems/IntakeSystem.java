@@ -40,28 +40,25 @@ public class IntakeSystem {
         return isBusy;
     }
 
-    public void setGatherSystemState(IntakeWheelsState state) {
-        this.intakeWheelsState = state;
-    }
 
     public void setStateIdle() {
-        setGatherSystemState(IntakeWheelsState.Idle);
+        setState(IntakeWheelsState.Idle);
 
     }
 
     public void setStateSpit() {
-        setGatherSystemState(IntakeWheelsState.Spit);
+        setState(IntakeWheelsState.Spit);
     }
 
     public void setStateCollect() {
-        setGatherSystemState(IntakeWheelsState.Collect);
+        setState(IntakeWheelsState.Collect);
 
     }
 
     public void init(HardwareMap hw) {
         this.hw = hw; // Cache the hardware map
         intakeWheelsMotor = hw.get(DcMotorEx.class, "intakeWheelsMotor");
-        setGatherSystemState(IntakeWheelsState.Idle);
+        setState(IntakeWheelsState.Idle);
 
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
         intakeServo2 = hw.get(Servo.class, "intakeServo2");
