@@ -8,28 +8,28 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class IntakeSystem {
     Servo intakeServo1, intakeServo2;
-    DcMotorEx intakeWheelsMotor;
+    DcMotorEx motor;
     LinearOpMode opMode;
     HardwareMap hw;
 
-    public enum GatherSystemServoPos {
+    public enum ServoPos {
         Open(1),
         Close(0);
         private final double servoPos;
 
-        GatherSystemServoPos(double servoPos) {
+        ServoPos(double servoPos) {
             this.servoPos = servoPos;
         }
     }
 
-    public enum IntakeWheelsState {
+    public enum WheelsState {
         Collect,
         Spit,
         Idle
     }
 
     private boolean isBusy;
-    private IntakeWheelsState intakeWheelsState;
+    private WheelsState state;
 
     public IntakeSystem(LinearOpMode opMode) {
         this.opMode = opMode;
@@ -42,23 +42,23 @@ public class IntakeSystem {
 
 
     public void setStateIdle() {
-        setState(IntakeWheelsState.Idle);
+        setState(WheelsState.Idle);
 
     }
 
     public void setStateSpit() {
-        setState(IntakeWheelsState.Spit);
+        setState(WheelsState.Spit);
     }
 
     public void setStateCollect() {
-        setState(IntakeWheelsState.Collect);
+        setState(WheelsState.Collect);
 
     }
 
     public void init(HardwareMap hw) {
         this.hw = hw; // Cache the hardware map
-        intakeWheelsMotor = hw.get(DcMotorEx.class, "intakeWheelsMotor");
-        setState(IntakeWheelsState.Idle);
+        motor = hw.get(DcMotorEx.class, "motor");
+        setState(WheelsState.Idle);
 
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
         intakeServo2 = hw.get(Servo.class, "intakeServo2");
@@ -70,8 +70,8 @@ public class IntakeSystem {
         intakeServo2.setPosition(pos);
     }
 
-    void setState(IntakeWheelsState state) {
-        this.intakeWheelsState = state;
+    void setState(WheelsState state) {
+        this.state = state;
     }
 
     /**
@@ -82,22 +82,22 @@ public class IntakeSystem {
         double spitPower = 0.3;
         if (isBusy)
             return; // Don't move if the system is busy
-        if (intakeWheelsState == IntakeWheelsState.Spit) {
-            setServoPos(GatherSystemServoPos.Close.servoPos);
-        } else if (intakeWheelsState == IntakeWheelsState.Idle) {
-            setServoPos(GatherSystemServoPos.Close.servoPos);
-            intakeWheelsMotor.setPower(0);
+        if (state == WheelsState.Spit) {
+            setServoPos(ServoPos.Close.servoPos);
+            motor.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.setPower(spitPower);
+        } else if (state == WheelsState.Idle) {
+            setServoPos(ServoPos.Close.servoPos);
+            motor.setPower(0);
             return;
-        } else {
-            setServoPos(GatherSystemServoPos.Open.servoPos);
+        } else if (state == WheelsState.Collect) {
+            setServoPos(ServoPos.Open.servoPos);
+            motor.setDirection(DcMotorSimple.Direction.REVERSE);
+            motor.setPower(normalPower);
         }
-        intakeWheelsMotor.setDirection( // Switch direction according to what state its in
-                intakeWheelsState == IntakeWheelsState.Spit ?
-                        DcMotorEx.Direction.FORWARD : DcMotorSimple.Direction.REVERSE);
-        intakeWheelsMotor.setPower(intakeWheelsState == IntakeWheelsState.Spit ? spitPower : normalPower);
     }
 
-    public IntakeWheelsState getIntakeWheelsState() {
-        return this.intakeWheelsState;
+    public WheelsState getState() {
+        return this.state;
     }
 }

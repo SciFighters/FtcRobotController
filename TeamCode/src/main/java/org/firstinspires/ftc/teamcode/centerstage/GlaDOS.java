@@ -115,7 +115,7 @@ public class GlaDOS extends Robot {
             multipleTelemetry.addData("tags detected ", (int) aprilTagDetector.getDetections().size());
             multipleTelemetry.addData("Allow Movement", allowMovement);
             multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
-            multipleTelemetry.addData("Gather state", intakeSystem.getIntakeWheelsState().toString());
+            multipleTelemetry.addData("Gather state", intakeSystem.getState().toString());
             multipleTelemetry.addData("Field Oriented state", fieldOriented);
             multipleTelemetry.addData("Arm State", arm.stateMachine.getCurrentState().toString());
             multipleTelemetry.addData("Arm pos", arm.getPos());
