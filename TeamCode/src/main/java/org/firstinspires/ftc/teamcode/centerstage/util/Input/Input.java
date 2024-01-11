@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.centerstage.util.Input;
 
-import androidx.annotation.NonNull;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Supplier;
@@ -125,7 +122,10 @@ public class Input {
      * Update the gamepad controls in a separate thread.
      */
     public static void updateControls(OpMode opMode) {
-        executor.execute(new UpdateControlsTask(opMode));
+//        executor.execute(new UpdateControlsTask(opMode));
+        for (Toggle t : existingTogglesInOpMode) {
+            t.update();
+        }
     }
 
     private static class UpdateControlsTask implements Runnable {
@@ -138,8 +138,9 @@ public class Input {
         @Override
         public void run() {
             for (Toggle t : existingTogglesInOpMode) {
-                if (t.getMapping() != null)
+                if (t.getMapping() != null) {
                     t.update();
+                }
             }
         }
     }
@@ -160,7 +161,6 @@ public class Input {
      * @return True if the KeyCode is pressed, false otherwise.
      */
     public static boolean GetKeyPressed(KeyCode key) {
-        RobotLog.d(String.format("%s Key pressed: %b", key.toString(), key.getValue()));
         return key.getValue();
     }
 
@@ -225,7 +225,7 @@ public class Input {
             return returnFunc.get();
         }
 
-        // Button constants for Gamepad1
+        //region Button constants for Gamepad1
         public static final KeyCode Gamepad1A = new KeyCode(() -> gamepad1.a);
         public static final KeyCode Gamepad1B = new KeyCode(() -> gamepad1.b);
         public static final KeyCode Gamepad1X = new KeyCode(() -> gamepad1.x);
@@ -235,13 +235,14 @@ public class Input {
         public static final KeyCode Gamepad1DpadLeft = new KeyCode(() -> gamepad1.dpad_left);
         public static final KeyCode Gamepad1DpadRight = new KeyCode(() -> gamepad1.dpad_right);
         public static final KeyCode Gamepad1Start = new KeyCode(() -> gamepad1.start);
-        public static final KeyCode Gamepad1Options = new KeyCode(() -> gamepad1.back);
+        public static final KeyCode Gamepad1Options = new KeyCode(() -> gamepad1.options);
         public static final KeyCode Gamepad1LeftBumper = new KeyCode(() -> gamepad1.left_bumper);
         public static final KeyCode Gamepad1RightBumper = new KeyCode(() -> gamepad1.right_bumper);
         public static final KeyCode Gamepad1LeftStickButton = new KeyCode(() -> gamepad1.left_stick_button);
         public static final KeyCode Gamepad1RightStickButton = new KeyCode(() -> gamepad1.right_stick_button);
-
-        // Button constants for Gamepad2
+        public static final KeyCode Gamepad1PS = new KeyCode(() -> gamepad1.ps);
+        //endregion
+        //region Button constants for Gamepad2
         public static final KeyCode Gamepad2A = new KeyCode(() -> gamepad2.a);
         public static final KeyCode Gamepad2B = new KeyCode(() -> gamepad2.b);
         public static final KeyCode Gamepad2X = new KeyCode(() -> gamepad2.x);
@@ -253,9 +254,12 @@ public class Input {
         public static final KeyCode Gamepad2Start = new KeyCode(() -> gamepad2.start);
         public static final KeyCode Gamepad2LeftBumper = new KeyCode(() -> gamepad2.left_bumper);
         public static final KeyCode Gamepad2RightBumper = new KeyCode(() -> gamepad2.right_bumper);
-        public static final KeyCode Gamepad2Options = new KeyCode(() -> gamepad2.back);
+        public static final KeyCode Gamepad2Options = new KeyCode(() -> gamepad2.options);
         public static final KeyCode Gamepad2LeftStickButton = new KeyCode(() -> gamepad2.left_stick_button);
         public static final KeyCode Gamepad2RightStickButton = new KeyCode(() -> gamepad2.right_stick_button);
+        public static final KeyCode Gamepad2PS = new KeyCode(() -> gamepad2.ps);
+
+        //endregion
     }
 
     /**
@@ -295,7 +299,6 @@ public class Input {
     }
 
     private static class InputUpdater implements Runnable {
-
         @Override
         public void run() {
             while (opMode.opModeIsActive() && !opMode.isStopRequested()) {

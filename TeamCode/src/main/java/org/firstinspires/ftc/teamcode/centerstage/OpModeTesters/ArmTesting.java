@@ -25,7 +25,7 @@ public class ArmTesting extends LinearOpMode {
         waitForStart();
         armThread.start();
         while (opModeIsActive() && !isStopRequested()) {
-            double power = gamepad2.left_stick_y;
+            double power = -gamepad2.left_stick_y;
             arm.setMotorsPower(power);
             multipleTelemetry.addData("LIFT", arm.isOverCurrentLimit());
             multipleTelemetry.addData("LIFT Current", arm.getCurrent());

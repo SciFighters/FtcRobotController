@@ -415,8 +415,8 @@ public class DriveClass {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, false);
     }
 
-    public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout, boolean superSpeed) {
-        return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, superSpeed);
+    public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout, boolean noSlowdown) {
+        return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, noSlowdown);
     }
 
     public enum Axis {

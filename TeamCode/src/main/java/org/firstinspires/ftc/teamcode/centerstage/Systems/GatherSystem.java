@@ -79,8 +79,8 @@ public class GatherSystem {
      * Moves the intake wheels
      */
     public void spinMotor() {
-        double normalPower = .7;
-        double spitPower = 0.5;
+        double normalPower = 0.4;
+        double spitPower = 0.3;
         if (isBusy)
             return; // Don't move if the system is busy
         if (intakeWheelsState == IntakeWheelsState.Spit) {

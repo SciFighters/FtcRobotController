@@ -6,8 +6,10 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
@@ -32,6 +34,8 @@ public class AutoFlow {
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
+    Arm arm;
+    int propLocation; // 1 => left 2 => middle 3 => right
 
     public enum StartPos {
         PIXEL_STACK(1), BACKSTAGE(-1);
@@ -91,6 +95,7 @@ public class AutoFlow {
 
 
     public void init() {
+        this.arm = new Arm(opMode, telemetry);
         this.drive = new DriveClass(opMode, DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
 
         dashboard = FtcDashboard.getInstance();
@@ -98,16 +103,29 @@ public class AutoFlow {
         telemetry = new MultipleTelemetry(dashboardTelemetry, opMode.telemetry);
 
         initWebcam();
+        /**
+         * TODO: check where the team prop is positioned {@link propLocation}
+         *
+         */
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
         drive.init(opMode.hardwareMap);
     }
 
     public void test() {
+        //go straight to this location.
         drive.goToLocation(new Location(0.9, tile * 2 + 0.4), 1, 0, 0.15, 0, true);
-        drive.goToLocation(new Location(0.9 - tile * 2, drive.getPosY()), 1, -90, 0.15, 0, true);
-        drive.goToLocation(new Location(drive.getPosX() - tile * 2, tile * 2), 1, -90, 0.05, 0);
+        //turn to 180 degrees.
+        //place the purple pixel on prop location.
+        //turn to the bridge and go to the board.
+        //open arm and locate the yellow pixel on the board.
+        drive.goToLocation(new Location(0.9 - tile * 2, tile * 2 + 0.4), 1, -90, 0.15, 0, true);
+        drive.goToLocation(new Location(0.9 - tile * 4 - tile * 2, tile * 2), 1, -90, 0.05, 0);
         opMode.sleep(300);
 //        cameraPipeline.lockOnTag(CameraPipeline.AprilTags.BlueCenter, 0.3, drive);
+    }
+
+    public void teaching() {
+
     }
 
 }

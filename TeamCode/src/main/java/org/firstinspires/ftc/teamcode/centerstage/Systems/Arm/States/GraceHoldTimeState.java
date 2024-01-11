@@ -10,13 +10,13 @@ public class GraceHoldTimeState extends State<Arm> {
     public void enter(Arm owner) {
         this.owner = owner;
         owner.setMotorsPower(0);
-        owner.timer.reset();
+//        owner.timer.reset();
     }
 
     @Override
     public void execute() {
 //        if (owner.timer.seconds() >= owner.graceTimeLimit) {
-        owner.stateMachine.changeState(owner.holdState);
+//        owner.stateMachine.changeState(owner.holdState);
 //        }
     }
 
