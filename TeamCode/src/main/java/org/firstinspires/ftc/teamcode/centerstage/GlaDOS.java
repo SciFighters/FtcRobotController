@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.centerstage;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.RobotStatus;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -14,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.GatherSystem;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
@@ -42,7 +40,7 @@ public class GlaDOS extends Robot {
     @UpdateAutomatically
     Toggle robotOrientedToggle = new Toggle(Input.KeyCode.Gamepad1PS);
     Arm arm;
-    GatherSystem gatherSystem;
+    IntakeSystem intakeSystem;
     double targetHeading;
 
     @Override
@@ -82,16 +80,16 @@ public class GlaDOS extends Robot {
             arm.goToPos(Arm.Position.Three);
         }
         if (Input.GetKeyPressed(Input.KeyCode.Gamepad2LeftBumper)) {
-            gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Idle);
+            intakeSystem.setStateIdle();
         } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightBumper)) {
-            gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Collect);
+            intakeSystem.setStateCollect();
         } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightStickButton)) {
-            gatherSystem.setGatherSystemState(GatherSystem.IntakeWheelsState.Spit);
+            intakeSystem.setStateSpit();
         }
         if (robotOrientedToggle.isClicked()) {
             this.fieldOriented = !this.fieldOriented;
         }
-        gatherSystem.spinMotor();
+        intakeSystem.spinMotor();
         if (gamepad1.dpad_left) drive.setPower(0, 0, 0.1);
         else if (gamepad1.dpad_right) drive.setPower(0, 0, -0.1);
         else if (gamepad1.dpad_up) drive.setPower(-0.1, 0, 0);
@@ -117,7 +115,7 @@ public class GlaDOS extends Robot {
             multipleTelemetry.addData("tags detected ", (int) aprilTagDetector.getDetections().size());
             multipleTelemetry.addData("Allow Movement", allowMovement);
             multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
-            multipleTelemetry.addData("Gather state", gatherSystem.getIntakeWheelsState().toString());
+            multipleTelemetry.addData("Gather state", intakeSystem.getIntakeWheelsState().toString());
             multipleTelemetry.addData("Field Oriented state", fieldOriented);
             multipleTelemetry.addData("Arm State", arm.stateMachine.getCurrentState().toString());
             multipleTelemetry.addData("Arm pos", arm.getPos());
@@ -133,8 +131,8 @@ public class GlaDOS extends Robot {
     }
 
     void initSystems() {
-        gatherSystem = new GatherSystem(this);
-        gatherSystem.init(hardwareMap);
+        intakeSystem = new IntakeSystem(this);
+        intakeSystem.init(hardwareMap);
         RobotLog.d("Init start");
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();

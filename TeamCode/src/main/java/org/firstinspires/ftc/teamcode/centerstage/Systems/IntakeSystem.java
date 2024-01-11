@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class GatherSystem {
+public class IntakeSystem {
     Servo intakeServo1, intakeServo2;
     DcMotorEx intakeWheelsMotor;
     LinearOpMode opMode;
@@ -31,7 +31,7 @@ public class GatherSystem {
     private boolean isBusy;
     private IntakeWheelsState intakeWheelsState;
 
-    public GatherSystem(LinearOpMode opMode) {
+    public IntakeSystem(LinearOpMode opMode) {
         this.opMode = opMode;
     }
 
@@ -45,15 +45,17 @@ public class GatherSystem {
     }
 
     public void setStateIdle() {
-        this.intakeWheelsState = IntakeWheelsState.Idle;
+        setGatherSystemState(IntakeWheelsState.Idle);
+
     }
 
     public void setStateSpit() {
-        this.intakeWheelsState = IntakeWheelsState.Spit;
+        setGatherSystemState(IntakeWheelsState.Spit);
     }
 
     public void setStateCollect() {
-        this.intakeWheelsState = IntakeWheelsState.Collect;
+        setGatherSystemState(IntakeWheelsState.Collect);
+
     }
 
     public void init(HardwareMap hw) {
