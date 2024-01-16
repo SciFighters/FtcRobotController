@@ -34,7 +34,6 @@ public class AutoFlow {
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
-    Arm arm;
     int propLocation; // 1 => left 2 => middle 3 => right
 
     public enum StartPos {
@@ -95,7 +94,6 @@ public class AutoFlow {
 
 
     public void init() {
-        this.arm = new Arm(opMode, telemetry);
         this.drive = new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
 
         dashboard = FtcDashboard.getInstance();
