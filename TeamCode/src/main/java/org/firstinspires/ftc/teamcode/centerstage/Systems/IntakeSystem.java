@@ -1,20 +1,24 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.Robot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class IntakeSystem {
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+
+public class IntakeSystem extends Component {
     Servo intakeServo1, intakeServo2;
     DcMotorEx motor;
-    LinearOpMode opMode;
-    HardwareMap hw;
+    public WheelsState state, prevState;
+    boolean initTime = true;
 
-    public enum ServoPos {
-        Open(1),
-        Close(0);
+    public static enum ServoPos {
+        Open(1), Close(0), Mid(0.5);
         private final double servoPos;
 
         ServoPos(double servoPos) {
@@ -23,17 +27,10 @@ public class IntakeSystem {
     }
 
     public enum WheelsState {
-        Collect,
-        Spit,
-        Idle
+        Collect, Spit, Idle, AvoidArm
     }
 
     private boolean isBusy;
-    private WheelsState state;
-
-    public IntakeSystem(LinearOpMode opMode) {
-        this.opMode = opMode;
-    }
 
 
     public boolean IsBusy() {
@@ -55,14 +52,22 @@ public class IntakeSystem {
 
     }
 
-    public void init(HardwareMap hw) {
-        this.hw = hw; // Cache the hardware map
-        motor = hw.get(DcMotorEx.class, "motor");
-        setState(WheelsState.Idle);
+    @Override
+    public void init() {
+        motor = hw.get(DcMotorEx.class, "intakeWheelsMotor");
 
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
         intakeServo2 = hw.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
+
+        setState(WheelsState.Idle);
+        spinMotor();
+        initTime = false;
+    }
+
+    @Override
+    public void loop() {
+        spinMotor();
     }
 
     void setServoPos(double pos) {
@@ -70,7 +75,13 @@ public class IntakeSystem {
         intakeServo2.setPosition(pos);
     }
 
+    void setServoPos(ServoPos pos) {
+        setServoPos(pos.servoPos);
+    }
+
     void setState(WheelsState state) {
+        if (state == WheelsState.AvoidArm) return;
+        prevState = state;
         this.state = state;
     }
 
@@ -78,21 +89,33 @@ public class IntakeSystem {
      * Moves the intake wheels
      */
     public void spinMotor() {
-        double normalPower = 0.1;
+        double normalPower = 0.4;
         double spitPower = 0.3;
-        if (isBusy)
-            return; // Don't move if the system is busy
-        if (state == WheelsState.Spit) {
-            setServoPos(ServoPos.Close.servoPos);
+        if (isBusy) return; // Don't move if the system is busy
+        if (Arm.getInstance() != null &&
+                Arm.getInstance().getPos() < 650 &&
+                Arm.getInstance().getPos() > 25 &&
+                state != WheelsState.Collect && !initTime) {
+            state = WheelsState.AvoidArm;
+        } else {
+            state = prevState;
+            if (state == WheelsState.Spit) {
+                setServoPos(ServoPos.Close);
+                motor.setDirection(DcMotorSimple.Direction.FORWARD);
+                motor.setPower(spitPower);
+            } else if (state == WheelsState.Idle) {
+                setServoPos(ServoPos.Close);
+                motor.setPower(0);
+                return;
+            } else if (state == WheelsState.Collect) {
+                setServoPos(ServoPos.Open);
+                motor.setDirection(DcMotorSimple.Direction.REVERSE);
+                motor.setPower(normalPower);
+            }
+        }
+        if (state == WheelsState.AvoidArm && !initTime) {
+            setServoPos(ServoPos.Mid);
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
-            motor.setPower(spitPower);
-        } else if (state == WheelsState.Idle) {
-            setServoPos(ServoPos.Close.servoPos);
-            motor.setPower(0);
-            return;
-        } else if (state == WheelsState.Collect) {
-            setServoPos(ServoPos.Open.servoPos);
-            motor.setDirection(DcMotorSimple.Direction.REVERSE);
             motor.setPower(normalPower);
         }
     }

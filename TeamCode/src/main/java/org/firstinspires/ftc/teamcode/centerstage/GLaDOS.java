@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetecto
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.UpdateAutomatically;
@@ -22,10 +23,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @Config
 @TeleOp(group = "CENTERSTAGE")
-public class GlaDOS extends Robot {
+public class GLaDOS extends Robot {
     boolean fieldOriented = false;
     FtcDashboard dashboard;
-    DriveClass drive = new DriveClass(this, DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT);
+    DriveClass drive;
     boolean allowMovement = true; // Flag to control movement
     double angle = 0;
     //region Camera
@@ -33,15 +34,19 @@ public class GlaDOS extends Robot {
     AprilTagDetector aprilTagDetector;
     public static AprilTagDetector.PortalConfiguration portalConfiguration = new AprilTagDetector.PortalConfiguration();
     //endregion
+    @RobotTelemetry
     MultipleTelemetry multipleTelemetry;
     Telemetry dashboardTelemetry;
     @UpdateAutomatically
-    Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation fix
+    Toggle rotateToggle = new Toggle(Input.KeyCode.Gamepad1A); // toggle to check rotation by april tag
+    Toggle turningToggle = new Toggle(); // for rotation fix
     @UpdateAutomatically
     Toggle robotOrientedToggle = new Toggle(Input.KeyCode.Gamepad1PS);
     Arm arm;
     IntakeSystem intakeSystem;
     double targetHeading;
+    Thread armThread;
+    int turningCount = 0;
 
     @Override
     public void initRobot() {
@@ -50,6 +55,7 @@ public class GlaDOS extends Robot {
 
     @Override
     public void startRobot() {
+        armThread.start();
         Input.init(this, gamepad1, gamepad2);
         targetHeading = drive.getHeading();
         drive.resetOrientation(180);
@@ -58,7 +64,6 @@ public class GlaDOS extends Robot {
     @Override
     public void updateLoop() {
         handleForceQuit();
-
         if (gamepad1.start) {
             if (gamepad1.x) {
                 drive.resetOrientation(180);
@@ -66,22 +71,28 @@ public class GlaDOS extends Robot {
             }
             return;
         }
-        arm.setPower(pow(gamepad2.left_stick_y));
+        //region Arm & Intake
+        double armBoost = 0.8;
+        if (Input.GetAxis(Input.Axis.Gamepad2RightTrigger) > 0) {
+            armBoost = 1.5;
+        }
+        arm.setMotorsPower(gamepad2.left_stick_y * Math.abs(gamepad2.left_stick_y) * armBoost);
 
-        final double boostK = 0.5;
-        double boost = gamepad1.right_trigger * boostK + (1 - boostK) * 2;
-        double y = pow(-gamepad1.left_stick_y) * boost;
-        double x = pow(gamepad1.left_stick_x) * boost;
-        double turn = pow(gamepad1.right_stick_x * boost);
+        if (gamepad2.right_bumper) {
+            arm.setClawPosition(true);
+        }
+        if (gamepad2.left_bumper) {
+            arm.setClawPosition(false);
+        }
         if (gamepad2.b) {
             arm.goToPos(Arm.Position.Two);
         }
         if (gamepad2.y) {
             arm.goToPos(Arm.Position.Three);
         }
-        if (Input.GetKeyPressed(Input.KeyCode.Gamepad2LeftBumper)) {
+        if (Input.GetKeyPressed(Input.KeyCode.Gamepad2DpadUp)) {
             intakeSystem.setStateIdle();
-        } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightBumper)) {
+        } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2DpadDown)) {
             intakeSystem.setStateCollect();
         } else if (Input.GetKeyPressed(Input.KeyCode.Gamepad2RightStickButton)) {
             intakeSystem.setStateSpit();
@@ -89,7 +100,29 @@ public class GlaDOS extends Robot {
         if (robotOrientedToggle.isClicked()) {
             this.fieldOriented = !this.fieldOriented;
         }
-        intakeSystem.spinMotor();
+        //endregion
+        //region Driving
+        final double boostK = 0.5;
+        double boost = gamepad1.right_trigger * boostK + (1 - boostK) * 2;
+        double y = pow(-gamepad1.left_stick_y) * boost;
+        double x = pow(gamepad1.left_stick_x) * boost;
+        double turn = pow(gamepad1.right_stick_x * boost);
+        turningToggle.update(Math.abs(turn) > 0.02);
+        if (turningToggle.isReleased()) {
+            turningCount = 8;
+        }
+        if (!turningToggle.isPressed()) {
+            turningCount--;
+        }
+
+        if (turningCount == 0) {
+            targetHeading = drive.getHeading();
+        }
+        if (!turningToggle.isPressed() && turningCount < 0) {
+            double delta = drive.getDeltaHeading(targetHeading);
+            double gain = 0.02;
+            turn = delta * gain;
+        }
         if (gamepad1.dpad_left) drive.setPower(0, 0, 0.1);
         else if (gamepad1.dpad_right) drive.setPower(0, 0, -0.1);
         else if (gamepad1.dpad_up) drive.setPower(-0.1, 0, 0);
@@ -112,6 +145,7 @@ public class GlaDOS extends Robot {
                 drive.setPowerOriented(y, x, turn, fieldOriented);
                 allowMovement = true;
             }
+            //region Telemetry
             multipleTelemetry.addData("tags detected ", (int) aprilTagDetector.getDetections().size());
             multipleTelemetry.addData("Allow Movement", allowMovement);
             multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
@@ -119,10 +153,14 @@ public class GlaDOS extends Robot {
             multipleTelemetry.addData("Field Oriented state", fieldOriented);
             multipleTelemetry.addData("Arm State", arm.stateMachine.getCurrentState().toString());
             multipleTelemetry.addData("Arm pos", arm.getPos());
+            multipleTelemetry.addData("Arm manual power", arm.getManualPower());
+            multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower());
             multipleTelemetry.addData("Arm target pos", arm.getTargetPos());
             multipleTelemetry.addData("Field oriented", fieldOriented);
             multipleTelemetry.update();
+            //endregion
         }
+        //endregion Driving
     }
 
     void zeroOnTarget() {
@@ -131,19 +169,16 @@ public class GlaDOS extends Robot {
     }
 
     void initSystems() {
-        intakeSystem = new IntakeSystem(this);
-        intakeSystem.init(hardwareMap);
-        RobotLog.d("Init start");
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
-        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
-        RobotLog.d("dashboard init");
+        telemetryInit();
+        intakeSystem = addComponent(IntakeSystem.class);
+        drive = addComponent(DriveClass.class,
+                new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
+        arm = addComponent(Arm.class);
+        armThread = new Thread(arm);
 
-        arm = new Arm(this, multipleTelemetry);
         telemetry.addData(">", "Init in progress...");
         telemetry.update();
         RobotLog.d("drive init start");
-        drive.init(hardwareMap);
         RobotLog.d("cam init start");
 
         aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), hardwareMap, multipleTelemetry, portalConfiguration);
@@ -160,6 +195,12 @@ public class GlaDOS extends Robot {
         if (Input.GetKeyPressed(Input.KeyCode.Gamepad1X) && Input.GetKeyPressed(Input.KeyCode.Gamepad1Start) && Input.GetKeyPressed(Input.KeyCode.Gamepad1Options)) { // Force stops the OpMode
             requestOpModeStop();
         }
+    }
+
+    void telemetryInit() {
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
+        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
     }
 
 }

@@ -1,33 +1,40 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems.Arm;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.*;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
 
 /**
  * The Arm class controls the movement of an arm using two DC motors.
  */
-public class Arm implements Runnable {
-    private final LinearOpMode opMode;
+@ThreadedComponent
+public class Arm extends Component {
+    private static Arm instance;
     private final double deadZone = 0.05;
     private double manualPower = 0;
     private int targetPos;
-    private final ElapsedTime timer;
+    private ElapsedTime timer;
     private final double graceTimeLimit = 0.25;
     public State<Arm> gotoState, graceHoldTimeState, holdState, idleState, manualState;
-    public final Telemetry telemetry;
-    public final DcMotorEx lift1, lift2;
-
+    public Telemetry telemetry;
+    public DcMotorEx lift1, lift2;
+    public TouchSensor limitSensor1;
     // Constants for proportional control in GoToState
     private static final double PROPORTIONAL_GAIN = 0.01; // Adjust this gain based on your requirements
-
+    private Servo frontServo, backServo;
     public StateMachine<Arm> stateMachine;
 
     /**
@@ -42,25 +49,30 @@ public class Arm implements Runnable {
         }
     }
 
+    public static Arm getInstance() {
+        return instance;
+    }
+
     /**
-     * Initializes the Arm object with the specified OpMode and Telemetry.
-     *
-     * @param opMode    The LinearOpMode associated with the arm.
-     * @param telemetry The telemetry object for debugging and monitoring.
+     * Initializes the Arm object.
      */
-    public Arm(LinearOpMode opMode, Telemetry telemetry) {
+    @Override
+    public void init() {
         initStateMachine();
-        this.telemetry = telemetry;
-        this.opMode = opMode;
         this.timer = new ElapsedTime();
-        this.lift1 = opMode.hardwareMap.get(DcMotorEx.class, "lift1");
-        this.lift2 = opMode.hardwareMap.get(DcMotorEx.class, "lift2");
+        this.lift1 = hw.get(DcMotorEx.class, "lift1");
+        this.limitSensor1 = hw.get(TouchSensor.class, "armLimitSensor1");
+        this.lift2 = hw.get(DcMotorEx.class, "lift2");
         this.lift1.setDirection(DcMotorEx.Direction.FORWARD);
         this.lift2.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        this.frontServo = hw.get(Servo.class, "frontClawServo");
+        this.backServo = hw.get(Servo.class, "backClawServo");
         initMotors();
+        resetClaw();
         resetArm();
+        setClawPosition(true);
         stateMachine.changeState(idleState);
+        instance = this;
     }
 
     private void initStateMachine() {
@@ -76,36 +88,50 @@ public class Arm implements Runnable {
         telemetry.addData("Lift Init", "In progress");
         telemetry.update();
 
-        lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-
-        lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
         lift1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         lift2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+
         telemetry.addData("Lift Init", "Finished");
         telemetry.update();
+    }
+
+    public void resetClaw() {
+        double minServoPos = 0.35;
+        frontServo.scaleRange(minServoPos, 1);
+        backServo.scaleRange(minServoPos, 1);
     }
 
     /**
      * Resets the arm to its initial state. To be implemented.
      */
     public void resetArm() {
-        // TODO: Make initialization sequence
-        // leftClawServo.setPosition(0);
-        // leftClawServo.setPosition(0);
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+        lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while (!limitSensor1.isPressed() && (robot.opModeInInit() && !robot.isStopRequested())) {
+            lift1.setPower(-0.2);
+            lift2.setPower(-0.2);
+            telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
+            telemetry.update();
+        }
+        lift1.setPower(0);
+        lift2.setPower(0);
+
+        lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     /**
      * Runs the Arm thread continuously, handling state transitions.
      */
-    public void run() {
-        while (opMode.opModeIsActive() && !opMode.isStopRequested()) {
-            handleStates();
-            opMode.idle();
-        }
+    @Override
+    public void loop() {
+        handleStates();
     }
 
     /**
@@ -188,7 +214,9 @@ public class Arm implements Runnable {
      */
     public void handleStates() {
         stateMachine.execute();
-        telemetry.addData("STATEMACHINE RUNNING", "");
+        if (limitSensor1.isPressed()) {
+            resetArm();
+        }
     }
 
     /**
@@ -208,9 +236,10 @@ public class Arm implements Runnable {
     public void setPower(double power) {
         if (outOfDeadZone(power)) {
             stateMachine.changeState(manualState);
-            gradualSetMotorsPower(power);
+            setMotorsPower(power);
             manualPower = power;
         } else {
+            manualPower = 0;
             if (stateMachine.getCurrentState() != gotoState && stateMachine.getCurrentState() != holdState) {
                 setTargetPositions(getPos());
                 stateMachine.changeState(holdState);
@@ -240,7 +269,7 @@ public class Arm implements Runnable {
         while (Math.abs(currentPower - targetPower) > 0.01) {
             currentPower += powerDifference * powerChangeRate;
             setMotorsPower(currentPower);
-            opMode.sleep(10); // Adjust sleep duration based on your requirements
+            robot.sleep(10); // Adjust sleep duration based on your requirements
         }
         setMotorsPower(targetPower);
     }
@@ -251,6 +280,9 @@ public class Arm implements Runnable {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
+        if (power <= 0 && (limitSensor1.isPressed())) {
+            return;
+        }
         lift1.setPower(power);
         lift2.setPower(power);
     }
@@ -280,8 +312,8 @@ public class Arm implements Runnable {
      * @param position The position to set the claw servos to.
      */
     public void setClawPosition(double position) {
-        // leftClawServo.setPosition(position);
-        // leftClawServo.setPosition(position);
+        frontServo.setPosition(position);
+        backServo.setPosition(position);
     }
 
     /**

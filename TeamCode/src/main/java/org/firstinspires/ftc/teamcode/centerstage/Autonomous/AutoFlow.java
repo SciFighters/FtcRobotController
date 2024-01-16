@@ -96,7 +96,7 @@ public class AutoFlow {
 
     public void init() {
         this.arm = new Arm(opMode, telemetry);
-        this.drive = new DriveClass(opMode, DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
+        this.drive = new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
 
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
@@ -108,7 +108,7 @@ public class AutoFlow {
          *
          */
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
-        drive.init(opMode.hardwareMap);
+        drive.init();
     }
 
     public void test() {

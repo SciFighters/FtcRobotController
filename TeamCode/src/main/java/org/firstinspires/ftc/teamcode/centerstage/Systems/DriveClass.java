@@ -8,7 +8,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,13 +17,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.RodLine;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-public class DriveClass {
+public class DriveClass extends Component {
     final double tile = 0.6;
     public boolean busy;
     public static final int USE_ENCODERS = 1 << 0;
@@ -35,7 +35,6 @@ public class DriveClass {
     private boolean useBrake;
     private boolean useDashboardField;
 
-    private LinearOpMode opMode; // First I declared it as OpMode now its LinearOpMode
 
     volatile public DcMotorEx fl = null;
     volatile private DcMotorEx fr = null;
@@ -64,7 +63,7 @@ public class DriveClass {
         GLADOS;
     }
 
-    private ROBOT robot;
+    private ROBOT robotType;
 
     private Location startingPosition;
 
@@ -91,27 +90,26 @@ public class DriveClass {
 
     ElapsedTime timer = new ElapsedTime();
 
-    public DriveClass(LinearOpMode opMode, ROBOT robot, Location startingPosition, int flags, DriveMode mode) {
-        this.opMode = opMode;
-        this.robot = robot;
+    public DriveClass(ROBOT robotType, Location startingPosition, int flags, DriveMode mode) {
+        this.robotType = robotType;
         this.startingPosition = startingPosition;
         this.mode = mode;
 
 
-        if (robot == ROBOT.JACCOUSE) {
+        if (robotType == ROBOT.JACCOUSE) {
             this.forwardTicksPerMeter = 1562.5;
             this.strafeTicksPerMeter = 1645.83;
-        } else if (robot == ROBOT.SCORPION) {
+        } else if (robotType == ROBOT.SCORPION) {
             this.forwardTicksPerMeter = 2455;
             this.strafeTicksPerMeter = 2587;
-        } else if (robot == ROBOT.COBALT) {
+        } else if (robotType == ROBOT.COBALT) {
             this.forwardTicksPerMeter = 1753;
             this.strafeTicksPerMeter = 2006;
-        } else if (robot == ROBOT.GLADOS) {
+        } else if (robotType == ROBOT.GLADOS) {
             this.forwardTicksPerMeter = 1000;
             this.strafeTicksPerMeter = 1110;
         }
-        switch (robot) {
+        switch (robotType) {
             case JACCOUSE:
                 this.forwardTicksPerMeter = 1562.5;
                 this.strafeTicksPerMeter = 1645.83;
@@ -156,7 +154,8 @@ public class DriveClass {
 
     }
 
-    public void init(HardwareMap hw) {
+    @Override
+    public void init() {
         RobotLog.d("motors init start");
 
         //region get from hw
@@ -201,10 +200,10 @@ public class DriveClass {
         }
         //endregion setZeroPowerBehavior
 
-        opMode.telemetry.addData("use encoders", this.useEncoders);
-        opMode.telemetry.addData("use brake", this.useBrake);
-        opMode.telemetry.addData("use dash", this.useDashboardField);
-        opMode.telemetry.update();
+        robot.telemetry.addData("use encoders", this.useEncoders);
+        robot.telemetry.addData("use brake", this.useBrake);
+        robot.telemetry.addData("use dash", this.useDashboardField);
+        robot.telemetry.update();
         RobotLog.d("imu init start");
 
         initIMU(hw);
@@ -221,27 +220,27 @@ public class DriveClass {
         imu.initialize(parameters);
         RobotLog.d("imu init finished");
 
-        opMode.telemetry.addData("Gyro", "calibrating...");
-        opMode.telemetry.addData("Integrator dashboard", this.useDashboardField);
-        // opMode.telemetry.update();
+        robot.telemetry.addData("Gyro", "calibrating...");
+        robot.telemetry.addData("Integrator dashboard", this.useDashboardField);
+        // robotType.telemetry.update();
 
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
-        while (!imu.isGyroCalibrated() && !opMode.isStopRequested() && timer.seconds() < 5) {
-            opMode.sleep(50);
+        while (!imu.isGyroCalibrated() && !robot.isStopRequested() && timer.seconds() < 5) {
+            robot.sleep(50);
         }
         if (imu.isGyroCalibrated()) {
-            opMode.telemetry.addData("Gyro", "Done Calibrating");
+            robot.telemetry.addData("Gyro", "Done Calibrating");
             RobotLog.d("Gyro done init");
 
         } else {
-            opMode.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
+            robot.telemetry.addData("Gyro", "Gyro/IMU Calibration Failed");
             RobotLog.d("Gyro failed init" + " " + imu.isGyroCalibrated() + " " + imu.isAccelerometerCalibrated() + " " + imu.isMagnetometerCalibrated());
         }
 
         imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 2);
 
-        // opMode.telemetry.update();
+        // robotType.telemetry.update();
 
         RobotLog.d("IMU status: %s", imu.getSystemStatus().toShortString());
         RobotLog.d("IMU calibration status: %s", imu.getCalibrationStatus().toString());
@@ -272,8 +271,8 @@ public class DriveClass {
             setPower(forward, turn, strafe);
         }
 
-//		opMode.telemetry.addData("Front","left/right: %d, %d", fl.getCurrentPosition(), fr.getCurrentPosition());
-//		opMode.telemetry.addData("Back","left/right: %d, %d", bl.getCurrentPosition(), br.getCurrentPosition());
+//		robotType.telemetry.addData("Front","left/right: %d, %d", fl.getCurrentPosition(), fr.getCurrentPosition());
+//		robotType.telemetry.addData("Back","left/right: %d, %d", bl.getCurrentPosition(), br.getCurrentPosition());
     }
 
     public void stopPower() {
@@ -363,15 +362,15 @@ public class DriveClass {
     }
 
     public void printWheelsPosition() {
-        opMode.telemetry.addData("fl", fl.getCurrentPosition());
-        opMode.telemetry.addData("fr", fr.getCurrentPosition());
-        opMode.telemetry.addData("bl", bl.getCurrentPosition());
-        opMode.telemetry.addData("br", br.getCurrentPosition());
+        robot.telemetry.addData("fl", fl.getCurrentPosition());
+        robot.telemetry.addData("fr", fr.getCurrentPosition());
+        robot.telemetry.addData("bl", bl.getCurrentPosition());
+        robot.telemetry.addData("br", br.getCurrentPosition());
 
-        opMode.telemetry.addData("average", (fl.getCurrentPosition() + fr.getCurrentPosition() + bl.getCurrentPosition() + br.getCurrentPosition()) / 4);
+        robot.telemetry.addData("average", (fl.getCurrentPosition() + fr.getCurrentPosition() + bl.getCurrentPosition() + br.getCurrentPosition()) / 4);
 
-        opMode.telemetry.addData("forwardDist", getForwardDistance());
-        opMode.telemetry.addData("strafeDist", getStrafeDistance());
+        robot.telemetry.addData("forwardDist", getForwardDistance());
+        robot.telemetry.addData("strafeDist", getStrafeDistance());
     }
 
     public void resetPosition() {
@@ -379,7 +378,7 @@ public class DriveClass {
         fr_startPos = fr.getCurrentPosition();
         bl_startPos = bl.getCurrentPosition();
         br_startPos = br.getCurrentPosition();
-        opMode.telemetry.addData("RESET POSITION !!!!!!", 0);
+        robot.telemetry.addData("RESET POSITION !!!!!!", 0);
     }
 
 
@@ -392,7 +391,7 @@ public class DriveClass {
     public void turnTo(double targetAngle, double targetPower) {
         double delta = getDeltaHeading(targetAngle);
         double s = (delta < 0) ? -1 : 1;
-        while ((delta * s > 0) && opMode.opModeIsActive()) {
+        while ((delta * s > 0) && robot.opModeIsActive()) {
 
             delta = getDeltaHeading(targetAngle);
             double gain = 0.02;
@@ -402,11 +401,11 @@ public class DriveClass {
 
             setPower(0, power, 0);
 
-            opMode.telemetry.addData("target", targetAngle);
-            opMode.telemetry.addData("current", getHeading());
-            opMode.telemetry.addData("delta", delta);
-            opMode.telemetry.addData("power", power);
-            opMode.telemetry.update();
+            robot.telemetry.addData("target", targetAngle);
+            robot.telemetry.addData("current", getHeading());
+            robot.telemetry.addData("delta", delta);
+            robot.telemetry.addData("power", power);
+            robot.telemetry.update();
         }
         stopPower();
     }
@@ -473,17 +472,17 @@ public class DriveClass {
 
         ElapsedTime timer = new ElapsedTime();
 
-        opMode.telemetry.addData("goto x", x);
-        opMode.telemetry.addData("goto y", y);
-        opMode.telemetry.addData("goto delta x", deltaX);
-        opMode.telemetry.addData("goto delta y", deltaY);
-        opMode.telemetry.addData("goto hypocampus total dist", totalDist);
-        opMode.telemetry.update();
+        robot.telemetry.addData("goto x", x);
+        robot.telemetry.addData("goto y", y);
+        robot.telemetry.addData("goto delta x", deltaX);
+        robot.telemetry.addData("goto delta y", deltaY);
+        robot.telemetry.addData("goto hypocampus total dist", totalDist);
+        robot.telemetry.update();
         // time delta variables
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
 
-        while (opMode.opModeIsActive() && (currentDist < (totalDist - tolerance))) {
+        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance))) {
 
             double power = targetPower;
 
@@ -530,15 +529,15 @@ public class DriveClass {
             setPower(forward, correction, strafe);
 
 
-            opMode.telemetry.addData("distance", "%2.3f, %2.3f", currentDist, remainDist);
-            opMode.telemetry.addData("Abs Pos", "X,Y %2.3f, %2.3f", getAbsolutesPosX(), getAbsolutesPosY());
-            opMode.telemetry.addData("> currnt", "X,Y: %2.3f, %2.3f", currentX, currentY);
-            opMode.telemetry.addData("goto delta", " x,y: %2.3f, %2.3f", deltaX, deltaY);
-            opMode.telemetry.addData("goto velos", "f,s: %2.3f, %2.3f", Vy, Vx);
-            opMode.telemetry.addData("heading ", getHeading());
-            opMode.telemetry.addData("heading error", headingErr);
-            opMode.telemetry.addData("power", power);
-            opMode.telemetry.update();
+            robot.telemetry.addData("distance", "%2.3f, %2.3f", currentDist, remainDist);
+            robot.telemetry.addData("Abs Pos", "X,Y %2.3f, %2.3f", getAbsolutesPosX(), getAbsolutesPosY());
+            robot.telemetry.addData("> current", "X,Y: %2.3f, %2.3f", currentX, currentY);
+            robot.telemetry.addData("goto delta", " x,y: %2.3f, %2.3f", deltaX, deltaY);
+            robot.telemetry.addData("goto velos", "f,s: %2.3f, %2.3f", Vy, Vx);
+            robot.telemetry.addData("heading ", getHeading());
+            robot.telemetry.addData("heading error", headingErr);
+            robot.telemetry.addData("power", power);
+            robot.telemetry.update();
 
             if ((timeout != 0 && timeout <= timer.seconds())) break;
 
@@ -594,7 +593,7 @@ public class DriveClass {
         resetPosition();
         timer.reset();
 
-        while (opMode.opModeIsActive() && (RVf != 0) || (RVs != 0)) {
+        while (robot.opModeIsActive() && (RVf != 0) || (RVs != 0)) {
 
             if (getForwardDistance() * sf > forward * sf - tolerance) {
                 RVf = 0;
@@ -634,20 +633,20 @@ public class DriveClass {
 
             setPowerOriented(Vf, Vs, correction, fieldOriented);
 
-            opMode.telemetry.addData("time", timer.milliseconds());
+            robot.telemetry.addData("time", timer.milliseconds());
             //position Telemetry:
-            opMode.telemetry.addData("x position:", getAbsolutesPosX());
-            opMode.telemetry.addData("y position:", getAbsolutesPosY());
+            robot.telemetry.addData("x position:", getAbsolutesPosX());
+            robot.telemetry.addData("y position:", getAbsolutesPosY());
 
 
-            opMode.telemetry.addData("delta forward:", deltaForward);
-            opMode.telemetry.addData("speed forward:", Vf);
-//			opMode.telemetry.addData("delta strafe:", deltaStrafe);
-            opMode.telemetry.addData("speed strafe:", Vs);
-            opMode.telemetry.addData("power:", power);
-            opMode.telemetry.addData("current pos", getForwardDistance());
+            robot.telemetry.addData("delta forward:", deltaForward);
+            robot.telemetry.addData("speed forward:", Vf);
+//			robotType.telemetry.addData("delta strafe:", deltaStrafe);
+            robot.telemetry.addData("speed strafe:", Vs);
+            robot.telemetry.addData("power:", power);
+            robot.telemetry.addData("current pos", getForwardDistance());
 
-            opMode.telemetry.update();
+            robot.telemetry.update();
         }
         stopPower();
     }
@@ -691,9 +690,9 @@ public class DriveClass {
     public void anglesTelemetry() { // Fix
         // telemetry - Angles (XYZ)
         Orientation heading = imu.getAngularOrientation();
-//        opMode.telemetry.addData("First angle (most used angle)",heading.firstAngle);
-        opMode.telemetry.addData("Second angle", heading.secondAngle);
-        opMode.telemetry.addData("Third angle", heading.thirdAngle);
+//        robotType.telemetry.addData("First angle (most used angle)",heading.firstAngle);
+        robot.telemetry.addData("Second angle", heading.secondAngle);
+        robot.telemetry.addData("Third angle", heading.thirdAngle);
     }
 
     public double hoverBoardMode() {
@@ -729,10 +728,9 @@ public class DriveClass {
 
     public void zeroOnTarget() {
         ElapsedTime timer = new ElapsedTime();
-        while (opMode.opModeIsActive() && rodPipline.isRodDetected() && (timer.seconds() <= 3)) {
+        while (robot.opModeIsActive() && rodPipline.isRodDetected() && (timer.seconds() <= 3)) {
             if (zeroOnTargetOnes()) break;
-
-            opMode.sleep(10);
+            robot.sleep(10);
         }
         Log.d("Sci", String.format("zeroOnTarget =============================================================="));
         setPower(0, 0, 0);

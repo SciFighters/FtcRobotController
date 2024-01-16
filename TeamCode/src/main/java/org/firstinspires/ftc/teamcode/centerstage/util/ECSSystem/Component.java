@@ -1,16 +1,33 @@
 package org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem;
 
-public abstract class Component {
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+public abstract class Component implements Runnable {
     public Robot robot;
+    public HardwareMap hw;
+    Telemetry telemetry;
     public boolean enabled;
 
-    abstract void init();
+    public abstract void init();
 
-    abstract void loop();
+    public void loop() {
+    }
 
-    abstract void stop();
+    public void stop() {
+    }
 
-    void attach(Robot robot) {
+    public final void run() {
+        while (robot.opModeIsActive() && !robot.isStopRequested()) {
+            loop();
+            robot.idle();
+        }
+    }
+
+    public void attach(Robot robot, Telemetry telemetry) {
         this.robot = robot;
+        this.hw = robot.hardwareMap;
+        this.telemetry = telemetry;
     }
 }

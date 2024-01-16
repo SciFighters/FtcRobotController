@@ -9,7 +9,7 @@ public class ManualState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
         this.owner = owner;
-        owner.setManualMode(true, owner.getManualPower());
+//        owner.setManualMode(true, owner.getManualPower());
     }
 
     @Override
