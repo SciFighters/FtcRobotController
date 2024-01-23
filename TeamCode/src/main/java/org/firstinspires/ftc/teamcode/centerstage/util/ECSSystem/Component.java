@@ -7,15 +7,20 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public abstract class Component implements Runnable {
     public Robot robot;
     public HardwareMap hw;
-    Telemetry telemetry;
+    public Telemetry telemetry;
     public boolean enabled;
 
     public abstract void init();
 
+    public void start() {
+    }
+
     public void loop() {
+        return;
     }
 
     public void stop() {
+        return;
     }
 
     public final void run() {

@@ -4,12 +4,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.*;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
@@ -29,19 +31,23 @@ public class Arm extends Component {
     private ElapsedTime timer;
     private final double graceTimeLimit = 0.25;
     public State<Arm> gotoState, graceHoldTimeState, holdState, idleState, manualState;
-    public Telemetry telemetry;
     public DcMotorEx lift1, lift2;
     public TouchSensor limitSensor1;
     // Constants for proportional control in GoToState
     private static final double PROPORTIONAL_GAIN = 0.01; // Adjust this gain based on your requirements
     private Servo frontServo, backServo;
     public StateMachine<Arm> stateMachine;
+    private DistanceSensor distanceSensor;
+
+    public Arm() {
+
+    }
 
     /**
      * Enumeration for different arm positions.
      */
     public enum Position {
-        One(500), Two(900), Three(1200); // Todo: put actual values
+        One(500), Two(900), Three(2120); // Todo: put actual values
         final int liftPos;
 
         Position(int liftPos) {
@@ -67,12 +73,14 @@ public class Arm extends Component {
         this.lift2.setDirection(DcMotorSimple.Direction.REVERSE);
         this.frontServo = hw.get(Servo.class, "frontClawServo");
         this.backServo = hw.get(Servo.class, "backClawServo");
+        this.distanceSensor = hw.get(DistanceSensor.class, "armDistanceSensor");
         initMotors();
         resetClaw();
         resetArm();
         setClawPosition(true);
         stateMachine.changeState(idleState);
         instance = this;
+
     }
 
     private void initStateMachine() {
@@ -110,11 +118,14 @@ public class Arm extends Component {
         timer.reset();
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        while (!limitSensor1.isPressed() && (robot.opModeInInit() && !robot.isStopRequested())) {
-            lift1.setPower(-0.2);
-            lift2.setPower(-0.2);
-            telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
-            telemetry.update();
+        if (!limitSensor1.isPressed()) {
+            robot.getComponent(IntakeSystem.class).setServoPos(IntakeSystem.ServoPos.Mid);
+            while (!limitSensor1.isPressed() && (robot.opModeInInit() && !robot.isStopRequested())) {
+                lift1.setPower(-0.2);
+                lift2.setPower(-0.2);
+                telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
+                telemetry.update();
+            }
         }
         lift1.setPower(0);
         lift2.setPower(0);
@@ -124,6 +135,7 @@ public class Arm extends Component {
 
         lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        setTargetPositions(0);
     }
 
     /**
@@ -202,10 +214,9 @@ public class Arm extends Component {
         } else {
             lift1.setTargetPosition(targetPos);
             lift1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-//            lift2.setTargetPosition(targetPos);
-//            lift2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-//            setMotorsPower(power);
-            lift1.setPower(power);
+            lift2.setTargetPosition(targetPos);
+            lift2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            setMotorsPower(power);
         }
     }
 
@@ -256,22 +267,9 @@ public class Arm extends Component {
         return manualPower;
     }
 
-    /**
-     * Sets the power for the arm motors gradually.
-     *
-     * @param targetPower The target power to be reached gradually.
-     */
-    private void gradualSetMotorsPower(double targetPower) {
-        double currentPower = lift1.getPower();
-        double powerDifference = targetPower - currentPower;
-        double powerChangeRate = 0.1; // Adjust this rate based on your requirements
 
-        while (Math.abs(currentPower - targetPower) > 0.01) {
-            currentPower += powerDifference * powerChangeRate;
-            setMotorsPower(currentPower);
-            robot.sleep(10); // Adjust sleep duration based on your requirements
-        }
-        setMotorsPower(targetPower);
+    public double getDistanceSensorDistance() {
+        return distanceSensor.getDistance(DistanceUnit.CM);
     }
 
     /**
@@ -280,11 +278,20 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        if (power <= 0 && (limitSensor1.isPressed())) {
+        if ((power <= 0) && (limitSensor1.isPressed())) {
+            return;
+        } else if (power > 0 && getDistanceSensorDistance() < 10 && getPos() > 1000) {
             return;
         }
         lift1.setPower(power);
         lift2.setPower(power);
+    }
+
+    public void setManualPower(double power) {
+        if (outOfDeadZone(power)) {
+            stateMachine.changeState(manualState);
+            setMotorsPower(power);
+        }
     }
 
     /**
@@ -325,7 +332,18 @@ public class Arm extends Component {
         setClawPosition(open ? 1 : 0);
     }
 
+    public double getClawPosition() {
+        return backServo.getPosition();
+    }
+
     public double getDeadZone() {
         return this.deadZone;
+    }
+
+    public void goHome() {
+        robot.getComponent(IntakeSystem.class).setStateCollect();
+        goToPos(0);
+        robot.getComponent(IntakeSystem.class).setStateIdle();
+        setClawPosition(true);
     }
 }

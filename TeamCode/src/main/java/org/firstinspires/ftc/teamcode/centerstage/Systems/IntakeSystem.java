@@ -16,6 +16,7 @@ public class IntakeSystem extends Component {
     DcMotorEx motor;
     public WheelsState state, prevState;
     boolean initTime = true;
+    Arm arm;
 
     public static enum ServoPos {
         Open(1), Close(0), Mid(0.5);
@@ -59,10 +60,13 @@ public class IntakeSystem extends Component {
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
         intakeServo2 = hw.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
-
-        setState(WheelsState.Idle);
-        spinMotor();
+        setStateIdle();
         initTime = false;
+    }
+
+    @Override
+    public void start() {
+        arm = robot.getComponent(Arm.class);
     }
 
     @Override
@@ -70,12 +74,12 @@ public class IntakeSystem extends Component {
         spinMotor();
     }
 
-    void setServoPos(double pos) {
+    public void setServoPos(double pos) {
         intakeServo1.setPosition(pos);
         intakeServo2.setPosition(pos);
     }
 
-    void setServoPos(ServoPos pos) {
+    public void setServoPos(ServoPos pos) {
         setServoPos(pos.servoPos);
     }
 
@@ -89,13 +93,10 @@ public class IntakeSystem extends Component {
      * Moves the intake wheels
      */
     public void spinMotor() {
-        double normalPower = 0.4;
-        double spitPower = 0.3;
+        double normalPower = 0.7;
+        double spitPower = 0.6;
         if (isBusy) return; // Don't move if the system is busy
-        if (Arm.getInstance() != null &&
-                Arm.getInstance().getPos() < 650 &&
-                Arm.getInstance().getPos() > 25 &&
-                state != WheelsState.Collect && !initTime) {
+        if (arm != null && arm.getPos() < 800 && arm.getPos() > 25 && state != WheelsState.Collect && !initTime) {
             state = WheelsState.AvoidArm;
         } else {
             state = prevState;

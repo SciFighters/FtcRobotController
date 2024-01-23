@@ -14,20 +14,10 @@ public class HoldState extends State<Arm> {
 
     @Override
     public void execute() {
-        owner.setPower(0);
-        // Continue running to position with the hold power
-//        if (!MathUtil.approximately(owner.getPos(), owner.getTargetPos(), 10)) {
-//            if (owner.getPos() > owner.getTargetPos()) {
-//                owner.setMotorsPower(-0.3);
-//            } else if (owner.getPos() < owner.getTargetPos()) {
-//                owner.setMotorsPower(0.3);
-//            }
-//        }
+        owner.setManualMode(false, 0.12);
     }
 
     @Override
     public void exit() {
-        // Stop the motors when exiting the HoldState
-        owner.setMotorsPower(0);
     }
 }

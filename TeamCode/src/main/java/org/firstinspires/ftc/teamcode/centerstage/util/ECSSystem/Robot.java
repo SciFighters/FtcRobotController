@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -12,11 +13,13 @@ import java.util.Map;
 /**
  * The base class for robot implementations in the ECSSystem.
  * Provides a framework for managing robot components as separate threads.
+ *
+ * @see Component
  */
 public abstract class Robot extends LinearOpMode {
 
     private final Map<Component, Thread> components = new HashMap<>();
-    protected Telemetry robotTelemetry = null;
+    protected Telemetry robotTelemetry = telemetry;
 
     /**
      * The main run loop for the robot. Initializes, starts, and updates the robot components.
@@ -32,14 +35,14 @@ public abstract class Robot extends LinearOpMode {
         startComponentThreads();
         while (opModeIsActive() && !isStopRequested()) {
             updateLoop();
+            for (Component c : components.keySet()) {
+                if (components.get(c) == null) {
+                    c.loop();
+                }
+            }
         }
         stopComponentThreads();
     }
-
-    /**
-     * Placeholder for the user-defined update loop.
-     */
-    public abstract void updateLoop();
 
     /**
      * Placeholder for user-defined robot initialization logic.
@@ -52,10 +55,14 @@ public abstract class Robot extends LinearOpMode {
     public abstract void startRobot();
 
     /**
+     * Placeholder for the user-defined update loop.
+     */
+    public abstract void updateLoop();
+
+    /**
      * Placeholder for user-defined robot stop logic.
      */
     public void stopRobot() {
-        // Add custom stop logic here
     }
 
     /**
@@ -123,11 +130,16 @@ public abstract class Robot extends LinearOpMode {
     private void initializeComponent(Component component) {
         component.attach(this, robotTelemetry);
         component.init();
-        Thread thread = null;
-        if (component.getClass().isAnnotationPresent(ThreadedComponent.class)) {
-            thread = new Thread(component);
-        }
+        Thread thread = createComponentThread(component);
         components.put(component, thread);
+    }
+
+
+    private Thread createComponentThread(Component component) {
+        if (component.getClass().isAnnotationPresent(ThreadedComponent.class)) {
+            return new Thread(component);
+        }
+        return null;
     }
 
     private <T extends Component> T createComponentInstance(Class<T> componentClass) {
@@ -148,9 +160,6 @@ public abstract class Robot extends LinearOpMode {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-        }
-        if (robotTelemetry == null) {
-            robotTelemetry = telemetry;
         }
     }
 }

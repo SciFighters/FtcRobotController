@@ -245,5 +245,7 @@ public class AprilTagDetector {
 
         public PortalConfiguration() {
         }
+
+        public final static PortalConfiguration DEFAULT = new PortalConfiguration();
     }
 }

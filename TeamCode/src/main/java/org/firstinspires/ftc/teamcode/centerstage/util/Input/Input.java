@@ -121,9 +121,12 @@ public class Input {
     /**
      * Update the gamepad controls in a separate thread.
      */
-    public static void updateControls(OpMode opMode) {
+    public static void updateControls() {
 //        executor.execute(new UpdateControlsTask(opMode));
         for (Toggle t : existingTogglesInOpMode) {
+            t.update();
+        }
+        for (Toggle t : toggles.values()) {
             t.update();
         }
     }
@@ -302,7 +305,7 @@ public class Input {
         @Override
         public void run() {
             while (opMode.opModeIsActive() && !opMode.isStopRequested()) {
-                Input.updateControls(opMode);
+                Input.updateControls();
                 opMode.idle();
             }
             inputUpdaterThread.interrupt();

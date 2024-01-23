@@ -1,18 +1,19 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
-import android.util.Size;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
+import org.firstinspires.ftc.teamcode.centerstage.util.Util;
 import org.firstinspires.ftc.teamcode.power_play.util.Location;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -21,10 +22,10 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
     private DriveClass drive;
-    LinearOpMode opMode = null;
+    Robot robot = null;
     final double robotLength = 0.4404;
     final double tile = 0.6;
-    Location startLocation = new Location(0.9, robotLength / 2, 0); // PIXEL_STACK
+    Location startLocation = new Location(1, robotLength / 2, 180); // PIXEL_STACK
     AprilTagDetector aprilTagDetector;
     Alliance alliance;
     public DuckLine duckLine;
@@ -34,7 +35,9 @@ public class AutoFlow {
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
-    int propLocation; // 1 => left 2 => middle 3 => right
+    IntakeSystem intakeSystem;
+    Arm arm;
+    ElapsedTime timer;
 
     public enum StartPos {
         PIXEL_STACK(1), BACKSTAGE(-1);
@@ -62,16 +65,28 @@ public class AutoFlow {
         }
     }
 
-    public AutoFlow(LinearOpMode opMode, Alliance alliance, StartPos startPos, Auto auto) {
-        this.alliance = alliance;
-        this.opMode = opMode;
+    public enum PropPos {
+        A, // LEFT
+        B, // MID
+        C  // RIGHT
+    }
 
+    PropPos propPos = PropPos.A;
+
+    public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto) {
+        this.alliance = alliance;
+        this.robot = robot;
+        if (alliance == Alliance.RED) {
+            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2 * 6, 180);
+        } else if (alliance == Alliance.BLUE) {
+            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2, 180);
+        }
     }
 
     void initWebcam() {
-        int cameraMonitorViewID = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+        int cameraMonitorViewID = robot.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robot.hardwareMap.appContext.getPackageName());
 
-        WebcamName webcamName = opMode.hardwareMap.get(WebcamName.class, "cam");
+        WebcamName webcamName = robot.hardwareMap.get(WebcamName.class, "cam");
         OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
         this.duckLine = new DuckLine(this.alliance, telemetry);
@@ -94,31 +109,49 @@ public class AutoFlow {
 
 
     public void init() {
-        this.drive = new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT);
-
+        timer = new ElapsedTime();
+        this.drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT));
+        intakeSystem = robot.addComponent(IntakeSystem.class);
+        arm = robot.addComponent(Arm.class);
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
-        telemetry = new MultipleTelemetry(dashboardTelemetry, opMode.telemetry);
-
+        telemetry = new MultipleTelemetry(dashboardTelemetry, robot.telemetry);
+        intakeSystem.setStateIdle();
+        intakeSystem.spinMotor();
         initWebcam();
         /**
          * TODO: check where the team prop is positioned {@link propLocation}
          *
          */
-//        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), opMode.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
-        drive.init();
+//        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
     public void test() {
         //go straight to this location.
-        drive.goToLocation(new Location(0.9, tile * 2 + 0.4), 1, 0, 0.15, 0, true);
-        //turn to 180 degrees.
+        if (propPos == PropPos.C)
+            drive.goToLocation(new Location(1, tile * 2.4), 1, 180, 0.05, 0, false);
+        else if (propPos == PropPos.A) {
+            drive.goToLocation(new Location(0.9, tile * 1.5), 1, 180, 0.05, 0, false);
+            drive.turnTo(-90, 1);
+        }
+        intakeSystem.setStateSpit();
+        timer.reset();
+        while (timer.seconds() < 1) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.setStateIdle();
+        intakeSystem.spinMotor();
+        drive.goToLocation(new Location(1, tile * 2.4 + 0.3), 1, 180, 0.2, 0, true);
+        drive.turnTo(90, 1);
         //place the purple pixel on prop location.
         //turn to the bridge and go to the board.
         //open arm and locate the yellow pixel on the board.
-        drive.goToLocation(new Location(0.9 - tile * 2, tile * 2 + 0.4), 1, -90, 0.15, 0, true);
-        drive.goToLocation(new Location(0.9 - tile * 4 - tile * 2, tile * 2), 1, -90, 0.05, 0);
-        opMode.sleep(300);
+        drive.goToLocation(new Location(1 - tile * 2.5, tile * 2.4 + 0.3), 1, 90, 0.15, 0, true);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+        arm.goToPos(Arm.Position.Three);
+        drive.goToLocation(new Location(1 - tile * 4 + 0.1, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
+        arm.setClawPosition(false);
+        robot.sleep(300);
 //        cameraPipeline.lockOnTag(CameraPipeline.AprilTags.BlueCenter, 0.3, drive);
     }
 

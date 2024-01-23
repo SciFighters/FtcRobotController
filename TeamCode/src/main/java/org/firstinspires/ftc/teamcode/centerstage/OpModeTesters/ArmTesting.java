@@ -7,33 +7,38 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 @TeleOp(group = "TESTER")
-public class ArmTesting extends LinearOpMode {
+public class ArmTesting extends Robot {
     Arm arm;
     FtcDashboard dashboard;
+    MultipleTelemetry multipleTelemetry;
+    Telemetry dashboardTelemetry;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void initRobot() {
         dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-        MultipleTelemetry multipleTelemetry;
+        dashboardTelemetry = dashboard.getTelemetry();
         multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
-        arm = new Arm(this, telemetry);
-        Thread armThread = new Thread(arm);
-        waitForStart();
-        armThread.start();
-        while (opModeIsActive() && !isStopRequested()) {
-            double power = -gamepad2.left_stick_y;
-            arm.setMotorsPower(power);
-            multipleTelemetry.addData("LIFT", arm.isOverCurrentLimit());
-            multipleTelemetry.addData("LIFT Current", arm.getCurrent());
-            multipleTelemetry.addData("Lift pos", arm.getPos());
-            multipleTelemetry.addData("Power", power);
-            multipleTelemetry.update();
-        }
+        addComponent(Arm.class);
+    }
 
-        armThread.interrupt();
+    @Override
+    public void updateLoop() {
+        double power = -gamepad2.left_stick_y;
+        arm.setMotorsPower(power);
+        multipleTelemetry.addData("LIFT", arm.isOverCurrentLimit());
+        multipleTelemetry.addData("LIFT Current", arm.getCurrent());
+        multipleTelemetry.addData("Lift pos", arm.getPos());
+        multipleTelemetry.addData("Power", power);
+        multipleTelemetry.update();
+    }
+
+
+    @Override
+    public void startRobot() {
+
     }
 }

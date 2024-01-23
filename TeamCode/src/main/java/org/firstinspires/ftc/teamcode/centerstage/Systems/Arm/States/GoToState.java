@@ -13,7 +13,7 @@ public class GoToState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
         this.arm = owner;
-        this.arm.setManualMode(false, 0.5);
+        this.arm.setManualMode(false, 0.6);
     }
 
     /**
