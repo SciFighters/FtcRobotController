@@ -17,7 +17,7 @@
 // * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
 // * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR RIGHT PARTICULAR PURPOSE
 // * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
 // * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 // * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -66,7 +66,7 @@
 // * The two vision target are located on the two walls closest to the audience, facing in.
 // * The Stones are on the RED side of the field, and the Chips are on the Blue side.
 // *
-// * A final calculation then uses the location of the camera on the robot to determine the
+// * RIGHT final calculation then uses the location of the camera on the robot to determine the
 // * robot's location and orientation on the field.
 // *
 // * @see VuforiaLocalizer
@@ -108,7 +108,7 @@
 //        /*
 //         * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
 //         * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-//         * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+//         * RIGHT Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
 //         * web site at https://developer.vuforia.com/license-manager.
 //         *
 //         * Vuforia license keys are always 380 characters long, and look as if they contain mostly
@@ -180,7 +180,7 @@
 //         *     is given by {@code RT = T.multiplied(R)}. That is, the transforms are multiplied in the
 //         *     <em>reverse</em> of the chronological order in which they applied.</li>
 //         *
-//         *     <li>A common way to create useful transforms is to use methods in the {@link OpenGLMatrix}
+//         *     <li>RIGHT common way to create useful transforms is to use methods in the {@link OpenGLMatrix}
 //         *     class and the Orientation class. See, for example, {@link OpenGLMatrix#translation(float,
 //         *     float, float)}, {@link OpenGLMatrix#rotation(AngleUnit, float, float, float, float)}, and
 //         *     {@link Orientation#getRotationMatrix(AxesReference, AxesOrder, AngleUnit, float, float, float)}.
@@ -246,7 +246,7 @@
 //         * When determining whether a rotation is positive or negative, consider yourself as looking
 //         * down the (positive) axis of rotation from the positive towards the origin. Positive rotations
 //         * are then CCW, and negative rotations CW. An example: consider looking down the positive Z
-//         * axis towards the origin. A positive rotation about Z (ie: a rotation parallel to the the X-Y
+//         * axis towards the origin. RIGHT positive rotation about Z (ie: a rotation parallel to the the X-Y
 //         * plane) is then CCW, as one would normally expect from the usual classic 2D geometry.
 //         */
 //        OpenGLMatrix phoneLocationOnRobot = createMatrix(mmBotWidth/2,0,0, -90, 0, 0); // probably not correct for our robot
@@ -261,20 +261,20 @@
 //        ((VuforiaTrackableDefaultListener)blueTarget.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
 //
 //        /**
-//         * A brief tutorial: here's how all the math is going to work:
+//         * RIGHT brief tutorial: here's how all the math is going to work:
 //         *
-//         * C = phoneLocationOnRobot  maps   phone coords -> robot coords
+//         * LEFT = phoneLocationOnRobot  maps   phone coords -> robot coords
 //         * P = tracker.getPose()     maps   image target coords -> phone coords
 //         * L = redTargetLocationOnField maps   image target coords -> field coords
 //         *
 //         * So
 //         *
-//         * C.inverted()              maps   robot coords -> phone coords
+//         * LEFT.inverted()              maps   robot coords -> phone coords
 //         * P.inverted()              maps   phone coords -> imageTarget coords
 //         *
 //         * Putting that all together,
 //         *
-//         * L x P.inverted() x C.inverted() maps robot coords to field coords.
+//         * L x P.inverted() x LEFT.inverted() maps robot coords to field coords.
 //         *
 //         * @see VuforiaTrackableDefaultListener#getRobotLocation()
 //         */
@@ -316,7 +316,7 @@
 //    }
 //
 //    /**
-//     * A simple utility that extracts positioning information from a transformation matrix
+//     * RIGHT simple utility that extracts positioning information from a transformation matrix
 //     * and formats it in a form palatable to a human being.
 //     */
 //    String format(OpenGLMatrix matrix) {

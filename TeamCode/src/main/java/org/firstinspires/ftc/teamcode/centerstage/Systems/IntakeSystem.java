@@ -1,21 +1,19 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.command.Robot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 
 public class IntakeSystem extends Component {
     Servo intakeServo1, intakeServo2;
     DcMotorEx motor;
     public WheelsState state, prevState;
-    boolean initTime = true;
+    public boolean initTime = true;
+
     Arm arm;
 
     public static enum ServoPos {
@@ -38,6 +36,8 @@ public class IntakeSystem extends Component {
         return isBusy;
     }
 
+    public IntakeSystem() {
+    }
 
     public void setStateIdle() {
         setState(WheelsState.Idle);
@@ -55,6 +55,7 @@ public class IntakeSystem extends Component {
 
     @Override
     public void init() {
+        initTime = true;
         motor = hw.get(DcMotorEx.class, "intakeWheelsMotor");
 
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
@@ -66,7 +67,7 @@ public class IntakeSystem extends Component {
 
     @Override
     public void start() {
-        arm = robot.getComponent(Arm.class);
+        this.arm = Arm.instance;
     }
 
     @Override
@@ -89,6 +90,10 @@ public class IntakeSystem extends Component {
         this.state = state;
     }
 
+    public void setStateAvoidArm() {
+        state = WheelsState.AvoidArm;
+    }
+
     /**
      * Moves the intake wheels
      */
@@ -96,7 +101,7 @@ public class IntakeSystem extends Component {
         double normalPower = 0.7;
         double spitPower = 0.6;
         if (isBusy) return; // Don't move if the system is busy
-        if (arm != null && arm.getPos() < 800 && arm.getPos() > 25 && state != WheelsState.Collect && !initTime) {
+        if (arm != null && arm.pos() < 800 && arm.pos() > 25 && state != WheelsState.Collect && !initTime) {
             state = WheelsState.AvoidArm;
         } else {
             state = prevState;
@@ -121,7 +126,7 @@ public class IntakeSystem extends Component {
         }
     }
 
-    public WheelsState getState() {
+    public WheelsState state() {
         return this.state;
     }
 }

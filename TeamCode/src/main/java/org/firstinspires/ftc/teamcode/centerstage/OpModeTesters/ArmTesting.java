@@ -2,15 +2,15 @@ package org.firstinspires.ftc.teamcode.centerstage.OpModeTesters;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 @TeleOp(group = "TESTER")
+@Disabled
 public class ArmTesting extends Robot {
     Arm arm;
     FtcDashboard dashboard;
@@ -31,7 +31,7 @@ public class ArmTesting extends Robot {
         arm.setMotorsPower(power);
         multipleTelemetry.addData("LIFT", arm.isOverCurrentLimit());
         multipleTelemetry.addData("LIFT Current", arm.getCurrent());
-        multipleTelemetry.addData("Lift pos", arm.getPos());
+        multipleTelemetry.addData("Lift pos", arm.pos());
         multipleTelemetry.addData("Power", power);
         multipleTelemetry.update();
     }

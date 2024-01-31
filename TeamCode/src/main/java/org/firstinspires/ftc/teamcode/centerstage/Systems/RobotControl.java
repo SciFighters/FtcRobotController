@@ -1,38 +1,29 @@
-package org.firstinspires.ftc.teamcode.centerstage;
-
-import android.util.Size;
+package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.DroneLauncher;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
-import org.firstinspires.ftc.teamcode.centerstage.util.Input.UpdateAutomatically;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Config
-@TeleOp(group = "CENTERSTAGE")
-@Disabled
-public class GLaDOS extends Robot {
+@ThreadedComponent
+public class RobotControl extends Component {
+    Gamepad gamepad1, gamepad2;
     // Robot components
     DriveClass drive;
     Arm arm;
     IntakeSystem intakeSystem;
-    AprilTagDetector aprilTagDetector;
+//    AprilTagDetector aprilTagDetector;
 
     // Telemetry and dashboard
     FtcDashboard dashboard;
@@ -56,23 +47,24 @@ public class GLaDOS extends Robot {
     AutoFlow.Alliance alliance = AutoFlow.Alliance.BLUE;
 
     @Override
-    public void initRobot() {
-        // Initialize robot components
+    public void init() {
+        gamepad1 = robot.gamepad1;
+        gamepad2 = robot.gamepad2;
+// Initialize robot components
         initSystems();
         rumbleEffect = new Gamepad.RumbleEffect.Builder().addStep(1.0, 1.0, 300).build();
     }
 
     @Override
-    public void startRobot() {
-        telemetry.addData("START IN PROGRESS", "");
-        telemetry.update();
+    public void start() {
         // Initialize input and start subsystems
-        Input.init(this, gamepad1, gamepad2);
+        Input.init(robot, robot.gamepad1, robot.gamepad2);
         targetHeading = drive.getHeading();
         drive.resetOrientation(allianceDefaultHeading);
         intakeSystem.start();
         arm.start();
     }
+
 
     public void setAlliance(AutoFlow.Alliance alliance) {
         this.alliance = alliance;
@@ -84,7 +76,7 @@ public class GLaDOS extends Robot {
     }
 
     @Override
-    public void updateLoop() {
+    public void loop() {
         // Handle force quit command
         handleForceQuit();
         robotOrientedToggle.update(gamepad1.ps);
@@ -147,26 +139,32 @@ public class GLaDOS extends Robot {
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
-        // Reset turning count if toggle is released
-//        if (turningToggle.isReleased()) {
-//            turningCount = 8;
-//        }
-//
-//        // Decrease turning count if toggle is not pressed
-//        if (!turningToggle.isPressed()) {
-//            turningCount--;
-//        }
+//         Reset turning count if toggle is released
+        if (turningToggle.isReleased()) {
+            turningCount = 8;
+        }
+
+        // Decrease turning count if toggle is not pressed
+        if (!turningToggle.isPressed()) {
+            turningCount--;
+        }
 
 //         Set target heading if turning count is zero
-//        if (turningCount == 0) {
-//            targetHeading = drive.getHeading();
-//        }
+        if (turningCount == 0) {
+            targetHeading = drive.getHeading();
+        }
         // Apply rotation fix if turning count is less than zero
         if (gamepad1.a && !gamepad1.share) {
             double delta = drive.getDeltaHeading(alliance == AutoFlow.Alliance.BLUE ? 180 : -180);
+            targetHeading = alliance == AutoFlow.Alliance.BLUE ? 180 : -180;
+            double gain = 0.02;
+            turn = delta * gain;
+        } else if (!turningToggle.isPressed() && turningCount < 0 && !gamepad1.a) {
+            double delta = drive.getDeltaHeading(targetHeading);
             double gain = 0.02;
             turn = delta * gain;
         }
+
         if (gamepad1.touchpad_finger_1) {
             if (gamepad1.b) setAlliance(AutoFlow.Alliance.RED);
             else if (gamepad1.a) setAlliance(AutoFlow.Alliance.BLUE);
@@ -189,29 +187,23 @@ public class GLaDOS extends Robot {
         telemetry.addData("Y POWER", y);
     }
 
-    // Method to zero on target based on AprilTag detection
-    private void zeroOnTarget() {
-        AprilTagDetection tag = aprilTagDetector.getSpecificTag(2);
-        drive.turn(-tag.ftcPose.yaw, 0.11);
-    }
-
     // Method to initialize robot subsystems
     private void initSystems() {
         telemetry.addData(">", "Init in progress...");
         // Initialize telemetry
         telemetryInit();
-        addComponent(Arm.class, new Arm());
-        arm = getComponent(Arm.class);
+        robot.addComponent(Arm.class, new Arm());
+        arm = robot.getComponent(Arm.class);
         // Add robot components
-        addComponent(IntakeSystem.class, new IntakeSystem());
-        intakeSystem = getComponent(IntakeSystem.class);
-        drive = addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
+        robot.addComponent(IntakeSystem.class, new IntakeSystem());
+        intakeSystem = robot.getComponent(IntakeSystem.class);
+        drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
 
         // Set intake system state and start motors
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
-        addComponent(DroneLauncher.class, new DroneLauncher());
-        droneLauncher = getComponent(DroneLauncher.class);
+        robot.addComponent(DroneLauncher.class, new DroneLauncher());
+        droneLauncher = robot.getComponent(DroneLauncher.class);
         // Initialize AprilTag detector
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), hardwareMap, multipleTelemetry,
 //                AprilTagDetector.PortalConfiguration.DEFAULT);
@@ -229,7 +221,7 @@ public class GLaDOS extends Robot {
     // Method to handle force quit command
     private void handleForceQuit() {
         if (gamepad1.y && gamepad1.start && gamepad1.options) {
-            requestOpModeStop();
+            robot.requestOpModeStop();
         }
     }
 
@@ -253,7 +245,7 @@ public class GLaDOS extends Robot {
         multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower());
         multipleTelemetry.addData("Arm target pos", arm.targetPos());
         multipleTelemetry.addData("Field oriented", fieldOriented);
-        multipleTelemetry.addData("Arm controlled power", pow(-gamepad2.left_stick_y) * armBoost);
+        multipleTelemetry.addData("Arm controlled power", pow(-robot.gamepad2.left_stick_y) * armBoost);
         multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
         multipleTelemetry.addData("Alliance", alliance.toString());
         multipleTelemetry.update();

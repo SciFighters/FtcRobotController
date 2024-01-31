@@ -17,7 +17,7 @@
  * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
  * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR RIGHT PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -133,7 +133,7 @@ public class Cobalt_Autonomous extends LinearOpMode {
         robot.drive(2.5 * tile, 0, 1, heading, false);
 
 
-//        if (abc == ABC.A) {
+//        if (abc == ABC.RIGHT) {
 //            robot.diagonal(tile * 2.5, tile / 3 * left, 0.8, heading);
 //            robot.drive(5 * tile, 3 * tile * left - 0.2, 0.8, heading);
 //            robot.goTo(-2 * tile, 3 * tile, 0.8, heading);
@@ -149,14 +149,14 @@ public class Cobalt_Autonomous extends LinearOpMode {
 //
 //        }
 //
-//        if (abc == ABC.B) {
+//        if (abc == ABC.MID) {
 ////            robot.driveForward(tile * 4, 1, heading);
 ////            robot.strafe(tile, 1);
 //            robot.goTo(-1*tile, 4 * tile, 0.8, heading);
 //
 //        }
 //
-//        if (abc == ABC.C) {
+//        if (abc == ABC.LEFT) {
 //            robot.goTo(-2* tile, 5 * tile, 0.8, heading);
 ////            robot.driveForward(tile * 5, 1, heading);
 //        }

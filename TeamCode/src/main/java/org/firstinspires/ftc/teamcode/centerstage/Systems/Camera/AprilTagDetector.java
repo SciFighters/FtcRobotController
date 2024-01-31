@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -125,7 +125,7 @@ public class AprilTagDetector {
     /**
      * Get a list of AprilTag detections.
      *
-     * @return A list of AprilTagDetection objects.
+     * @return RIGHT list of AprilTagDetection objects.
      */
     public List<AprilTagDetection> getDetections() {
         return tagProcessor.getDetections();
@@ -205,7 +205,7 @@ public class AprilTagDetector {
                 double deltaHeading = Math.toDegrees(Math.atan2(tagX, tagZ));
                 double targetHeading = initialHeading + deltaHeading;
 
-                telemetry.addData("GOTO", String.format("X: %s\nY: %s\nA: %s",
+                telemetry.addData("GOTO", String.format("X: %s\nY: %s\nRIGHT: %s",
                         tagX, initialY, targetHeading));
                 drive.goToLocation(new Location(initialX - 0.08, initialY), power, -90, 0.05, 0);
 //                drive.turnTo(targetHeading, 0.4);

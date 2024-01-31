@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -13,8 +12,7 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
-import org.firstinspires.ftc.teamcode.centerstage.util.Util;
-import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -34,7 +32,7 @@ public class AutoFlow {
     int beaconPos = 0;
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
-    Telemetry dashboardTelemetry;
+    public static Telemetry dashboardTelemetry;
     IntakeSystem intakeSystem;
     Arm arm;
     ElapsedTime timer;
@@ -66,21 +64,24 @@ public class AutoFlow {
     }
 
     public enum PropPos {
-        A, // LEFT
-        B, // MID
-        C  // RIGHT
+        RIGHT, // RIGHT
+        MID, // MID
+        LEFT  // LEFT
+        , NONE
     }
 
-    PropPos propPos = PropPos.A;
+    public static PropPos propPos = PropPos.NONE;
+    public Auto auto;
 
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto) {
         this.alliance = alliance;
         this.robot = robot;
         if (alliance == Alliance.RED) {
-            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2 * 6, 180);
+            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2 * 6, 0);
         } else if (alliance == Alliance.BLUE) {
             startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2, 180);
         }
+        this.auto = auto;
     }
 
     void initWebcam() {
@@ -105,6 +106,8 @@ public class AutoFlow {
                 telemetry.addData("camera initialization failed", errorCode);
             }
         });
+        robot.sleep(5000);
+        webcam.closeCameraDevice();
     }
 
 
@@ -119,20 +122,20 @@ public class AutoFlow {
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
         initWebcam();
-        /**
-         * TODO: check where the team prop is positioned {@link propLocation}
-         *
-         */
+        dashboardTelemetry.update();
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
-    public void test() {
+    public void pixelStackSideBlue() {
         //go straight to this location.
-        if (propPos == PropPos.C)
-            drive.goToLocation(new Location(1, tile * 2.4), 1, 180, 0.05, 0, false);
-        else if (propPos == PropPos.A) {
-            drive.goToLocation(new Location(0.9, tile * 1.5), 1, 180, 0.05, 0, false);
+        if (propPos == PropPos.MID)
+            drive.goToLocation(new Location(startLocation.x, tile * 2.4), 1, 180, 0.05, 0, false);
+        else if (propPos == PropPos.LEFT) {
+            drive.goToLocation(new Location(startLocation.x, tile * 1.5), 1, 180, 0.05, 0, false);
             drive.turnTo(-90, 1);
+        } else if (propPos == PropPos.RIGHT) {
+            drive.goToLocation(new Location(startLocation.x, tile * 2), 1, 180, 0.05, 0, false);
+            drive.turnTo(135, 1);
         }
         intakeSystem.setStateSpit();
         timer.reset();
@@ -141,22 +144,90 @@ public class AutoFlow {
         }
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
-        drive.goToLocation(new Location(1, tile * 2.4 + 0.3), 1, 180, 0.2, 0, true);
+        drive.goToLocation(new Location(startLocation.x, tile * 2.4 + 0.1), 1, 180, 0.2, 0, true);
         drive.turnTo(90, 1);
-        //place the purple pixel on prop location.
-        //turn to the bridge and go to the board.
-        //open arm and locate the yellow pixel on the board.
-        drive.goToLocation(new Location(1 - tile * 2.5, tile * 2.4 + 0.3), 1, 90, 0.15, 0, true);
+        drive.goToLocation(new Location(startLocation.x - tile * 2.5, tile * 2.4 + 0.1), 1, 90, 0.15, 0, true);
         intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
         arm.goToPos(Arm.Position.Three);
-        drive.goToLocation(new Location(1 - tile * 4 + 0.1, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
+        drive.goToLocation(new Location(startLocation.x - tile * 4 + 0.1, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
         arm.setClawPosition(false);
         robot.sleep(300);
-//        cameraPipeline.lockOnTag(CameraPipeline.AprilTags.BlueCenter, 0.3, drive);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid); // reset arm
+        arm.goToPos(200);
+        robot.sleep(1000);
+        arm.goToPos(0);
+        robot.sleep(3000);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
     }
 
-    public void teaching() {
-
+    public void pixelStackSideRed() {
+        //go straight to this location.
+        if (propPos == PropPos.MID || propPos == PropPos.NONE)
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2), 1, 0, 0.05, 0, false);
+        else if (propPos == PropPos.LEFT) {
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile), 1, 0, 0.05, 0, false);
+            drive.turnTo(-90, 1);
+        } else if (propPos == PropPos.RIGHT) {
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 1.5), 1, 0, 0.05, 0, false);
+            drive.turnTo(135, 1);
+        }
+        intakeSystem.setStateSpit();
+        timer.reset();
+        while (timer.seconds() < 1) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.setStateIdle();
+        intakeSystem.spinMotor();
+        drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2 - 0.3), 1, 90, 0.2, 0, true);
+        drive.turnTo(90, 1);
+        drive.goToLocation(new Location(startLocation.x - tile * 2.5, startLocation.y - tile * 2 - 0.3), 1, 90, 0.15, 0, true);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+        arm.goToPos(Arm.Position.Three);
+        drive.goToLocation(new Location(startLocation.x - tile * 4 + 0.1, startLocation.y - tile * 1.5), 1, 90, 0.05, 0, false);
+        arm.setClawPosition(false);
+        robot.sleep(300);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid); // reset arm
+        arm.goToPos(200);
+        robot.sleep(1000);
+        arm.goToPos(0);
+        robot.sleep(3000);
+        intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
     }
 
+    public void backdropSide() {
+        if (propPos == PropPos.MID)
+            drive.goToLocation(new Location(startLocation.x, tile * 2.4), 1, 180, 0.05, 0, false);
+        else if (propPos == PropPos.LEFT) {
+            drive.goToLocation(new Location(startLocation.x, tile * 1.5), 1, 180, 0.05, 0, false);
+            drive.turnTo(-90, 1);
+        } else if (propPos == PropPos.RIGHT) {
+            drive.goToLocation(new Location(startLocation.x, tile * 2), 1, 180, 0.05, 0, false);
+            drive.turnTo(135, 1);
+        }
+        intakeSystem.setStateSpit();
+        timer.reset();
+        while (timer.seconds() < 1) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.setStateIdle();
+        intakeSystem.spinMotor();
+        drive.turnTo(90, 1);
+        if (auto != Auto.PARK) {
+            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+            arm.goToPos(Arm.Position.Three);
+            robot.sleep(300);
+            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.4, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
+            arm.setClawPosition(false);
+            robot.sleep(300);
+            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+            arm.goToPos(100);
+            robot.sleep(1000);
+            arm.goToPos(0);
+            robot.sleep(3000);
+            intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
+        } else {
+            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.5, startLocation.y), 1, 90, 0.05, 0, false);
+        }
+        drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.5, startLocation.y), 1, 90, 0.05, 0, false);
+    }
 }

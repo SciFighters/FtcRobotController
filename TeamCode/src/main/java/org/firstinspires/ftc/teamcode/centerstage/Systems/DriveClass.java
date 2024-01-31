@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -18,8 +19,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
-import org.firstinspires.ftc.teamcode.power_play.util.Location;
+import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.RodLine;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvWebcam;
@@ -69,6 +71,7 @@ public class DriveClass extends Component {
 
     private double forwardTicksPerMeter;
     private double strafeTicksPerMeter;
+    private DistanceSensor leftDistanceSensor, rightDistanceSensor;
 
     // DriveMode - (direction & origin of IMU_Integrator)
     public enum DriveMode {
@@ -163,6 +166,8 @@ public class DriveClass extends Component {
         fr = hw.get(DcMotorEx.class, "fr");
         bl = hw.get(DcMotorEx.class, "bl");
         br = hw.get(DcMotorEx.class, "br");
+        rightDistanceSensor = hw.get(DistanceSensor.class, "rearRightDistanceSensor");
+        leftDistanceSensor = hw.get(DistanceSensor.class, "rearLeftDistanceSensor");
         //endregion get from hw
 
         //region setDirection
@@ -244,6 +249,10 @@ public class DriveClass extends Component {
 
         RobotLog.d("IMU status: %s", imu.getSystemStatus().toShortString());
         RobotLog.d("IMU calibration status: %s", imu.getCalibrationStatus().toString());
+    }
+
+    public double getDistanceSensorDistance() {
+        return rightDistanceSensor.getDistance(DistanceUnit.CM);
     }
 
     public double getImuDistance(Position target) {

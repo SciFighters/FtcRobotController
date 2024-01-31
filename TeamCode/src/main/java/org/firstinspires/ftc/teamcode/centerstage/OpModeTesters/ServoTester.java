@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.centerstage.OpModeTesters;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 
 @TeleOp
+@Disabled
 public class ServoTester extends LinearOpMode {
     Servo servo1, servo2;
     double min = 0.325, max;

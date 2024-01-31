@@ -49,8 +49,8 @@ public class JaccouseTest extends LinearOpMode {
     private double targetHeading = 0;
 
     // HandRail variables
-    private Toggle collector = new Toggle(); //  Collection toggle (A button)
-    boolean release; // releasing object (B button)
+    private Toggle collector = new Toggle(); //  Collection toggle (RIGHT button)
+    boolean release; // releasing object (MID button)
     private Toggle homing = new Toggle();
     private Toggle spincarousel = new Toggle();
     private Toggle homingHand = new Toggle();
@@ -141,7 +141,7 @@ public class JaccouseTest extends LinearOpMode {
             X.update(gamepad2.x);
             testGotoA.update(gamepad1.dpad_up);
             testGotoB.update(gamepad1.dpad_down);
-            collector.update(gamepad2.dpad_down); // update toggle (A button)
+            collector.update(gamepad2.dpad_down); // update toggle (RIGHT button)
             release = gamepad2.dpad_up;
             a.update(gamepad1.a);
             b.update(gamepad1.b);

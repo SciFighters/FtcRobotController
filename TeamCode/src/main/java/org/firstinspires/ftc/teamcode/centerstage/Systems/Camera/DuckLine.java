@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -28,6 +26,7 @@ public class DuckLine extends OpenCvPipeline {
     AutoFlow.Alliance alliance;
     Telemetry telemetry;
     volatile private Point targetPos = null;
+    volatile public double propPos;
     //Rect(x, y, width, height)             x, y - position. width, height - dimensions.
     volatile private Rect targetRect = null;
     Scalar min_red = new Scalar(0, 100, 100);
@@ -57,11 +56,11 @@ public class DuckLine extends OpenCvPipeline {
 
 //	public ABC getDuck(int screenWidth) {
 //		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen
-//			return ABC.A;
+//			return ABC.RIGHT;
 //		} else if (targetPos.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
-//			return ABC.B;
+//			return ABC.MID;
 //		} else if (targetPos.x <= screenWidth) { // Detects on the whole screen
-//			return ABC.C;
+//			return ABC.LEFT;
 //		} else {
 //			return null;
 //		}
@@ -114,8 +113,7 @@ public class DuckLine extends OpenCvPipeline {
         Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
 
 
-        Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ?
-                min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
+        Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ? min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
 
         Core.inRange(hsv, min_, max_, mask);   // Mask all orange
 //        Scalar min_yellow = new Scalar(8, 130, 160);
@@ -172,6 +170,16 @@ public class DuckLine extends OpenCvPipeline {
 
             // Draw x-coordinate next to the rectangle
             String xCoordinateText = "X: " + centerX;
+            propPos = centerX;
+            if (MathUtil.approximately(propPos, 292, 10)) {
+                AutoFlow.propPos = AutoFlow.PropPos.MID;
+            } else if (propPos <= 100) {
+                AutoFlow.propPos = AutoFlow.PropPos.LEFT;
+            } else if (MathUtil.approximately(propPos, 500, 30))
+                AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
+            AutoFlow.dashboardTelemetry.addData("PROP POS", AutoFlow.propPos);
+            AutoFlow.dashboardTelemetry.addData("PROP X POS", propPos);
+            AutoFlow.dashboardTelemetry.update();
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed
             Imgproc.putText(smallFrame, xCoordinateText, textPoint, Imgproc.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 100, 100), 1);
         } else {

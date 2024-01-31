@@ -41,4 +41,16 @@ public class MathUtil {
     public static boolean approximately(double value, double targetValue, double approximation) {
         return value > (targetValue - approximation) && value < (targetValue + approximation);
     }
+
+    public static double map(double x, double minX, double maxX, double minY, double maxY) {
+        if (maxX == minX) {
+            throw new ArithmeticException("Cannot divide by 0");
+        }
+        // Scale the value to a 0-1 range based on its position in the original range
+        double normalizedValue = (x - minX) / (maxX - minX);
+
+        // Map the normalized value to the new range
+        return normalizedValue * (maxY - minY) + minY;
+    }
+
 }

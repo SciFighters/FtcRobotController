@@ -44,8 +44,8 @@ public class Jaccouse extends LinearOpMode {
     private double targetHeading = 0;
 
     // HandRail variables
-    private Toggle collector = new Toggle(); //  Collection toggle (A button)
-    //	boolean release; // releasing object (B button)
+    private Toggle collector = new Toggle(); //  Collection toggle (RIGHT button)
+    //	boolean release; // releasing object (MID button)
     private Toggle release = new Toggle();
     private Toggle homing = new Toggle();
     private Toggle spincarousel = new Toggle();
@@ -163,11 +163,11 @@ public class Jaccouse extends LinearOpMode {
 
 
             A.update(gamepad2.a);
-//			B.update(gamepad2.b);
+//			MID.update(gamepad2.b);
             C.update(gamepad2.y);
             X.update(gamepad2.x);
 
-            collector.update(gamepad2.dpad_down); // update toggle (A button)
+            collector.update(gamepad2.dpad_down); // update toggle (RIGHT button)
 //			release = gamepad2.dpad_up;
             release.update(gamepad2.dpad_up);
 
@@ -211,7 +211,7 @@ public class Jaccouse extends LinearOpMode {
             if (A.isClicked()) {
                 handRail.gotoLevel(DuckLine.SH_Levels.Collect);
             }
-//			else if (B.isClicked()) {
+//			else if (MID.isClicked()) {
 //				handRail.gotoLevel(DuckLine.SH_Levels.Middle);
 //			}
             else if (C.isClicked()) {

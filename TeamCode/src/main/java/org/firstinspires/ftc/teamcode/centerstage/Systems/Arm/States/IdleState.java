@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 public class IdleState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
-        owner.setTargetPositions(owner.getPos());
+        owner.setTargetPositions(owner.pos());
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems.Arm;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -9,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.*;
@@ -18,15 +16,14 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 /**
  * The Arm class controls the movement of an arm using two DC motors.
  */
 @ThreadedComponent
 public class Arm extends Component {
-    private static Arm instance;
     private final double deadZone = 0.05;
-    private double manualPower = 0;
     private int targetPos;
     private ElapsedTime timer;
     private final double graceTimeLimit = 0.25;
@@ -34,10 +31,11 @@ public class Arm extends Component {
     public DcMotorEx lift1, lift2;
     public TouchSensor limitSensor1;
     // Constants for proportional control in GoToState
-    private static final double PROPORTIONAL_GAIN = 0.01; // Adjust this gain based on your requirements
     private Servo frontServo, backServo;
     public StateMachine<Arm> stateMachine;
     private DistanceSensor distanceSensor;
+    private IntakeSystem intakeSystem;
+    public static Arm instance;
 
     public Arm() {
 
@@ -55,9 +53,6 @@ public class Arm extends Component {
         }
     }
 
-    public static Arm getInstance() {
-        return instance;
-    }
 
     /**
      * Initializes the Arm object.
@@ -80,7 +75,6 @@ public class Arm extends Component {
         setClawPosition(true);
         stateMachine.changeState(idleState);
         instance = this;
-
     }
 
     private void initStateMachine() {
@@ -90,6 +84,11 @@ public class Arm extends Component {
         idleState = new IdleState();
         manualState = new ManualState();
         stateMachine = new StateMachine<>(this);
+    }
+
+    @Override
+    public void start() {
+        intakeSystem = robot.getComponent(IntakeSystem.class);
     }
 
     private void initMotors() {
@@ -119,8 +118,7 @@ public class Arm extends Component {
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (!limitSensor1.isPressed()) {
-            robot.getComponent(IntakeSystem.class).setServoPos(IntakeSystem.ServoPos.Mid);
-            while (!limitSensor1.isPressed() && (robot.opModeInInit() && !robot.isStopRequested())) {
+            while (!limitSensor1.isPressed() && (robot.opModeInInit() && !robot.isStopRequested()) && timer.seconds() < 1) {
                 lift1.setPower(-0.2);
                 lift2.setPower(-0.2);
                 telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
@@ -144,6 +142,9 @@ public class Arm extends Component {
     @Override
     public void loop() {
         handleStates();
+//        if (pos() < 800 && pos() > 60 && intakeSystem.state() != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
+//            intakeSystem.setStateAvoidArm();
+//        }
     }
 
     /**
@@ -156,7 +157,7 @@ public class Arm extends Component {
     }
 
     /**
-     * Moves the arm to the specified position using proportional control.
+     * Moves the arm to the specified position using fixed control.
      *
      * @param pos The target position for the arm.
      */
@@ -179,7 +180,7 @@ public class Arm extends Component {
      *
      * @return The current position in encoder counts.
      */
-    public int getPos() {
+    public int pos() {
         return lift1.getCurrentPosition();
     }
 
@@ -188,7 +189,7 @@ public class Arm extends Component {
      *
      * @return The target position in encoder counts.
      */
-    public int getTargetPos() {
+    public int targetPos() {
         return this.targetPos;
     }
 
@@ -248,27 +249,15 @@ public class Arm extends Component {
         if (outOfDeadZone(power)) {
             stateMachine.changeState(manualState);
             setMotorsPower(power);
-            manualPower = power;
         } else {
-            manualPower = 0;
-            if (stateMachine.getCurrentState() != gotoState && stateMachine.getCurrentState() != holdState) {
-                setTargetPositions(getPos());
+            if (stateMachine.getCurrentState() != gotoState && stateMachine.getCurrentState() != holdState && (stateMachine.getCurrentState() != manualState && Math.abs(power) > 0.05)) {
+                setTargetPositions(pos());
                 stateMachine.changeState(holdState);
             }
         }
     }
 
-    /**
-     * Gets the current manual power setting.
-     *
-     * @return The current manual power setting.
-     */
-    public double getManualPower() {
-        return manualPower;
-    }
-
-
-    public double getDistanceSensorDistance() {
+    public double distanceSensorDistance() {
         return distanceSensor.getDistance(DistanceUnit.CM);
     }
 
@@ -278,10 +267,21 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        if ((power <= 0) && (limitSensor1.isPressed())) {
+        final int higherLimit = 40, lowerLimit = 5;
+        if (Math.abs(power) < 0.05) {
+            power = 0;
+        } else if ((power <= 0) && (limitSensor1.isPressed())) {
             return;
-        } else if (power > 0 && getDistanceSensorDistance() < 10 && getPos() > 1000) {
+        } else if (power > 0 && distanceSensorDistance() < 3 && pos() > 1000) {
             return;
+        } else if (pos() < 800 && outOfDeadZone(power)) {
+//            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+        } else if (distanceSensorDistance() < higherLimit && pos() > 1000 && power > 0) {
+            power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
+        } else if (pos() < 1000 && pos() > 60 && intakeSystem.state != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
+            intakeSystem.state = IntakeSystem.WheelsState.AvoidArm;
+            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+            intakeSystem.spinMotor();
         }
         lift1.setPower(power);
         lift2.setPower(power);
@@ -332,7 +332,7 @@ public class Arm extends Component {
         setClawPosition(open ? 1 : 0);
     }
 
-    public double getClawPosition() {
+    public double clawPosition() {
         return backServo.getPosition();
     }
 
@@ -341,9 +341,9 @@ public class Arm extends Component {
     }
 
     public void goHome() {
-        robot.getComponent(IntakeSystem.class).setStateCollect();
+//        intakeSystem.setStateCollect();
         goToPos(0);
-        robot.getComponent(IntakeSystem.class).setStateIdle();
+//        intakeSystem.setStateIdle();
         setClawPosition(true);
     }
 }

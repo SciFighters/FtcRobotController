@@ -17,7 +17,7 @@
  * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
  * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR RIGHT PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -83,7 +83,7 @@ import java.util.Locale;
  * </li>
  *
  * <p>To calibrate the IMU, run this sample opmode with a gamepad attached to the driver station.
- * Once the IMU has reached sufficient calibration as reported on telemetry, press the 'A'
+ * Once the IMU has reached sufficient calibration as reported on telemetry, press the 'RIGHT'
  * button on the gamepad to write the calibration to a file. That file can then be indicated
  * later when running an opmode which uses the IMU.</p>
  *
@@ -125,7 +125,7 @@ public class IMU_Calibration extends LinearOpMode
         telemetry.log().add("sample opmode.");
         telemetry.log().add("");
         telemetry.log().add("When sufficient calibration has been reached,");
-        telemetry.log().add("press the 'A' button to write the current");
+        telemetry.log().add("press the 'RIGHT' button to write the current");
         telemetry.log().add("calibration data to a file.");
         telemetry.log().add("");
 

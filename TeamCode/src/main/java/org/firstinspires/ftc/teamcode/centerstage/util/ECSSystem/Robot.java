@@ -3,28 +3,27 @@ package org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.*;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The base class for robot implementations in the ECSSystem.
- * Provides a framework for managing robot components as separate threads.
+ * The abstract base class for creating robot programs.
+ * Extend this class to create a custom robot program.
  *
- * @see Component
+ * @see LinearOpMode
  */
 public abstract class Robot extends LinearOpMode {
-
     private final Map<Component, Thread> components = new HashMap<>();
     protected Telemetry robotTelemetry = telemetry;
 
     /**
-     * The main run loop for the robot. Initializes, starts, and updates the robot components.
+     * Runs the main loop of the robot program.
+     * Override this method to define the robot's behavior.
      *
-     * @throws InterruptedException if the run loop is interrupted
+     * @throws InterruptedException If the program is interrupted
      */
     @Override
     public final void runOpMode() throws InterruptedException {
@@ -33,51 +32,56 @@ public abstract class Robot extends LinearOpMode {
         waitForStart();
         startRobot();
         startComponentThreads();
+
         while (opModeIsActive() && !isStopRequested()) {
             updateLoop();
-            for (Component c : components.keySet()) {
-                if (components.get(c) == null) {
-                    c.loop();
-                }
-            }
+            components.forEach((c, t) -> {
+                if (t == null && c.enabled) c.loop();
+            });
         }
+
         stopComponentThreads();
     }
 
     /**
-     * Placeholder for user-defined robot initialization logic.
+     * Initializes the robot. Override this method to perform any necessary
+     * initialization steps for the robot.
      */
     public abstract void initRobot();
 
     /**
-     * Placeholder for user-defined robot start logic.
+     * Starts the robot. Override this method to define actions that should
+     * be taken when the robot starts running.
      */
     public abstract void startRobot();
 
     /**
-     * Placeholder for the user-defined update loop.
+     * The main update loop of the robot. Override this method to define the
+     * behavior that should be executed repeatedly during the program.
      */
-    public abstract void updateLoop();
+    public void updateLoop() {
+        requestOpModeStop();
+    }
 
     /**
-     * Placeholder for user-defined robot stop logic.
+     * Stops the robot. Override this method to define actions that should be
+     * taken when the robot is stopped.
      */
     public void stopRobot() {
     }
 
     /**
-     * Adds a component to the robot and creates a corresponding thread for it.
+     * Adds a component to the robot.
      *
-     * @param <T>               the type of the component
-     * @param componentClass    the class of the component
-     * @param componentInstance an instance of the component
-     * @return the added component or null if an error occurs
-     * @see Component
+     * @param <T>               The type of the component
+     * @param componentClass    The class of the component
+     * @param componentInstance The instance of the component to add
+     * @return The added component or null if an error occurred
      */
     public <T extends Component> T addComponent(Class<T> componentClass, T componentInstance) {
         try {
             initializeComponent(componentInstance);
-            return componentInstance;
+            return getComponent(componentClass);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -85,12 +89,11 @@ public abstract class Robot extends LinearOpMode {
     }
 
     /**
-     * Adds a component to the robot using reflection to create an instance of the component class.
+     * Adds a component to the robot.
      *
-     * @param <T>            the type of the component
-     * @param componentClass the class of the component
-     * @return the added component or null if an error occurs
-     * @see #addComponent(Class, Component)
+     * @param <T>            The type of the component
+     * @param componentClass The class of the component
+     * @return The added component or null if an error occurred
      */
     public <T extends Component> T addComponent(Class<T> componentClass) {
         T componentInstance = createComponentInstance(componentClass);
@@ -98,11 +101,11 @@ public abstract class Robot extends LinearOpMode {
     }
 
     /**
-     * Retrieves a component of the specified class from the robot's components map.
+     * Gets a component of the specified type.
      *
-     * @param <T>            the type of the component
-     * @param componentClass the class of the component
-     * @return the component of the specified class or null if not found
+     * @param <T>            The type of the component
+     * @param componentClass The class of the component
+     * @return The component of the specified type or null if not found
      */
     public <T extends Component> T getComponent(Class<T> componentClass) {
         for (Component component : components.keySet()) {
@@ -114,32 +117,26 @@ public abstract class Robot extends LinearOpMode {
     }
 
     private void startComponentThreads() {
-        for (Thread thread : components.values()) {
-            if (thread != null)
-                thread.start();
-        }
+        components.values().forEach(t -> {
+            if (t != null) t.start();
+        });
     }
 
     private void stopComponentThreads() {
-        for (Thread thread : components.values()) {
-            if (thread != null)
-                thread.interrupt();
-        }
+        components.values().forEach(t -> {
+            if (t != null) t.interrupt();
+        });
     }
 
     private void initializeComponent(Component component) {
         component.attach(this, robotTelemetry);
-        component.init();
         Thread thread = createComponentThread(component);
         components.put(component, thread);
+        component.init();
     }
 
-
     private Thread createComponentThread(Component component) {
-        if (component.getClass().isAnnotationPresent(ThreadedComponent.class)) {
-            return new Thread(component);
-        }
-        return null;
+        return component.getClass().isAnnotationPresent(ThreadedComponent.class) ? new Thread(component) : null;
     }
 
     private <T extends Component> T createComponentInstance(Class<T> componentClass) {
@@ -150,8 +147,12 @@ public abstract class Robot extends LinearOpMode {
         }
     }
 
+    /**
+     * Finds and sets the robot telemetry field using reflection.
+     * This method is called during initialization to set the telemetry object.
+     */
     void getTelemetry() {
-        for (Field f : this.getClass().getDeclaredFields()) {
+        for (Field f : getClass().getDeclaredFields()) {
             try {
                 f.setAccessible(true);
                 if (f.isAnnotationPresent(RobotTelemetry.class) && f.get(this) instanceof Telemetry) {

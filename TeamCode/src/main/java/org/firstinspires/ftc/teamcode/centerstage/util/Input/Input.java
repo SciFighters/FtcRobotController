@@ -126,9 +126,6 @@ public class Input {
         for (Toggle t : existingTogglesInOpMode) {
             t.update();
         }
-        for (Toggle t : toggles.values()) {
-            t.update();
-        }
     }
 
     private static class UpdateControlsTask implements Runnable {
@@ -145,13 +142,16 @@ public class Input {
                     t.update();
                 }
             }
+//            for (Toggle t : toggles.values()) {
+//                t.update();
+//            }
         }
     }
 
     /**
      * Get the list of Toggle instances.
      *
-     * @return A map of KeyCode to Toggle instances.
+     * @return RIGHT map of KeyCode to Toggle instances.
      */
     public static Map<KeyCode, Toggle> getToggles() {
         return toggles;

@@ -25,7 +25,7 @@ public class Util {
                 throw new TimeoutException("Timeout waiting for condition");
             }
 
-            // A small delay to avoid busy-waiting and give the CPU a chance to perform other tasks
+            // RIGHT small delay to avoid busy-waiting and give the CPU a chance to perform other tasks
             Thread.sleep(10);
         }
 

@@ -23,10 +23,10 @@ public class motor_test extends LinearOpMode {
         waitForStart();
         if(gamepad1.dpad_down) {
             collector.setPower(1);
-            telemetry.addData("pressing","A");
+            telemetry.addData("pressing","RIGHT");
         } else {
             collector.setPower(0);
-            telemetry.addData("not pressing","A");
+            telemetry.addData("not pressing","RIGHT");
         }
         telemetry.update();
     }
