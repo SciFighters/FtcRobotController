@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
+import android.util.Size;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -13,6 +15,8 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -29,13 +33,23 @@ public class AutoFlow {
     public DuckLine duckLine;
     final int screenWidth = 640;
     final int screenHeight = 360;
-    int beaconPos = 0;
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
     public static Telemetry dashboardTelemetry;
     IntakeSystem intakeSystem;
     Arm arm;
     ElapsedTime timer;
+    OpenCvWebcam webcam;
+    DriveClass.GotoSettings normalDriveSettings = new DriveClass.GotoSettings.Builder()
+            .setPower(1)
+            .setTolerance(0.05)
+            .setSlowdownMode(false)
+            .setTimeout(0).build(),
+            lowToleranceSettings = new DriveClass.GotoSettings.Builder()
+                    .setPower(1)
+                    .setTolerance(0.16)
+                    .setSlowdownMode(true)
+                    .setTimeout(0).build();
 
     public enum StartPos {
         PIXEL_STACK(1), BACKSTAGE(-1);
@@ -88,16 +102,14 @@ public class AutoFlow {
         int cameraMonitorViewID = robot.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robot.hardwareMap.appContext.getPackageName());
 
         WebcamName webcamName = robot.hardwareMap.get(WebcamName.class, "cam");
-        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
         this.duckLine = new DuckLine(this.alliance, telemetry);
         webcam.setPipeline(this.duckLine);
 
-        // Remove the camera monitor view ID from here
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                // Use a different camera monitor view ID here or don't use it if you don't need it
                 webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
             }
 
@@ -106,16 +118,18 @@ public class AutoFlow {
                 telemetry.addData("camera initialization failed", errorCode);
             }
         });
-        robot.sleep(5000);
-        webcam.closeCameraDevice();
     }
 
+    void startAprilTagDetection() {
+        aprilTagDetector = new AprilTagDetector("cam", new Size(screenWidth, screenHeight), robot.hardwareMap, robot.telemetry, AprilTagDetector.PortalConfiguration.DEFAULT);
+    }
 
     public void init() {
         timer = new ElapsedTime();
-        this.drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT));
-        intakeSystem = robot.addComponent(IntakeSystem.class);
         arm = robot.addComponent(Arm.class);
+        this.drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT));
+        robot.addComponent(IntakeSystem.class);
+        intakeSystem = robot.getComponent(IntakeSystem.class);
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
         telemetry = new MultipleTelemetry(dashboardTelemetry, robot.telemetry);
@@ -127,16 +141,19 @@ public class AutoFlow {
     }
 
     public void pixelStackSideBlue() {
-        //go straight to this location.
-        if (propPos == PropPos.MID)
-            drive.goToLocation(new Location(startLocation.x, tile * 2.4), 1, 180, 0.05, 0, false);
+        intakeSystem.start();
+        arm.start();
+        drive.goToLocation(new Location(startLocation.x, startLocation.y + tile * 2.5, 180), lowToleranceSettings);
+        if (propPos == PropPos.MID || propPos == PropPos.NONE)
+            drive.goToLocation(new Location(startLocation.x, tile * 2.4, 180), normalDriveSettings);
         else if (propPos == PropPos.LEFT) {
-            drive.goToLocation(new Location(startLocation.x, tile * 1.5), 1, 180, 0.05, 0, false);
+            drive.goToLocation(new Location(startLocation.x, tile * 1.5, 180), normalDriveSettings);
             drive.turnTo(-90, 1);
         } else if (propPos == PropPos.RIGHT) {
-            drive.goToLocation(new Location(startLocation.x, tile * 2), 1, 180, 0.05, 0, false);
+            drive.goToLocation(new Location(startLocation.x, tile * 2, 180), normalDriveSettings);
             drive.turnTo(135, 1);
         }
+        webcam.closeCameraDevice();
         intakeSystem.setStateSpit();
         timer.reset();
         while (timer.seconds() < 1) {
@@ -144,20 +161,14 @@ public class AutoFlow {
         }
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
-        drive.goToLocation(new Location(startLocation.x, tile * 2.4 + 0.1), 1, 180, 0.2, 0, true);
+        startAprilTagDetection();
+        drive.goToLocation(new Location(startLocation.x, tile * 2.4 + 0.1, 180), lowToleranceSettings);
         drive.turnTo(90, 1);
-        drive.goToLocation(new Location(startLocation.x - tile * 2.5, tile * 2.4 + 0.1), 1, 90, 0.15, 0, true);
+        drive.goToLocation(new Location(startLocation.x - tile * 2.5, tile * 2.4 + 0.1, 90), lowToleranceSettings);
         intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
         arm.goToPos(Arm.Position.Three);
         drive.goToLocation(new Location(startLocation.x - tile * 4 + 0.1, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
-        arm.setClawPosition(false);
-        robot.sleep(300);
-        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid); // reset arm
-        arm.goToPos(200);
-        robot.sleep(1000);
-        arm.goToPos(0);
-        robot.sleep(3000);
-        intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
+        arm.dropAndReturn();
     }
 
     public void pixelStackSideRed() {
@@ -166,11 +177,12 @@ public class AutoFlow {
             drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2), 1, 0, 0.05, 0, false);
         else if (propPos == PropPos.LEFT) {
             drive.goToLocation(new Location(startLocation.x, startLocation.y - tile), 1, 0, 0.05, 0, false);
-            drive.turnTo(-90, 1);
+            drive.turnTo(90, 1);
         } else if (propPos == PropPos.RIGHT) {
             drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 1.5), 1, 0, 0.05, 0, false);
-            drive.turnTo(135, 1);
+            drive.turnTo(-45, 1);
         }
+        webcam.closeCameraDevice();
         intakeSystem.setStateSpit();
         timer.reset();
         while (timer.seconds() < 1) {
@@ -178,24 +190,19 @@ public class AutoFlow {
         }
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
+        startAprilTagDetection();
         drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2 - 0.3), 1, 90, 0.2, 0, true);
         drive.turnTo(90, 1);
         drive.goToLocation(new Location(startLocation.x - tile * 2.5, startLocation.y - tile * 2 - 0.3), 1, 90, 0.15, 0, true);
         intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
         arm.goToPos(Arm.Position.Three);
-        drive.goToLocation(new Location(startLocation.x - tile * 4 + 0.1, startLocation.y - tile * 1.5), 1, 90, 0.05, 0, false);
-        arm.setClawPosition(false);
-        robot.sleep(300);
-        intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid); // reset arm
-        arm.goToPos(200);
-        robot.sleep(1000);
-        arm.goToPos(0);
-        robot.sleep(3000);
-        intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
+        drive.goToLocation(new Location(startLocation.x - tile * 4 - 0.07, startLocation.y - tile * 1.5), 1, 90, 0.05, 0, false);
+        arm.dropAndReturn();
+        drive.goToLocation(new Location(startLocation.x - tile * 4 - 0.07, startLocation.y), 1, 90, 0.05, 0, false);
     }
 
-    public void backdropSide() {
-        if (propPos == PropPos.MID)
+    public void backdropSideBlue() {
+        if (propPos == PropPos.MID || propPos == PropPos.NONE)
             drive.goToLocation(new Location(startLocation.x, tile * 2.4), 1, 180, 0.05, 0, false);
         else if (propPos == PropPos.LEFT) {
             drive.goToLocation(new Location(startLocation.x, tile * 1.5), 1, 180, 0.05, 0, false);
@@ -204,6 +211,7 @@ public class AutoFlow {
             drive.goToLocation(new Location(startLocation.x, tile * 2), 1, 180, 0.05, 0, false);
             drive.turnTo(135, 1);
         }
+        webcam.closeCameraDevice();
         intakeSystem.setStateSpit();
         timer.reset();
         while (timer.seconds() < 1) {
@@ -211,23 +219,86 @@ public class AutoFlow {
         }
         intakeSystem.setStateIdle();
         intakeSystem.spinMotor();
+        startAprilTagDetection();
+        drive.turnTo(90, 1);
+        if (auto != Auto.PARK) {
+            arm.goToPos(Arm.Position.Three);
+            robot.sleep(300);
+            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.4, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
+            arm.dropAndReturn();
+        }
+        drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.4, startLocation.y), 1, 90, 0.05, 0, false);
+    }
+
+    public void backdropSideRed() {
+        if (propPos == PropPos.MID || propPos == PropPos.NONE)
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2), 1, 0, 0.05, 0, false);
+        else if (propPos == PropPos.LEFT) {
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile), 1, 0, 0.05, 0, false);
+            drive.turnTo(90, 1);
+        } else if (propPos == PropPos.RIGHT) {
+            drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 1.5), 1, 0, 0.05, 0, false);
+            drive.turnTo(-45, 1);
+        }
+        webcam.closeCameraDevice();
+        intakeSystem.setStateSpit();
+        timer.reset();
+        while (timer.seconds() < 1) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.setStateIdle();
+        intakeSystem.spinMotor();
+        startAprilTagDetection();
+        drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2.5), 1, 0.05, 0, true);
         drive.turnTo(90, 1);
         if (auto != Auto.PARK) {
             intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
             arm.goToPos(Arm.Position.Three);
             robot.sleep(300);
-            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.4, tile * 2 - 0.3), 1, 90, 0.05, 0, false);
-            arm.setClawPosition(false);
-            robot.sleep(300);
-            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
-            arm.goToPos(100);
+            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.05, startLocation.y - tile * 1), 1, 90, 0.05, 0, false);
+            lockOnTagByProp(propPos);
+            arm.dropAndReturn();
             robot.sleep(1000);
-            arm.goToPos(0);
-            robot.sleep(3000);
-            intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
-        } else {
-            drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.5, startLocation.y), 1, 90, 0.05, 0, false);
         }
-        drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.5, startLocation.y), 1, 90, 0.05, 0, false);
+        drive.goToLocation(new Location(startLocation.x - tile * 2 + 0.3, startLocation.y), 1, 90, 0.15, 0, true);
+        drive.goToLocation(new Location(startLocation.x - tile * 2.3, startLocation.y), 1, 90, 0.05, 0, true);
+    }
+
+    public void lockOnTag(int tagID) {
+        AprilTagDetection tag = aprilTagDetector.getSpecificTag(tagID);
+        if (tag == null) return;
+        while (tag != null && Math.abs(tag.rawPose.x) > 0.05) {
+            double strafe = 0;
+            strafe = MathUtil.map(1, 0, Math.abs(tag.rawPose.x), 0, 1) * 2;
+            if (tag.rawPose.x > 0) {
+                strafe *= -1;
+            }
+            drive.setPower(0, 0, strafe);
+            tag = aprilTagDetector.getSpecificTag(tagID);
+            drive.turnTo(90, MathUtil.map(1, drive.getHeading(), 90, 0, 1));
+        }
+        drive.setPower(0, 0, 0);
+    }
+
+    public void lockOnTagByProp(PropPos pos) {
+        lockOnTag(getTagIDAccordingToTeamPropLocation(pos, alliance));
+    }
+
+    public int getTagIDAccordingToTeamPropLocation(PropPos pos, Alliance alliance) {
+        int id;
+        switch (pos) {
+            case LEFT:
+                id = 1;
+            case MID:
+                id = 2;
+            case RIGHT:
+                id = 3;
+            default:
+                id = 2;
+        }
+        if (alliance == Alliance.RED) {
+            id += 3;
+        }
+        return id;
     }
 }

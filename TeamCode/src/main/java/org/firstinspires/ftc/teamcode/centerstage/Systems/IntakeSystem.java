@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedCompone
 public class IntakeSystem extends Component {
     Servo intakeServo1, intakeServo2;
     DcMotorEx motor;
-    public WheelsState state, prevState;
+    public WheelsState state = WheelsState.Idle, prevState = WheelsState.Idle;
     public boolean initTime = true;
 
     Arm arm;
@@ -26,7 +26,10 @@ public class IntakeSystem extends Component {
     }
 
     public enum WheelsState {
-        Collect, Spit, Idle, AvoidArm
+        Collect,
+        Spit,
+        Idle,
+        AvoidArm
     }
 
     private boolean isBusy;
@@ -41,7 +44,6 @@ public class IntakeSystem extends Component {
 
     public void setStateIdle() {
         setState(WheelsState.Idle);
-
     }
 
     public void setStateSpit() {
@@ -85,7 +87,7 @@ public class IntakeSystem extends Component {
     }
 
     void setState(WheelsState state) {
-        if (state == WheelsState.AvoidArm) return;
+//        if (state == WheelsState.AvoidArm) return;
         prevState = state;
         this.state = state;
     }
@@ -101,30 +103,30 @@ public class IntakeSystem extends Component {
         double normalPower = 0.7;
         double spitPower = 0.6;
         if (isBusy) return; // Don't move if the system is busy
-        if (arm != null && arm.pos() < 800 && arm.pos() > 25 && state != WheelsState.Collect && !initTime) {
-            state = WheelsState.AvoidArm;
-        } else {
-            state = prevState;
-            if (state == WheelsState.Spit) {
-                setServoPos(ServoPos.Close);
-                motor.setDirection(DcMotorSimple.Direction.FORWARD);
-                motor.setPower(spitPower);
-            } else if (state == WheelsState.Idle) {
-                setServoPos(ServoPos.Close);
-                motor.setPower(0);
-                return;
-            } else if (state == WheelsState.Collect) {
-                setServoPos(ServoPos.Open);
-                motor.setDirection(DcMotorSimple.Direction.REVERSE);
-                motor.setPower(normalPower);
-            }
-        }
-        if (state == WheelsState.AvoidArm && !initTime) {
-            setServoPos(ServoPos.Mid);
+//        if (arm != null && arm.pos() < 800 && arm.pos() > 50 && state != WheelsState.Collect && !initTime) {
+//            state = WheelsState.AvoidArm;
+//        } else {
+//        state = prevState;
+        if (state == WheelsState.Spit) {
+            setServoPos(ServoPos.Close);
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
+            motor.setPower(spitPower);
+        } else if (state == WheelsState.Idle) {
+            setServoPos(ServoPos.Close);
+            motor.setPower(0);
+            return;
+        } else if (state == WheelsState.Collect) {
+            setServoPos(ServoPos.Open);
+            motor.setDirection(DcMotorSimple.Direction.REVERSE);
             motor.setPower(normalPower);
         }
     }
+//        if (state == WheelsState.AvoidArm && !initTime) {
+//            setServoPos(ServoPos.Mid);
+//            motor.setDirection(DcMotorSimple.Direction.FORWARD);
+//            motor.setPower(normalPower);
+//        }
+//    }
 
     public WheelsState state() {
         return this.state;

@@ -278,11 +278,15 @@ public class Arm extends Component {
 //            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
         } else if (distanceSensorDistance() < higherLimit && pos() > 1000 && power > 0) {
             power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
-        } else if (pos() < 1000 && pos() > 60 && intakeSystem.state != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
-            intakeSystem.state = IntakeSystem.WheelsState.AvoidArm;
-            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
-            intakeSystem.spinMotor();
-        }
+        } // else if (pos() < 1000 && pos() > 60 && intakeSystem.state != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
+//            intakeSystem.state = IntakeSystem.WheelsState.AvoidArm;
+//            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
+//            intakeSystem.spinMotor();
+//        }
+//        if (outOfDeadZone(power) && power > 0 && intakeSystem.state == IntakeSystem.WheelsState.Collect) {
+//            setClawPosition(true);
+//            intakeSystem.setStateIdle();
+//        }
         lift1.setPower(power);
         lift2.setPower(power);
     }
@@ -341,9 +345,13 @@ public class Arm extends Component {
     }
 
     public void goHome() {
-//        intakeSystem.setStateCollect();
-        goToPos(0);
-//        intakeSystem.setStateIdle();
         setClawPosition(true);
+        goToPos(0);
+    }
+
+    public void dropAndReturn() {
+        setClawPosition(true);
+        robot.sleep(300);
+        goToPos(0);
     }
 }

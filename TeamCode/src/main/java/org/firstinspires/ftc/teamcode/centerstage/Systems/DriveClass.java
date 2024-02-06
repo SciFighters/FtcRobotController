@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoPath;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
@@ -32,7 +33,6 @@ public class DriveClass extends Component {
     public static final int USE_ENCODERS = 1 << 0;
     public static final int USE_BRAKE = 1 << 1;
     public static final int USE_DASHBOARD_FIELD = 1 << 2;
-
     private boolean useEncoders;
     private boolean useBrake;
     private boolean useDashboardField;
@@ -44,7 +44,7 @@ public class DriveClass extends Component {
     volatile private DcMotorEx br = null;
 
     private BNO055IMU imu = null;
-    private BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    private final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
     private boolean fieldOriented = true;
     private double angleOffset = 0;
@@ -272,7 +272,7 @@ public class DriveClass extends Component {
 
     public void setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
         if (!fieldOriented) {
-            setPower(y, turn, x);  // No field oriented
+            setPower(y, turn, x);  // No field oriented  (=> Robot oriented)
         } else {
             double phiRad = (-getHeading() + angleOffset) / 180 * Math.PI;
             double forward = y * Math.cos(phiRad) - x * Math.sin(phiRad);
@@ -292,6 +292,10 @@ public class DriveClass extends Component {
     public void resetOrientation(double angle) {
         imu.initialize(parameters);
         angleOffset = angle;
+    }
+
+    public void resetHeading(double angle) {
+        resetOrientation(angle);
     }
 
     public double getHeading() {
@@ -457,6 +461,13 @@ public class DriveClass extends Component {
         return goTo(location.x, location.y, power, location.angle, tolerance, timeout, superSpeed);
     }
 
+    public double goToLocation(Location location, GotoSettings settings) {
+        return goTo(location.x, location.y, settings.power, location.angle, settings.tolerance, settings.timeout, settings.noSlowdown);
+    }
+
+    public double goToLocation(Location location, double targetHeading, GotoSettings settings) {
+        return goToLocation(new Location(location.x, location.y, targetHeading), settings);
+    }
 
     public final int MAX_IDLE_BREAK = 20;
 
@@ -570,16 +581,6 @@ public class DriveClass extends Component {
         }
         setPower(0, 0, 0);
         return remainDist;
-    }
-
-    private boolean inRange(double min, double max, double value) {
-        if (max < min) {
-            double tempMax = max;
-            max = min;
-            min = tempMax;
-        }
-        if (value > min && value < max) return true;
-        return false;
     }
 
 
@@ -743,5 +744,51 @@ public class DriveClass extends Component {
         }
         Log.d("Sci", String.format("zeroOnTarget =============================================================="));
         setPower(0, 0, 0);
+    }
+
+    public static class GotoSettings {
+        double power, tolerance, timeout;
+        boolean noSlowdown;
+
+        public GotoSettings(double power, double tolerance, double timeout, boolean noSlowdown) {
+            this.power = power;
+            this.tolerance = tolerance;
+            this.timeout = timeout;
+            this.noSlowdown = noSlowdown;
+        }
+
+        public static class Builder {
+            double power, tolerance, timeout;
+            boolean noSlowdown;
+
+            public Builder setPower(double power) {
+                this.power = power;
+                return this;
+            }
+
+            public Builder setTolerance(double tolerance) {
+                this.tolerance = tolerance;
+                return this;
+            }
+
+            public Builder setTimeout(double timeout) {
+                this.timeout = timeout;
+                return this;
+            }
+
+            public Builder setSlowdownMode(boolean active) {
+                this.noSlowdown = active;
+                return this;
+            }
+
+            public GotoSettings build() {
+                try {
+                    return new GotoSettings(power, tolerance, timeout, noSlowdown);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.util;
 
-import org.firstinspires.ftc.teamcode.power_play.util.DriveClass;
+
+import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 
 public class Location {
 
@@ -97,7 +98,7 @@ public class Location {
         return new Location(this.x + offset, this.y, this.angle);
     }
 
-    public Location stayOnX(org.firstinspires.ftc.teamcode.power_play.util.DriveClass drive) {
+    public Location stayOnX(DriveClass drive) {
         return new Location(drive.getPosX(), this.y);
     }
 

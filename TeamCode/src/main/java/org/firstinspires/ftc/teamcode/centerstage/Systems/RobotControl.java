@@ -73,6 +73,7 @@ public class RobotControl extends Component {
         } else {
             allianceDefaultHeading = -90;
         }
+        drive.resetHeading(allianceDefaultHeading);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class RobotControl extends Component {
         robotOrientedToggle.update(gamepad1.ps);
         // Check for reorientation command
         if (gamepad1.start && gamepad1.x) {
-            drive.resetOrientation(allianceDefaultHeading);
+            drive.resetHeading(allianceDefaultHeading);
             gamepad1.runRumbleEffect(rumbleEffect);
             targetHeading = drive.getHeading();
             return;
@@ -121,7 +122,7 @@ public class RobotControl extends Component {
         } else if (gamepad2.right_stick_button) {
             intakeSystem.setStateSpit();
         }
-        if (gamepad1.y) {
+        if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
             droneLauncher.launch();
         }
     }
@@ -168,7 +169,7 @@ public class RobotControl extends Component {
         if (gamepad1.touchpad_finger_1) {
             if (gamepad1.b) setAlliance(AutoFlow.Alliance.RED);
             else if (gamepad1.a) setAlliance(AutoFlow.Alliance.BLUE);
-            drive.resetOrientation(allianceDefaultHeading);
+            drive.resetHeading(allianceDefaultHeading);
         }
         if (robotOrientedToggle.isClicked()) {
             fieldOriented = !fieldOriented;
@@ -176,8 +177,8 @@ public class RobotControl extends Component {
         // Perform dpad-specific actions
         if (gamepad1.dpad_left) drive.setPowerOriented(0, -0.1, 0, fieldOriented);
         else if (gamepad1.dpad_right) drive.setPowerOriented(0, 0.1, 0, fieldOriented);
-        else if (gamepad1.dpad_up) drive.setPowerOriented(-0.1, 0, 0, fieldOriented);
-        else if (gamepad1.dpad_down) drive.setPowerOriented(0.1, 0, 0, fieldOriented);
+        else if (gamepad1.dpad_up) drive.setPowerOriented(0.1, 0, 0, fieldOriented);
+        else if (gamepad1.dpad_down) drive.setPowerOriented(-0.1, 0, 0, fieldOriented);
         else {
             drive.setPowerOriented(y, x, turn, fieldOriented);
             allowMovement = true;

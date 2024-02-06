@@ -8,9 +8,7 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 @Autonomous(group = "RED", name = "Red: Pixel Stack - Full")
-@Config
 public class RedPixelStackFull extends Robot {
-    public static DuckLine duckLine;
     AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.RED,
             AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL);
 

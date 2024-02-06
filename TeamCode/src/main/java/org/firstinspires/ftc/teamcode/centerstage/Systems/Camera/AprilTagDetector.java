@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -29,13 +31,11 @@ import java.util.List;
  * This class represents a camera pipeline for processing AprilTag detections with image stabilization.
  */
 public class AprilTagDetector {
-
     private final String cameraName;
     private final Size viewSize;
     private final Telemetry telemetry;
     private AprilTagProcessor tagProcessor;
     private VisionPortal visionPortal;
-    private Mat previousFrame;
 
     /**
      * Initializes the CameraPipeline with the specified parameters.
@@ -60,6 +60,7 @@ public class AprilTagDetector {
                 .setDrawTagID(configuration.DRAW_TAG_ID)
                 .setDrawTagOutline(configuration.DRAW_TAG_OUTLINE)
                 .setNumThreads(configuration.NUM_THREADS)
+                .setOutputUnits(DistanceUnit.CM, AngleUnit.DEGREES)
                 .build();
 
         visionPortal = new VisionPortal.Builder()
@@ -67,59 +68,6 @@ public class AprilTagDetector {
                 .setCamera(hardwareMap.get(WebcamName.class, cameraName))
                 .setCameraResolution(viewSize)
                 .build();
-    }
-
-    /**
-     * Apply a simple custom image stabilization algorithm to consecutive frames.
-     *
-     * @param currentFrame The current camera frame.
-     * @return The stabilized frame.
-     */
-    private Mat stabilizeFrame(Mat currentFrame) {
-        if (previousFrame == null) {
-            previousFrame = currentFrame.clone();
-            return currentFrame;
-        }
-
-        // Convert frames to grayscale for feature tracking
-        Mat grayPrevious = new Mat();
-        Mat grayCurrent = new Mat();
-        Imgproc.cvtColor(previousFrame, grayPrevious, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.cvtColor(currentFrame, grayCurrent, Imgproc.COLOR_RGBA2GRAY);
-
-        // Detect features (corners) in the previous frame
-        MatOfPoint prevFeatures = new MatOfPoint();
-        Imgproc.goodFeaturesToTrack(grayPrevious, prevFeatures, 500, 0.01, 10);
-
-        // Calculate optical flow using Lucas-Kanade method
-        MatOfPoint2f prevFeatures2f = new MatOfPoint2f(prevFeatures.toArray());
-        MatOfPoint2f nextFeatures = new MatOfPoint2f();
-        MatOfByte status = new MatOfByte();
-        MatOfFloat err = new MatOfFloat();
-        Video.calcOpticalFlowPyrLK(grayPrevious, grayCurrent, prevFeatures2f, nextFeatures, status, err);
-
-        // Calculate the transformation matrix
-        Mat transformMatrix = Imgproc.getPerspectiveTransform(prevFeatures2f, nextFeatures);
-
-        // Apply the transformation to the current frame
-        Mat stabilizedFrame = new Mat(currentFrame.size(), CvType.CV_32F);
-        Imgproc.warpPerspective(currentFrame, stabilizedFrame, transformMatrix, stabilizedFrame.size(), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, Scalar.all(0));
-
-        // Release resources
-        grayPrevious.release();
-        grayCurrent.release();
-        prevFeatures.release();
-        prevFeatures2f.release();
-        nextFeatures.release();
-        status.release();
-        err.release();
-        transformMatrix.release();
-
-        // Update the previous frame
-        previousFrame.release();
-        previousFrame = currentFrame.clone();
-
-        return stabilizedFrame;
     }
 
     /**
@@ -152,6 +100,7 @@ public class AprilTagDetector {
      * @return The AprilTagDetection object with the specified ID, or null if not found.
      */
     public AprilTagDetection getSpecificTag(int id) {
+        if (getDetections().size() == 0) return null;
         for (AprilTagDetection tag : getDetections()) {
             if (tag.id == id) {
                 return tag;
@@ -176,20 +125,6 @@ public class AprilTagDetector {
         double dy = corners[0].y - corners[2].y;
 
         return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    /**
-     * Process the camera frame, including image stabilization.
-     *
-     * @param frame The current camera frame.
-     */
-    public void processFrame(Mat frame) {
-        // Stabilize the frame
-        Mat stabilizedFrame = stabilizeFrame(frame);
-        // IDK what now
-
-        // Release the stabilized frame
-        stabilizedFrame.release();
     }
 
     public void lockOnTag(int tagID, double power, DriveClass drive) {
