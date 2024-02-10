@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.*;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -19,6 +19,12 @@ public abstract class Robot extends LinearOpMode {
     private final Map<Component, Thread> components = new HashMap<>();
     protected Telemetry robotTelemetry = telemetry;
 
+    public enum TYPE {
+        Auto, TeleOp
+    }
+
+    protected TYPE type;
+
     /**
      * Runs the main loop of the robot program.
      * Override this method to define the robot's behavior.
@@ -30,13 +36,16 @@ public abstract class Robot extends LinearOpMode {
         getTelemetry();
         initRobot();
         waitForStart();
+        startComponents();
         startRobot();
         startComponentThreads();
-
+        if (this.type == TYPE.Auto) {
+            requestOpModeStop();
+        }
         while (opModeIsActive() && !isStopRequested()) {
             updateLoop();
             components.forEach((c, t) -> {
-                if (t == null && c.enabled) c.loop();
+                if (t == null && c.enabled) c.update();
             });
         }
 
@@ -60,7 +69,7 @@ public abstract class Robot extends LinearOpMode {
      * behavior that should be executed repeatedly during the program.
      */
     public void updateLoop() {
-        requestOpModeStop();
+//        requestOpModeStop();
     }
 
     /**
@@ -116,6 +125,10 @@ public abstract class Robot extends LinearOpMode {
         return null;
     }
 
+    private void startComponents() {
+        components.keySet().forEach(Component::start);
+    }
+
     private void startComponentThreads() {
         components.values().forEach(t -> {
             if (t != null) t.start();
@@ -152,6 +165,11 @@ public abstract class Robot extends LinearOpMode {
      * This method is called during initialization to set the telemetry object.
      */
     void getTelemetry() {
+        if (this.getClass().isAnnotationPresent(Autonomous.class)) {
+            this.type = TYPE.Auto;
+        } else {
+            this.type = TYPE.TeleOp;
+        }
         for (Field f : getClass().getDeclaredFields()) {
             try {
                 f.setAccessible(true);

@@ -60,17 +60,17 @@
 // *
 // * When images are located, Vuforia is able to determine the position and orientation of the
 // * image relative to the camera.  This sample code then combines that information with a
-// * knowledge of where the target images are on the field, to determine the location of the camera.
+// * knowledge of where the target images are on the field, to determine the locationDelta of the camera.
 // *
 // * From the Audience perspective, the Red Alliance station is on the right and the
 // * Blue Alliance Station is on the left.
 //
 // * Eight perimeter targets are distributed evenly around the four perimeter walls
 // * Four Bridge targets are located on the bridge uprights.
-// * Refer to the Field Setup manual for more specific location details
+// * Refer to the Field Setup manual for more specific locationDelta details
 // *
-// * RIGHT final calculation then uses the location of the camera on the robot to determine the
-// * robot's location and orientation on the field.
+// * RIGHT final calculation then uses the locationDelta of the camera on the robot to determine the
+// * robot's locationDelta and orientation on the field.
 // *
 // * @see VuforiaLocalizer
 // * @see VuforiaTrackableDefaultListener

@@ -183,7 +183,7 @@ public class AutoFlow {
                 opMode.sleep((int) (2 * 1000));
                 lift.gotoLevel(Lift.LiftLevel.Floor, true, null, false); // TODO: check if the height right? (cone pile)
                 opMode.sleep((int) (2 * 1000));
-                drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone location (1.5, 1.5 ? )
+                drive.goToLocation(coneLocation, 1, 0.2, 0); // TODO: change cone locationDelta (1.5, 1.5 ? )
                 opMode.sleep((int) (2 * 1000));
                 lift.grabber(true); //(Changed to true) TODO: check validity of grabber ability
                 opMode.sleep((int) (2 * 1000));

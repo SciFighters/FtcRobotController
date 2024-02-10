@@ -50,7 +50,7 @@ public abstract class Component implements Runnable {
      * The main loop of the component.
      * Override this method to define the behavior that should be executed repeatedly.
      */
-    public void loop() {
+    public void update() {
         return;
     }
 
@@ -68,7 +68,7 @@ public abstract class Component implements Runnable {
      */
     public final void run() {
         while (robot.opModeIsActive() && !robot.isStopRequested()) {
-            loop();
+            update();
             robot.idle();
             robot.sleep(1);
         }

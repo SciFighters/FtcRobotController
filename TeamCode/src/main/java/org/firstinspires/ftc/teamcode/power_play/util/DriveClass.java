@@ -396,7 +396,7 @@ public class DriveClass {
     /**
      * Asynchronous gotoLocation that opens a new thread and runs it there
      *
-     * @param location      location on the field (X, Y, Angle...)
+     * @param location      locationDelta on the field (X, Y, Angle...)
      * @param power         Drive power on the wheels (How fast it moves)
      * @param targetHeading The target heading (Head angle) of the robot
      * @param tolerance     How much tolerance the movement the robot has to errors

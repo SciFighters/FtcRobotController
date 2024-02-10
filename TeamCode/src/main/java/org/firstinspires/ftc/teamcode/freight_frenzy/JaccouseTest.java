@@ -38,10 +38,10 @@ public class JaccouseTest extends LinearOpMode {
 //    Location yLocation = new Location(0, 1.8);
 //    Location xLocation = new Location(-0.6, 1.2);
     // Redo
-    Location aLocation = new Location(1.32, 0.27); // blue carousel location
-    Location bLocation = new Location(0.3, 0.6); // blue shipping hub location
-    Location yLocation = new Location(-1.32, 0.27); // red carousel location
-    Location xLocation = new Location(-0.3, 0.6); // red shipping hub location
+    Location aLocation = new Location(1.32, 0.27); // blue carousel locationDelta
+    Location bLocation = new Location(0.3, 0.6); // blue shipping hub locationDelta
+    Location yLocation = new Location(-1.32, 0.27); // red carousel locationDelta
+    Location xLocation = new Location(-0.3, 0.6); // red shipping hub locationDelta
 
 
     private com.qualcomm.robotcore.hardware.HardwareMap HardwareMap;

@@ -23,79 +23,39 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class AutoFlow {
-    private DriveClass drive;
-    Robot robot = null;
+    public static Telemetry dashboardTelemetry;
+    public static PropPos propPos = PropPos.NONE;
     final double robotLength = 0.4404;
     final double tile = 0.6;
+    final int screenWidth = 640;
+    final int screenHeight = 360;
+    public DuckLine duckLine;
+    public Auto auto;
+    Robot robot = null;
     Location startLocation = new Location(1, robotLength / 2, 180); // PIXEL_STACK
     AprilTagDetector aprilTagDetector;
     Alliance alliance;
-    public DuckLine duckLine;
-    final int screenWidth = 640;
-    final int screenHeight = 360;
     MultipleTelemetry telemetry;
     FtcDashboard dashboard;
-    public static Telemetry dashboardTelemetry;
     IntakeSystem intakeSystem;
     Arm arm;
     ElapsedTime timer;
     OpenCvWebcam webcam;
-    DriveClass.GotoSettings normalDriveSettings = new DriveClass.GotoSettings.Builder()
-            .setPower(1)
-            .setTolerance(0.05)
-            .setSlowdownMode(false)
-            .setTimeout(0).build(),
-            lowToleranceSettings = new DriveClass.GotoSettings.Builder()
-                    .setPower(1)
-                    .setTolerance(0.16)
-                    .setSlowdownMode(true)
-                    .setTimeout(0).build();
-
-    public enum StartPos {
-        PIXEL_STACK(1), BACKSTAGE(-1);
-
-        int mul;
-
-        StartPos(int mul) {
-            this.mul = mul;
-        }
-    }
-
-    public enum Alliance {
-        BLUE, RED
-    }
-
-    public enum Auto {
-        PARK(1, true), SHORT(2, true), LONG(3, true), FULL(4, true), CYCLING(5, true);
-
-        public int value;
-        public boolean _isParking;
-
-        Auto(int value, boolean isParking) {
-            this.value = value;
-            this._isParking = isParking;
-        }
-    }
-
-    public enum PropPos {
-        RIGHT, // RIGHT
-        MID, // MID
-        LEFT  // LEFT
-        , NONE
-    }
-
-    public static PropPos propPos = PropPos.NONE;
-    public Auto auto;
+    DriveClass.GotoSettings normalDriveSettings = new DriveClass.GotoSettings.Builder().setPower(1).setTolerance(0.05).setSlowdownMode(false).setTimeout(0).build();
+    DriveClass.GotoSettings lowToleranceSettings = new DriveClass.GotoSettings.Builder().setPower(1).setTolerance(0.16).setSlowdownMode(true).setTimeout(0).build();
+    AutoPath path;
+    private DriveClass drive;
 
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto) {
         this.alliance = alliance;
         this.robot = robot;
         if (alliance == Alliance.RED) {
-            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2 * 6, 0);
+            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, (robotLength / 2) + (tile * 2), 0);
         } else if (alliance == Alliance.BLUE) {
-            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, robotLength / 2, 180);
+            startLocation = new Location(startPos == StartPos.PIXEL_STACK ? 1 : -0.3, (-robotLength / 2) - (tile * 2), 180);
         }
         this.auto = auto;
+
     }
 
     void initWebcam() {
@@ -112,6 +72,7 @@ public class AutoFlow {
             public void onOpened() {
                 webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
             }
+
 
             @Override
             public void onError(int errorCode) {
@@ -133,10 +94,21 @@ public class AutoFlow {
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
         telemetry = new MultipleTelemetry(dashboardTelemetry, robot.telemetry);
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         initWebcam();
         dashboardTelemetry.update();
+
+        path = new AutoPath.Builder()
+                .addStep(
+                        new Location(0, tile * 2 + 0.3, startLocation.angle), lowToleranceSettings)
+                .addStep(new Location(0, 0, 90), normalDriveSettings)
+                .addStep(new Location(-tile * 3, 0, 90), lowToleranceSettings)
+                .addStep(new Location(0, -tile - 0.3, 90), normalDriveSettings)
+                .build(drive, startLocation);
+        if (alliance == Alliance.RED) {
+            path.flipY();
+        }
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
@@ -154,12 +126,12 @@ public class AutoFlow {
             drive.turnTo(135, 1);
         }
         webcam.closeCameraDevice();
-        intakeSystem.setStateSpit();
+        intakeSystem.spit();
         timer.reset();
         while (timer.seconds() < 1) {
             intakeSystem.spinMotor();
         }
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         startAprilTagDetection();
         drive.goToLocation(new Location(startLocation.x, tile * 2.4 + 0.1, 180), lowToleranceSettings);
@@ -172,7 +144,7 @@ public class AutoFlow {
     }
 
     public void pixelStackSideRed() {
-        //go straight to this location.
+        //go straight to this locationDelta.
         if (propPos == PropPos.MID || propPos == PropPos.NONE)
             drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2), 1, 0, 0.05, 0, false);
         else if (propPos == PropPos.LEFT) {
@@ -183,12 +155,12 @@ public class AutoFlow {
             drive.turnTo(-45, 1);
         }
         webcam.closeCameraDevice();
-        intakeSystem.setStateSpit();
+        intakeSystem.spit();
         timer.reset();
         while (timer.seconds() < 1) {
             intakeSystem.spinMotor();
         }
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         startAprilTagDetection();
         drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2 - 0.3), 1, 90, 0.2, 0, true);
@@ -212,12 +184,12 @@ public class AutoFlow {
             drive.turnTo(135, 1);
         }
         webcam.closeCameraDevice();
-        intakeSystem.setStateSpit();
+        intakeSystem.spit();
         timer.reset();
         while (timer.seconds() < 1) {
             intakeSystem.spinMotor();
         }
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         startAprilTagDetection();
         drive.turnTo(90, 1);
@@ -241,12 +213,12 @@ public class AutoFlow {
             drive.turnTo(-45, 1);
         }
         webcam.closeCameraDevice();
-        intakeSystem.setStateSpit();
+        intakeSystem.spit();
         timer.reset();
         while (timer.seconds() < 1) {
             intakeSystem.spinMotor();
         }
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         startAprilTagDetection();
         drive.goToLocation(new Location(startLocation.x, startLocation.y - tile * 2.5), 1, 0.05, 0, true);
@@ -300,5 +272,55 @@ public class AutoFlow {
             id += 3;
         }
         return id;
+    }
+
+    public void placePixelByProp(PropPos pos) {
+        Location mid = new Location(startLocation.x, startLocation.y + tile * 2, startLocation.angle), left = new Location(startLocation.x, startLocation.y + tile, startLocation.angle), right = new Location(startLocation.x, startLocation.y + tile * 1.5, startLocation.angle);
+        if (propPos == PropPos.MID || propPos == PropPos.NONE)
+            drive.goToLocation(mid, normalDriveSettings);
+        else if (propPos == PropPos.LEFT) {
+            drive.goToLocation(left, normalDriveSettings);
+            drive.turnTo(90, 1);
+        } else if (propPos == PropPos.RIGHT) {
+            drive.goToLocation(right, normalDriveSettings);
+            drive.turnTo(-45, 1);
+        }
+    }
+
+    public void test() {
+        path.run();
+    }
+
+    public enum StartPos {
+        PIXEL_STACK(1), BACKSTAGE(-1);
+
+        int mul;
+
+        StartPos(int mul) {
+            this.mul = mul;
+        }
+    }
+
+    public enum Alliance {
+        BLUE, RED
+    }
+
+    public enum Auto {
+        PARK(1, true), SHORT(2, true), LONG(3, true), FULL(4, true), CYCLING(5, true);
+
+        public int value;
+        public boolean _isParking;
+
+        Auto(int value, boolean isParking) {
+            this.value = value;
+            this._isParking = isParking;
+        }
+    }
+
+    public enum PropPos {
+        RIGHT, // RIGHT
+        MID, // MID
+        LEFT  // LEFT
+        , NONE
     }
 }

@@ -106,7 +106,7 @@ public class AutoFlow {
 		}
 
 		if (alliance == ALLIANCE.RED) {
-			//TODO: flip all location on x axis (<location>.flipX())
+			//TODO: flip all locationDelta on x axis (<locationDelta>.flipX())
 			opMode.telemetry.addLine("RED");
 
 			this.startLocation.flipX();
@@ -237,7 +237,7 @@ public class AutoFlow {
 
 			if (auto == Auto.FULL) {
 				drive.goToLocation(freightLocation_Pre1, 1, 0.2, 0);
-				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first location
+				drive.goToLocation(freightLocation_Pre2, 1, 0.2, 0); //first locationDelta
 				drive.goToLocation(freightLocation, 1, 0.05, 0);
 
 			} else {
@@ -252,8 +252,8 @@ public class AutoFlow {
 		} else {
 			// Barrier (freight)
 			if (startPos == StartPos.BARRIER && auto != Auto.CYCLING) {
-				drive.goToLocation(freightLocation_Pre3, 1, 0.15, 0); //first location
-				drive.goToLocation(freightLocation_Pre2, 1, 0.15, 0); //first location
+				drive.goToLocation(freightLocation_Pre3, 1, 0.15, 0); //first locationDelta
+				drive.goToLocation(freightLocation_Pre2, 1, 0.15, 0); //first locationDelta
 				drive.goToLocation(freightLocation, 1, 0.05, 0);
 				// TODO: Collect freight item, moreover, place it on the shipping hub
 			} else if (auto != Auto.CYCLING) {
@@ -274,7 +274,7 @@ public class AutoFlow {
 
 	private void parkStorage() {
 		RobotLog.d("going to storageLocation");
-		drive.goToLocation(storageLocation_Pre1, 1, 0.02, 0); //first location
+		drive.goToLocation(storageLocation_Pre1, 1, 0.02, 0); //first locationDelta
 		opMode.telemetry.addData("after", drive.getHeading());
 		drive.goToLocation(storageLocation, 1, 0.02, 0);
 		opMode.telemetry.addData("now", drive.getHeading());
@@ -285,7 +285,7 @@ public class AutoFlow {
 		opMode.telemetry.addLine("cycle");
 		opMode.telemetry.update();
 		handrail.gotoRail(100, 1);
-		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first location - pre-barrier
+		drive.goToLocation(pre_cycle, 1, 0.1, 0); // first locationDelta - pre-barrier
 		drive.turnTo(pre_cycle.angle, 0.5);
 		handrail.gotoLevel(DuckLine.SH_Levels.CollectAuto);
 		handrail.grabberGrab();

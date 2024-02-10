@@ -18,9 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoPath;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.power_play.util.RodLine;
@@ -28,70 +26,36 @@ import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 public class DriveClass extends Component {
-    final double tile = 0.6;
-    public boolean busy;
     public static final int USE_ENCODERS = 1 << 0;
     public static final int USE_BRAKE = 1 << 1;
     public static final int USE_DASHBOARD_FIELD = 1 << 2;
+    public final int MAX_IDLE_BREAK = 20;
+    final double tile = 0.6;
+    private final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    public boolean busy;
+    volatile public DcMotorEx fl = null;
+    DriveMode mode;
+    ElapsedTime timer = new ElapsedTime();
     private boolean useEncoders;
     private boolean useBrake;
     private boolean useDashboardField;
-
-
-    volatile public DcMotorEx fl = null;
     volatile private DcMotorEx fr = null;
     volatile private DcMotorEx bl = null;
     volatile private DcMotorEx br = null;
-
     private BNO055IMU imu = null;
-    private final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-
     private boolean fieldOriented = true;
     private double angleOffset = 0;
-
     private int fl_startPos = 0;
     private int fr_startPos = 0;
     private int bl_startPos = 0;
     private int br_startPos = 0;
-
     private RodLine rodPipline = new RodLine().useYellow();
     private RodLine towerPipline = new RodLine();
-
-    public enum ROBOT {
-        SCORPION,
-        COBALT,
-        JACCOUSE,
-        CONSTANTIN,
-        GLADOS;
-    }
-
     private ROBOT robotType;
-
     private Location startingPosition;
-
     private double forwardTicksPerMeter;
     private double strafeTicksPerMeter;
     private DistanceSensor leftDistanceSensor, rightDistanceSensor;
-
-    // DriveMode - (direction & origin of IMU_Integrator)
-    public enum DriveMode {
-        LEFT(1, new Point(0, 0), new Point(-1, -1)),
-        RIGHT(2, new Point(0, 0), new Point(1, 1));
-
-        //        public static double tile = 0.6;
-        public int index;
-        public Point origin, direciton;
-
-        DriveMode(int index, Point origin, Point direction) {
-            this.index = index;
-            this.origin = origin;
-            this.direciton = direction;
-        }
-    }
-
-    DriveMode mode;
-
-    ElapsedTime timer = new ElapsedTime();
 
     public DriveClass(ROBOT robotType, Location startingPosition, int flags, DriveMode mode) {
         this.robotType = robotType;
@@ -251,8 +215,12 @@ public class DriveClass extends Component {
         RobotLog.d("IMU calibration status: %s", imu.getCalibrationStatus().toString());
     }
 
-    public double getDistanceSensorDistance() {
+    public double getDistanceRightSensorDistance() {
         return rightDistanceSensor.getDistance(DistanceUnit.CM);
+    }
+
+    public double getDistanceLeftSensorDistance() {
+        return leftDistanceSensor.getDistance(DistanceUnit.CM);
     }
 
     public double getImuDistance(Position target) {
@@ -394,7 +362,6 @@ public class DriveClass extends Component {
         robot.telemetry.addData("RESET POSITION !!!!!!", 0);
     }
 
-
     public void turn(double deg, double power) {
         busy = true;
         double targetAngle = getHeading() + deg; // zeroAngle
@@ -431,10 +398,6 @@ public class DriveClass extends Component {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, noSlowdown);
     }
 
-    public enum Axis {
-        x, y;
-    }
-
     public double goToLocationOnAxis(Location location, double power, double tolerance, double timeout, Axis axis, boolean superSpeedX, boolean superSpeedY) {
         switch (axis) {
             case x:
@@ -468,8 +431,6 @@ public class DriveClass extends Component {
     public double goToLocation(Location location, double targetHeading, GotoSettings settings) {
         return goToLocation(new Location(location.x, location.y, targetHeading), settings);
     }
-
-    public final int MAX_IDLE_BREAK = 20;
 
     public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout, boolean superSpeed) {
         int goToIdle = 0; //if not moving
@@ -583,7 +544,6 @@ public class DriveClass extends Component {
         return remainDist;
     }
 
-
     public void drive(double forward, double sideward, double targetPower, double targetAngle) {
         drive(forward, sideward, targetPower, targetAngle, true);
     }
@@ -667,36 +627,6 @@ public class DriveClass extends Component {
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
-//    public void update_dashboard_field() {
-////        final double field_width = 5.75 * tile;
-//        double x_ = this.getPosX() * meters_to_inches;
-//        double y_ = this.getPosY() * meters_to_inches;
-//
-//        double lastx = robot_pathx.get(robot_pathx.size() - 1);
-//        double lasty = robot_pathy.get(robot_pathy.size() - 1);
-//        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-//            robot_pathx.add(x_);
-//            robot_pathy.add(y_);
-//
-//            TelemetryPacket packet = new TelemetryPacket();
-//            Canvas canvas = packet.fieldOverlay();
-//
-//            canvas.setStroke("tomato");
-//            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
-//
-//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-//        }
-//    }
-//
-//    private double[] to_d_katan(ArrayList<Double> arr) {
-//        double[] a = new double[arr.size()];
-//        for (int i = 0; i < arr.size(); i++) {
-//            a[i] = arr.get(i);
-//        }
-//
-//        return a;
-//    }
-
     public void anglesTelemetry() { // Fix
         // telemetry - Angles (XYZ)
         Orientation heading = imu.getAngularOrientation();
@@ -736,6 +666,36 @@ public class DriveClass extends Component {
         return false;
     }
 
+//    public void update_dashboard_field() {
+////        final double field_width = 5.75 * tile;
+//        double x_ = this.getPosX() * meters_to_inches;
+//        double y_ = this.getPosY() * meters_to_inches;
+//
+//        double lastx = robot_pathx.get(robot_pathx.size() - 1);
+//        double lasty = robot_pathy.get(robot_pathy.size() - 1);
+//        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
+//            robot_pathx.add(x_);
+//            robot_pathy.add(y_);
+//
+//            TelemetryPacket packet = new TelemetryPacket();
+//            Canvas canvas = packet.fieldOverlay();
+//
+//            canvas.setStroke("tomato");
+//            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
+//
+//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//        }
+//    }
+//
+//    private double[] to_d_katan(ArrayList<Double> arr) {
+//        double[] a = new double[arr.size()];
+//        for (int i = 0; i < arr.size(); i++) {
+//            a[i] = arr.get(i);
+//        }
+//
+//        return a;
+//    }
+
     public void zeroOnTarget() {
         ElapsedTime timer = new ElapsedTime();
         while (robot.opModeIsActive() && rodPipline.isRodDetected() && (timer.seconds() <= 3)) {
@@ -746,9 +706,37 @@ public class DriveClass extends Component {
         setPower(0, 0, 0);
     }
 
+    public enum ROBOT {
+        SCORPION,
+        COBALT,
+        JACCOUSE,
+        CONSTANTIN,
+        GLADOS;
+    }
+
+    // DriveMode - (direction & origin of IMU_Integrator)
+    public enum DriveMode {
+        LEFT(1, new Point(0, 0), new Point(-1, -1)),
+        RIGHT(2, new Point(0, 0), new Point(1, 1));
+
+        //        public static double tile = 0.6;
+        public int index;
+        public Point origin, direciton;
+
+        DriveMode(int index, Point origin, Point direction) {
+            this.index = index;
+            this.origin = origin;
+            this.direciton = direction;
+        }
+    }
+
+    public enum Axis {
+        x, y;
+    }
+
     public static class GotoSettings {
-        double power, tolerance, timeout;
-        boolean noSlowdown;
+        public double power, tolerance, timeout;
+        public boolean noSlowdown;
 
         public GotoSettings(double power, double tolerance, double timeout, boolean noSlowdown) {
             this.power = power;

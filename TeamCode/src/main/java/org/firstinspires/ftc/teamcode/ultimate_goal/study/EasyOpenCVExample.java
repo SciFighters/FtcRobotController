@@ -79,7 +79,7 @@ public class EasyOpenCVExample extends LinearOpMode {
         static final Scalar GREEN = new Scalar(0, 255, 0);
 
         /*
-         * The core values which define the location and size of the sample regions
+         * The core values which define the locationDelta and size of the sample regions
          */
         static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(181,98);
 

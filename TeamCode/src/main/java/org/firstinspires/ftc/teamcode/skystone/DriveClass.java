@@ -897,7 +897,7 @@ public class DriveClass {
 
 //        // continue driving until cant see the skystone
 //        timer.reset();
-//        while (isSkystone(location) && timer.seconds() < 2  && opMode.opModeIsActive()) {
+//        while (isSkystone(locationDelta) && timer.seconds() < 2  && opMode.opModeIsActive()) {
 //            speed = speedup(total_timer.seconds(), 0.2, maxSpeed, accTime);
 //            drive(0, -speed * mul, 0, 0, 0);
 //            RobotLog.d("Skystone speed %f",speed);

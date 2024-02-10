@@ -7,14 +7,12 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.AprilTagDetector;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 @ThreadedComponent
 public class RobotControl extends Component {
@@ -77,7 +75,7 @@ public class RobotControl extends Component {
     }
 
     @Override
-    public void loop() {
+    public void update() {
         // Handle force quit command
         handleForceQuit();
         robotOrientedToggle.update(gamepad1.ps);
@@ -101,26 +99,36 @@ public class RobotControl extends Component {
         // Arm control based on gamepad input
         armBoost = (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) ? 0.4 : 1;
         if (Math.abs(gamepad2.left_stick_y) > 0.05) {
-            arm.setMotorsPower(pow(-gamepad2.left_stick_y) * armBoost);
+            arm.setPower(pow(-gamepad2.left_stick_y) * armBoost);
+        } else if (gamepad2.y) {
+            armGotoLevel(Arm.Position.Three);
+        } else if (gamepad2.b && !gamepad2.start) {
+            armGotoLevel(Arm.Position.Two);
+        } else if (gamepad2.a) {
+            armGotoLevel(Arm.Position.One);
+        } else if (gamepad2.x) {
+            armGotoLevel(Arm.Position.Home);
+        } else if (gamepad1.b && !gamepad1.start) {
+            arm.hang();
         } else {
             arm.setMotorsPower(0);
         }
         // Claw control based on gamepad input
         if (gamepad2.right_bumper) {
-            arm.setClawPosition(true);
+            arm.closeClaw(true); // close claw
             if (!gamepad2.isRumbling()) {
                 gamepad2.runRumbleEffect(rumbleEffect);
             }
         } else if (gamepad2.left_bumper) {
-            arm.setClawPosition(false);
+            arm.closeClaw(false); // open claw
         } else if (gamepad2.dpad_up) {
-            intakeSystem.setStateIdle();
-            arm.setClawPosition(true);
+            intakeSystem.stopIntake(); // stop intake
+            arm.closeClaw(true);
         } else if (gamepad2.dpad_down) {
-            intakeSystem.setStateCollect();
-            arm.setClawPosition(false);
+            intakeSystem.collect(); // start intake
+            arm.closeClaw(false);
         } else if (gamepad2.right_stick_button) {
-            intakeSystem.setStateSpit();
+            intakeSystem.spit(); // start spit
         }
         if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
             droneLauncher.launch();
@@ -179,7 +187,7 @@ public class RobotControl extends Component {
         else if (gamepad1.dpad_right) drive.setPowerOriented(0, 0.1, 0, fieldOriented);
         else if (gamepad1.dpad_up) drive.setPowerOriented(0.1, 0, 0, fieldOriented);
         else if (gamepad1.dpad_down) drive.setPowerOriented(-0.1, 0, 0, fieldOriented);
-        else {
+        else if (!arm.isPlacePixelBusy) {
             drive.setPowerOriented(y, x, turn, fieldOriented);
             allowMovement = true;
             // Update telemetry
@@ -201,7 +209,7 @@ public class RobotControl extends Component {
         drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
 
         // Set intake system state and start motors
-        intakeSystem.setStateIdle();
+        intakeSystem.stopIntake();
         intakeSystem.spinMotor();
         robot.addComponent(DroneLauncher.class, new DroneLauncher());
         droneLauncher = robot.getComponent(DroneLauncher.class);
@@ -236,7 +244,7 @@ public class RobotControl extends Component {
     // Method to update telemetry data
     private void updateTelemetry() {
         // Display relevant telemetry data
-        multipleTelemetry.addData("drive distance", drive.getDistanceSensorDistance());
+        multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
 //        multipleTelemetry.addData("tags detected ", aprilTagDetector.getDetections().size());
         multipleTelemetry.addData("Allow Movement", allowMovement);
         multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
@@ -250,5 +258,20 @@ public class RobotControl extends Component {
         multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
         multipleTelemetry.addData("Alliance", alliance.toString());
         multipleTelemetry.update();
+    }
+
+    public void armGotoLevel(Arm.Position position) {
+        if (position == Arm.Position.Home) {
+            arm.closeClaw(false);
+            arm.goToPos(Arm.Position.Two);
+        } else {
+            arm.closeClaw(true);
+            intakeSystem.stopIntake();
+        }
+        if (position.distanceFromBackboard != -1) {
+            arm.placePixels(position);
+        } else {
+            arm.goToPos(position);
+        }
     }
 }

@@ -127,35 +127,6 @@ public class AprilTagDetector {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    public void lockOnTag(int tagID, double power, DriveClass drive) {
-        try {
-            double initialX = drive.getPosX(), initialY = drive.getPosY();
-            double initialHeading = drive.getHeading();
-
-            AprilTagDetection tag = this.getSpecificTag(tagID);
-
-            if (tag != null && tag.rawPose != null) {
-                double tagX = tag.rawPose.x;
-                double tagZ = tag.rawPose.z;
-                double deltaHeading = Math.toDegrees(Math.atan2(tagX, tagZ));
-                double targetHeading = initialHeading + deltaHeading;
-
-                telemetry.addData("GOTO", String.format("X: %s\nY: %s\nRIGHT: %s",
-                        tagX, initialY, targetHeading));
-                drive.goToLocation(new Location(initialX - 0.08, initialY), power, -90, 0.05, 0);
-//                drive.turnTo(targetHeading, 0.4);
-            }
-        } catch (Exception e) {
-            telemetry.addData("THE FUCK WENT WRONG", e.toString());
-            telemetry.update();
-        }
-    }
-
-
-    public void lockOnTag(AprilTagDetector.AprilTags tag, double power, DriveClass drive) {
-        lockOnTag(tag.ID, power, drive);
-    }
-
     /**
      * Enumeration of AprilTags.
      */

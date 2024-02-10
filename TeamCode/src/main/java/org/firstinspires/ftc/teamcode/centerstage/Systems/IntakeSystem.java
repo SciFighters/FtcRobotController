@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
-import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 
 public class IntakeSystem extends Component {
     Servo intakeServo1, intakeServo2;
@@ -42,15 +41,15 @@ public class IntakeSystem extends Component {
     public IntakeSystem() {
     }
 
-    public void setStateIdle() {
+    public void stopIntake() {
         setState(WheelsState.Idle);
     }
 
-    public void setStateSpit() {
+    public void spit() {
         setState(WheelsState.Spit);
     }
 
-    public void setStateCollect() {
+    public void collect() {
         setState(WheelsState.Collect);
 
     }
@@ -63,7 +62,7 @@ public class IntakeSystem extends Component {
         intakeServo1 = hw.get(Servo.class, "intakeServo1");
         intakeServo2 = hw.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
-        setStateIdle();
+        stopIntake();
         initTime = false;
     }
 
@@ -73,7 +72,7 @@ public class IntakeSystem extends Component {
     }
 
     @Override
-    public void loop() {
+    public void update() {
         spinMotor();
     }
 

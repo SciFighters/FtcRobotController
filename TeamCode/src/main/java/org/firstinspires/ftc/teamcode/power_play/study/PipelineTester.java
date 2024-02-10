@@ -23,7 +23,7 @@ public class PipelineTester extends LinearOpMode {
 		waitForStart();
 
 		while (opModeIsActive()) {
-			telemetry.addData("sleeve location", sleeve.getParkingLocation());
+			telemetry.addData("sleeve locationDelta", sleeve.getParkingLocation());
 
 			telemetry.addData("rod Offset", rod.getRodCenterOffset());
 			if (rod.isRodDetected())

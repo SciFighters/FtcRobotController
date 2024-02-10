@@ -44,7 +44,7 @@ public class MathUtil {
 
     public static double map(double x, double minX, double maxX, double minY, double maxY) {
         if (maxX == minX) {
-            throw new ArithmeticException("Cannot divide by 0");
+            return 0;
         }
         // Scale the value to a 0-1 range based on its position in the original range
         double normalizedValue = (x - minX) / (maxX - minX);

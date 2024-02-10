@@ -47,51 +47,34 @@ public class Location {
     }
 
     public Location add(Location location) {
-        addX(location.x);
-        addY(location.y);
-        return this;
+        Location result = this;
+        result = result.addX(location.x);
+        result = result.addY(location.y);
+        return result;
     }
 
     public Location addX(double x) {
-        this.x += x;
-        return this;
+        return new Location(this.x + x, this.y, this.angle);
     }
 
     public Location addY(double y) {
-        this.y += y;
-        return this;
+        return new Location(this.x, this.y + y, this.angle);
     }
 
     public Location subtract(Location location) {
-        subtractX(location.x);
-        subtructY(location.y);
-        return this;
+        Location result = this;
+        result = result.subtractX(location.x);
+        result = result.subtractY(location.y);
+        return result;
     }
 
     public Location subtractX(double x) {
-        this.x -= x;
-        return this;
+        return this.addX(-x);
     }
 
-    public Location subtructY(double y) {
-        this.y -= y;
-        return this;
-    }
 
-    public Location multiply(float num) {
-        multiplyX(num);
-        multiplyY(num);
-        return this;
-    }
-
-    public Location multiplyX(double x) {
-        this.x *= x;
-        return this;
-    }
-
-    public Location multiplyY(double y) {
-        this.y *= y;
-        return this;
+    public Location subtractY(double y) {
+        return this.addY(-y);
     }
 
     public Location offsetX(double offset) {

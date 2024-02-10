@@ -13,16 +13,10 @@ public class GLaDOSBlue extends Robot {
     @Override
     public void initRobot() {
         addComponent(RobotControl.class);
-    }
-
-    @Override
-    public void startRobot() {
-        getComponent(RobotControl.class).start();
         getComponent(RobotControl.class).setAlliance(AutoFlow.Alliance.BLUE);
     }
 
     @Override
-    public void updateLoop() {
-        return;
+    public void startRobot() {
     }
 }

@@ -14,7 +14,7 @@ public class HoldState extends State<Arm> {
 
     @Override
     public void execute() {
-        owner.setManualMode(false, 0.12);
+        owner.setManualMode(false, Arm.holdPower);
     }
 
     @Override

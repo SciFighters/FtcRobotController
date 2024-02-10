@@ -58,7 +58,7 @@
 // *
 // * When images are located, Vuforia is able to determine the position and orientation of the
 // * image relative to the camera.  This sample code than combines that information with a
-// * knowledge of where the target images are on the field, to determine the location of the camera.
+// * knowledge of where the target images are on the field, to determine the locationDelta of the camera.
 // *
 // * This example assumes a "diamond" field configuration where the red and blue alliance stations
 // * are adjacent on the corner of the field furthest from the audience.
@@ -66,8 +66,8 @@
 // * The two vision target are located on the two walls closest to the audience, facing in.
 // * The Stones are on the RED side of the field, and the Chips are on the Blue side.
 // *
-// * RIGHT final calculation then uses the location of the camera on the robot to determine the
-// * robot's location and orientation on the field.
+// * RIGHT final calculation then uses the locationDelta of the camera on the robot to determine the
+// * robot's locationDelta and orientation on the field.
 // *
 // * @see VuforiaLocalizer
 // * @see VuforiaTrackableDefaultListener
@@ -323,7 +323,7 @@
 //        return matrix.formatAsTransform();
 //    }
 //
-//    //xyz - sets the location
+//    //xyz - sets the locationDelta
 //    // uvw - degrees
 //    public OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w) {
 //
