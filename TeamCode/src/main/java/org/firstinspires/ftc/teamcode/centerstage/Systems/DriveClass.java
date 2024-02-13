@@ -459,7 +459,7 @@ public class DriveClass extends Component {
         robot.telemetry.addData("goto delta y", deltaY);
         robot.telemetry.addData("goto hypocampus total dist", totalDist);
         robot.telemetry.update();
-        // time delta variables
+        // timer delta variables
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
 
@@ -522,9 +522,9 @@ public class DriveClass extends Component {
 
             if ((timeout != 0 && timeout <= timer.seconds())) break;
 
-            // time delta
+            // timer delta
             currentTime = System.nanoTime();
-            double timeDelta = ((currentTime - lastTime) / Math.pow(10, 9)); // time delta in seconds
+            double timeDelta = ((currentTime - lastTime) / Math.pow(10, 9)); // timer delta in seconds
             lastTime = currentTime;
             // Idle checker
             double velocityRange = 0.0001;
@@ -603,7 +603,7 @@ public class DriveClass extends Component {
 
             setPowerOriented(Vf, Vs, correction, fieldOriented);
 
-            robot.telemetry.addData("time", timer.milliseconds());
+            robot.telemetry.addData("timer", timer.milliseconds());
             //position Telemetry:
             robot.telemetry.addData("x position:", getAbsolutesPosX());
             robot.telemetry.addData("y position:", getAbsolutesPosY());

@@ -10,10 +10,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.*;
+import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GoToState;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GraceHoldTimeState;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.HoldState;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.IdleState;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.ManualState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
@@ -187,24 +193,32 @@ public class Arm extends Component {
         isPlacePixelBusy = false;
     }
 
-    void alignToBoard(Position position) {
+    public void alignToBoard(Position position) {
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
 
-        while (!MathUtil.approximately(distance, position.distanceFromBackboard, 1)) {
+        while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5)) {
             double delta = position.distanceFromBackboard - distance;
-            double gain = 0.016;
+            double gain = 0.016 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
+            if (robot.type == Robot.TYPE.Auto) {
+                gain *= -1;
+            }
             double power = gain * delta;
 
             robot.telemetry.addData("Place pixel delta distance", delta);
             robot.telemetry.addData("power", power);
             robot.telemetry.update();
-
-            drive.setPowerOriented(0, power, 0, true);
+            drive.setPowerOriented(pow(-robot.gamepad1.left_stick_y / 2),
+                    power + pow(robot.gamepad1.left_stick_x / 2),
+                    pow(robot.gamepad1.right_stick_x / 2), true);
             distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
-            if (Math.abs(robot.gamepad1.left_stick_x) > 0.1 || Math.abs(robot.gamepad1.left_stick_y) > 0.1 || Math.abs(robot.gamepad2.left_stick_x) > 0.1 || Math.abs(robot.gamepad2.left_stick_y) > 0.1) {
-                break;
-            }
+//            if (Math.abs(robot.gamepad1.left_stick_x) > 0.1 || Math.abs(robot.gamepad1.left_stick_y) > 0.1 || Math.abs(robot.gamepad2.left_stick_x) > 0.1 || Math.abs(robot.gamepad2.left_stick_y) > 0.1) {
+//                break;
+//            }
         }
+    }
+
+    public double pow(double x) {
+        return Math.pow(x, 2) * Math.signum(x);
     }
 
     /**
@@ -300,7 +314,11 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        final int higherLimit = 40, lowerLimit = 5;
+        int higherLimit = 40, lowerLimit = 5;
+        if (stateMachine.getCurrentState() == gotoState) {
+            higherLimit = 70;
+            power /= 1.7;
+        }
         if (Math.abs(power) < 0.05) {
             power = 0;
         } else if ((power < 0) && (limitSensor1.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
@@ -393,6 +411,10 @@ public class Arm extends Component {
     public void hang() {
         holdPower = 0.15;
         goToPos(Position.Hang);
+    }
+
+    public void dropBottomPixel() {
+        backServo.setPosition(0);
     }
 
     /**

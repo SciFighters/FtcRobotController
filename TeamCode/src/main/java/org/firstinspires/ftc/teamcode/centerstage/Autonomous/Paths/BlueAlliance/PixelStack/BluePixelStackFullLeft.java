@@ -1,16 +1,14 @@
-package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths;
+package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths.BlueAlliance.PixelStack;
 
-import com.acmerobotics.dashboard.RobotStatus;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
-@Autonomous(group = "BLUE", name = "TEST")
-public class Test extends Robot {
+@Autonomous(group = "BLUE", name = "Blue: Pixel Stack - Full P-Left")
+public class BluePixelStackFullLeft extends Robot {
     AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.BLUE,
-            AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL);
+            AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.LEFT);
 
     @Override
     public void initRobot() {
@@ -19,6 +17,6 @@ public class Test extends Robot {
 
     @Override
     public void startRobot() {
-        auto.test();
+        auto.run();
     }
 }

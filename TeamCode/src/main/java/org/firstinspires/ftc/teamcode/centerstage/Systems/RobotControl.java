@@ -42,7 +42,6 @@ public class RobotControl extends Component {
     double armBoost;
     DroneLauncher droneLauncher;
     double allianceDefaultHeading = 90;
-    AutoFlow.Alliance alliance = AutoFlow.Alliance.BLUE;
 
     @Override
     public void init() {
@@ -65,7 +64,7 @@ public class RobotControl extends Component {
 
 
     public void setAlliance(AutoFlow.Alliance alliance) {
-        this.alliance = alliance;
+        robot.alliance = alliance;
         if (alliance == AutoFlow.Alliance.BLUE) {
             allianceDefaultHeading = 90;
         } else {
@@ -78,15 +77,6 @@ public class RobotControl extends Component {
     public void update() {
         // Handle force quit command
         handleForceQuit();
-        robotOrientedToggle.update(gamepad1.ps);
-        // Check for reorientation command
-        if (gamepad1.start && gamepad1.x) {
-            drive.resetHeading(allianceDefaultHeading);
-            gamepad1.runRumbleEffect(rumbleEffect);
-            targetHeading = drive.getHeading();
-            return;
-        }
-
         // Update Arm and Intake subsystems
         updateArmAndIntake();
 
@@ -96,29 +86,28 @@ public class RobotControl extends Component {
 
     // Method to update Arm and Intake subsystems
     private void updateArmAndIntake() {
+        if (gamepad2.start) {
+            return;
+        }
         // Arm control based on gamepad input
         armBoost = (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) ? 0.4 : 1;
         if (Math.abs(gamepad2.left_stick_y) > 0.05) {
             arm.setPower(pow(-gamepad2.left_stick_y) * armBoost);
         } else if (gamepad2.y) {
             armGotoLevel(Arm.Position.Three);
-        } else if (gamepad2.b && !gamepad2.start) {
+        } else if (gamepad2.b) {
             armGotoLevel(Arm.Position.Two);
         } else if (gamepad2.a) {
             armGotoLevel(Arm.Position.One);
         } else if (gamepad2.x) {
             armGotoLevel(Arm.Position.Home);
-        } else if (gamepad1.b && !gamepad1.start) {
-            arm.hang();
         } else {
             arm.setMotorsPower(0);
         }
         // Claw control based on gamepad input
         if (gamepad2.right_bumper) {
             arm.closeClaw(true); // close claw
-            if (!gamepad2.isRumbling()) {
-                gamepad2.runRumbleEffect(rumbleEffect);
-            }
+//            gamepad2.runRumbleEffect(rumbleEffect);
         } else if (gamepad2.left_bumper) {
             arm.closeClaw(false); // open claw
         } else if (gamepad2.dpad_up) {
@@ -129,14 +118,21 @@ public class RobotControl extends Component {
             arm.closeClaw(false);
         } else if (gamepad2.right_stick_button) {
             intakeSystem.spit(); // start spit
-        }
-        if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
-            droneLauncher.launch();
+        } else if (gamepad2.dpad_left) {
+            arm.dropBottomPixel();
         }
     }
 
     // Method to update driving controls
     private void updateDriving() {
+        robotOrientedToggle.update(gamepad1.ps);
+        // Check for reorientation command
+        if (gamepad1.start && gamepad1.x) {
+            drive.resetHeading(allianceDefaultHeading);
+//            gamepad1.runRumbleEffect(rumbleEffect);
+            targetHeading = drive.getHeading();
+            return;
+        }
         // Boost factor for driving speed
         double boost = (gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1.5 : 0.6;
 
@@ -164,8 +160,8 @@ public class RobotControl extends Component {
         }
         // Apply rotation fix if turning count is less than zero
         if (gamepad1.a && !gamepad1.share) {
-            double delta = drive.getDeltaHeading(alliance == AutoFlow.Alliance.BLUE ? 180 : -180);
-            targetHeading = alliance == AutoFlow.Alliance.BLUE ? 180 : -180;
+            double delta = drive.getDeltaHeading(robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180);
+            targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180;
             double gain = 0.02;
             turn = delta * gain;
         } else if (!turningToggle.isPressed() && turningCount < 0 && !gamepad1.a) {
@@ -183,17 +179,25 @@ public class RobotControl extends Component {
             fieldOriented = !fieldOriented;
         }
         // Perform dpad-specific actions
-        if (gamepad1.dpad_left) drive.setPowerOriented(0, -0.1, 0, fieldOriented);
-        else if (gamepad1.dpad_right) drive.setPowerOriented(0, 0.1, 0, fieldOriented);
-        else if (gamepad1.dpad_up) drive.setPowerOriented(0.1, 0, 0, fieldOriented);
-        else if (gamepad1.dpad_down) drive.setPowerOriented(-0.1, 0, 0, fieldOriented);
+        if (gamepad1.dpad_left) drive.setPowerOriented(0, -0.3, 0, fieldOriented);
+        else if (gamepad1.dpad_right) drive.setPowerOriented(0, 0.3, 0, fieldOriented);
+        else if (gamepad1.dpad_up) drive.setPowerOriented(0.3, 0, 0, fieldOriented);
+        else if (gamepad1.dpad_down) drive.setPowerOriented(-0.3, 0, 0, fieldOriented);
         else if (!arm.isPlacePixelBusy) {
             drive.setPowerOriented(y, x, turn, fieldOriented);
             allowMovement = true;
             // Update telemetry
+            telemetry.addData("Y POWER", y);
             updateTelemetry();
         }
-        telemetry.addData("Y POWER", y);
+
+        //region hang and drone
+        if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
+            droneLauncher.launch();
+        } else if (gamepad1.b && !gamepad1.start) {
+            arm.hang();
+        }
+        //endregion
     }
 
     // Method to initialize robot subsystems
@@ -256,14 +260,13 @@ public class RobotControl extends Component {
         multipleTelemetry.addData("Field oriented", fieldOriented);
         multipleTelemetry.addData("Arm controlled power", pow(-robot.gamepad2.left_stick_y) * armBoost);
         multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
-        multipleTelemetry.addData("Alliance", alliance.toString());
+        multipleTelemetry.addData("Alliance", robot.alliance.toString());
         multipleTelemetry.update();
     }
 
     public void armGotoLevel(Arm.Position position) {
         if (position == Arm.Position.Home) {
             arm.closeClaw(false);
-            arm.goToPos(Arm.Position.Two);
         } else {
             arm.closeClaw(true);
             intakeSystem.stopIntake();

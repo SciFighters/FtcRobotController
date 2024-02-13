@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths.RedAlliance.Backdrop;
+package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths.BlueAlliance.PixelStack;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -7,10 +7,10 @@ import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Camera.DuckLine;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
-@Autonomous(group = "RED", name = "Red: Backdrop - Full")
-public class RedBackdropkFull extends Robot {
-    AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.RED,
-            AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL);
+@Autonomous(group = "BLUE", name = "Blue: Pixel Stack - Full P-Right")
+public class BluePixelStackFullRight extends Robot {
+    AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.BLUE,
+            AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.RIGHT);
 
     @Override
     public void initRobot() {
@@ -19,6 +19,6 @@ public class RedBackdropkFull extends Robot {
 
     @Override
     public void startRobot() {
-        auto.backdropSideRed();
+        auto.run();
     }
 }
