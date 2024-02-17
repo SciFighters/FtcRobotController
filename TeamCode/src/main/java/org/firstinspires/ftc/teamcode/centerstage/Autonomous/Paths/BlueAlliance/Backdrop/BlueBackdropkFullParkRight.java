@@ -17,6 +17,6 @@ public class BlueBackdropkFullParkRight extends Robot {
 
     @Override
     public void startRobot() {
-        auto.run();
+        auto.runPath();
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 
 import java.util.ArrayList;
@@ -20,14 +21,15 @@ public class AutoPath {
     /**
      * Constructs an AutoPath object with the specified drive system, start location, and waypoints.
      *
-     * @param drive_        The DriveClass instance to control robot movement.
+     * @param robot         The robot instance to control robot movement.
      * @param startLocation The starting location of the robot.
      * @param waypoints     The list of waypoints defining the path.
+     * @see Waypoint
      */
-    private AutoPath(DriveClass drive_, Location startLocation, Waypoint... waypoints) {
+    private AutoPath(Robot robot, Location startLocation, Waypoint... waypoints) {
         this.path = new ArrayList<>();
         path.addAll(Arrays.asList(waypoints));
-        drive = drive_;
+        drive = robot.getComponent(DriveClass.class);
         this.startLocation = startLocation;
         prevLocation = startLocation;
     }
@@ -39,6 +41,8 @@ public class AutoPath {
      * @throws RuntimeException if steps are negative.
      */
     public void step(int steps) {
+        if (steps == 0) return;
+
         if (steps < 0) {
             throw new RuntimeException("Cannot go negative amount of steps");
         } else {
@@ -87,6 +91,8 @@ public class AutoPath {
     public void flipY() {
         for (int i = 0; i < path.size(); i++) {
             Waypoint newW = path.get(i);
+            if (newW.type == Waypoint.Type.StaticWaypoint)
+                continue;
             newW.locationDelta.flipY();
             path.set(i, newW);
         }
@@ -110,27 +116,13 @@ public class AutoPath {
         public Type type = Type.Step;
 
         /**
-         * Constructs a Waypoint object with the specified location and movement parameters.
-         *
-         * @param locationDelta The target location of the waypoint.
-         * @param power         The power level for movement.
-         * @param tolerance     The tolerance radius around the target location.
-         * @param timeout       The timeout duration for reaching the target location.
-         * @param noSlowdown    Whether to disable slowdown mode.
-         * @param type          The type of waypoint.
-         */
-        public Waypoint(Location locationDelta, double power, double tolerance, double timeout, boolean noSlowdown, Type type) {
-            this.locationDelta = locationDelta;
-            this.type = type;
-            this.settings = new DriveClass.GotoSettings.Builder().setPower(power).setTolerance(tolerance).setTimeout(timeout).setSlowdownMode(noSlowdown).build();
-        }
-
-        /**
          * Constructs a Waypoint object with the specified location and movement settings.
          *
          * @param locationDelta The target location of the waypoint.
          * @param settings      The movement settings for reaching the target location.
          * @param type          The type of waypoint.
+         * @see Location
+         * @see org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass.GotoSettings
          */
         public Waypoint(Location locationDelta, DriveClass.GotoSettings settings, Type type) {
             this.locationDelta = locationDelta;
@@ -157,7 +149,7 @@ public class AutoPath {
          * Enumerates the type of waypoint.
          */
         public enum Type {
-            Step, Location
+            Step, Location, StaticWaypoint
         }
     }
 
@@ -168,25 +160,12 @@ public class AutoPath {
         private final ArrayList<Waypoint> waypoints = new ArrayList<>();
 
         /**
-         * Adds a waypoint to the path with the specified movement parameters.
-         *
-         * @param location   The target location of the waypoint.
-         * @param power      The power level for movement.
-         * @param tolerance  The tolerance radius around the target location.
-         * @param timeout    The timeout duration for reaching the target location.
-         * @param noSlowdown Whether to disable slowdown mode.
-         * @return The Builder instance.
-         */
-        public Builder addStep(Location location, double power, double tolerance, double timeout, boolean noSlowdown) {
-            return addStep(location, new DriveClass.GotoSettings.Builder().setPower(power).setTolerance(tolerance).setTimeout(timeout).setSlowdownMode(noSlowdown).build());
-        }
-
-        /**
          * Adds a waypoint to the path with the specified movement settings.
          *
          * @param location The target location of the waypoint.
          * @param settings The movement settings for reaching the target location.
-         * @return The Builder instance.
+         * @return The {@link Builder} instance.
+         * @see Location
          */
         public Builder addStep(Location location, DriveClass.GotoSettings settings) {
             return add(location, settings, Waypoint.Type.Step);
@@ -197,10 +176,23 @@ public class AutoPath {
          *
          * @param location The target location of the waypoint.
          * @param settings The movement settings for reaching the target location.
-         * @return The Builder instance.
+         * @return The {@link Builder} instance.
+         * @see Location
          */
         public Builder addLocation(Location location, DriveClass.GotoSettings settings) {
             return add(location, settings, Waypoint.Type.Location);
+        }
+
+        /**
+         * Adds a static waypoint (isn't getting flipped) to the path with the specified location settings
+         *
+         * @param location The target location of the waypoint
+         * @param settings The movement settings for reaching the target location
+         * @return The {@link Builder} instance.
+         * @see Location
+         */
+        public Builder addStaticWaypoint(Location location, DriveClass.GotoSettings settings) {
+            return add(location, settings, Waypoint.Type.StaticWaypoint);
         }
 
         /**
@@ -208,8 +200,8 @@ public class AutoPath {
          *
          * @param from The starting index of the section to cut.
          * @param to   The ending index of the section to cut.
-         * @param path The AutoPath object from which to cut the section.
-         * @return A new Builder instance containing the cut section.
+         * @param path The {@link AutoPath} object from which to cut the section.
+         * @return A new {@link Builder} instance containing the cut section.
          */
         public Builder cut(int from, int to, AutoPath path) {
             Builder builder = new Builder();
@@ -221,10 +213,10 @@ public class AutoPath {
         }
 
         /**
-         * Combines another Builder instance with this one.
+         * Combines another {@link Builder} instance with this one.
          *
-         * @param other The other Builder instance to combine.
-         * @return This Builder instance after combining.
+         * @param other The other {@link Builder} instance to combine.
+         * @return This {@link Builder} instance after combining.
          */
         public Builder combine(Builder other) {
             for (int i = 0; i < other.waypoints.size(); i++) {
@@ -234,6 +226,17 @@ public class AutoPath {
             return this;
         }
 
+        /**
+         * Adds a new waypoint with the specified type, location and settings
+         *
+         * @param location The target location
+         * @param settings Movement settings for reaching the target location
+         * @param type     The waypoint type : Step (A movement), Location (a specific place) or a Static Waypoint (a specific place that isn't flipped together with the rest of the path.
+         * @return The {@link Builder} instance.
+         * @see #addLocation(Location, DriveClass.GotoSettings)
+         * @see #addStep(Location, DriveClass.GotoSettings)
+         * @see #addStaticWaypoint(Location, DriveClass.GotoSettings)
+         */
         private Builder add(Location location, DriveClass.GotoSettings settings, Waypoint.Type type) {
             waypoints.add(new Waypoint(location, settings, type));
             return this;
@@ -242,13 +245,13 @@ public class AutoPath {
         /**
          * Constructs an AutoPath object with the specified drive system and start location.
          *
-         * @param drive         The DriveClass instance to control robot movement.
+         * @param robot         The {@link Robot} instance to control robot movement.
          * @param startLocation The starting location of the robot.
          * @return The constructed AutoPath object.
          */
-        public AutoPath build(DriveClass drive, Location startLocation) {
+        public AutoPath build(Robot robot, Location startLocation) {
             try {
-                return new AutoPath(drive, startLocation, waypoints.toArray(new Waypoint[0]));
+                return new AutoPath(robot, startLocation, waypoints.toArray(new Waypoint[0]));
             } catch (Exception e) {
                 return null;
             }

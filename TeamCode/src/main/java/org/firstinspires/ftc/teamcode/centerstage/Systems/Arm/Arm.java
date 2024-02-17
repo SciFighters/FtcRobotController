@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.HoldState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.IdleState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.ManualState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.IntakeSystem;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
@@ -45,7 +44,6 @@ public class Arm extends Component {
     // Constants for proportional control in GoToState
     private Servo frontServo, backServo;
     private DistanceSensor distanceSensor;
-    private IntakeSystem intakeSystem;
 
     public Arm() {
 
@@ -85,7 +83,6 @@ public class Arm extends Component {
 
     @Override
     public void start() {
-        intakeSystem = robot.getComponent(IntakeSystem.class);
         drive = robot.getComponent(DriveClass.class);
     }
 
@@ -117,15 +114,17 @@ public class Arm extends Component {
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (!limitSensor1.isPressed()) {
-            while (!limitSensor1.isPressed() && (!robot.isStopRequested()) && timer.seconds() < 1.5) {
+            while (!limitSensor1.isPressed() && (!robot.isStopRequested()) && timer.seconds() < 1.5 && lift1.getPower() < 0) {
                 lift1.setPower(-0.3);
                 lift2.setPower(-0.3);
                 telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
                 telemetry.update();
             }
         }
-        lift1.setPower(0);
-        lift2.setPower(0);
+        if (!outOfDeadZone(robot.gamepad2.left_stick_y)) {
+            lift1.setPower(0);
+            lift2.setPower(0);
+        }
 
         lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -194,27 +193,31 @@ public class Arm extends Component {
     }
 
     public void alignToBoard(Position position) {
+        double targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180 - (robot.type == Robot.TYPE.Auto ? 90 : 0);
+        ElapsedTime timer = new ElapsedTime();
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
 
-        while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5)) {
-            double delta = position.distanceFromBackboard - distance;
+        while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5) && timer.seconds() < 3) {
             double gain = 0.016 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
+            double deltaAngle = drive.getDeltaHeading(targetHeading);
+            double turn = deltaAngle * gain / 2;
+            double delta = position.distanceFromBackboard - distance;
             if (robot.type == Robot.TYPE.Auto) {
                 gain *= -1;
             }
-            double power = gain * delta;
+            double power = gain * delta / 2;
 
             robot.telemetry.addData("Place pixel delta distance", delta);
             robot.telemetry.addData("power", power);
             robot.telemetry.update();
-            drive.setPowerOriented(pow(-robot.gamepad1.left_stick_y / 2),
-                    power + pow(robot.gamepad1.left_stick_x / 2),
-                    pow(robot.gamepad1.right_stick_x / 2), true);
+            drive.setPowerOriented(pow(-robot.gamepad1.left_stick_y / 2), power + pow(robot.gamepad1.left_stick_x / 2), pow(robot.gamepad1.right_stick_x / 2), true);
             distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
 //            if (Math.abs(robot.gamepad1.left_stick_x) > 0.1 || Math.abs(robot.gamepad1.left_stick_y) > 0.1 || Math.abs(robot.gamepad2.left_stick_x) > 0.1 || Math.abs(robot.gamepad2.left_stick_y) > 0.1) {
 //                break;
 //            }
         }
+        if (robot.type == Robot.TYPE.Auto)
+            drive.setPowerOriented(0, 0, 0, true);
     }
 
     public double pow(double x) {
@@ -228,6 +231,14 @@ public class Arm extends Component {
      */
     public int pos() {
         return lift1.getCurrentPosition();
+    }
+
+    public int pos2() {
+        return lift2.getCurrentPosition();
+    }
+
+    public double getCurrent2() {
+        return lift2.getCurrent(CurrentUnit.AMPS);
     }
 
     /**
@@ -274,8 +285,18 @@ public class Arm extends Component {
     public void handleStates() {
         stateMachine.execute();
         if (limitSensor1.isPressed()) {
-            resetArm();
+//            resetArm();
+            resetArmPos();
         }
+    }
+
+    public void resetArmPos() {
+        lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        setTargetPositions(0);
     }
 
     /**
@@ -317,7 +338,9 @@ public class Arm extends Component {
         int higherLimit = 40, lowerLimit = 5;
         if (stateMachine.getCurrentState() == gotoState) {
             higherLimit = 70;
-            power /= 1.7;
+            if (pos() > 2700) {
+                power /= 1.5;
+            }
         }
         if (Math.abs(power) < 0.05) {
             power = 0;
@@ -325,7 +348,7 @@ public class Arm extends Component {
             return;
         } else if (pos() < 800 && outOfDeadZone(power)) {
 //            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
-        } else if (distanceSensorDistance() < higherLimit && pos() > 1000 && power > 0) {
+        } else if (distanceSensorDistance() < higherLimit && pos() > 2000 && power > 0) {
             if (stateMachine.getCurrentState() == gotoState && targetPos() < pos()) {
             } else {
                 power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
@@ -421,7 +444,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(2700, 40), Two(2525, 27), Hang(500, -1), Three(2245, 7);
+        Home(0, -1), One(3600, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
         // Todo: put actual values
         public final int liftPos;
         public final double distanceFromBackboard;

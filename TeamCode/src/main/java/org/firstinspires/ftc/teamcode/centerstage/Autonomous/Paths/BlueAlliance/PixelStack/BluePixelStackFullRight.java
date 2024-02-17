@@ -19,6 +19,6 @@ public class BluePixelStackFullRight extends Robot {
 
     @Override
     public void startRobot() {
-        auto.run();
+        auto.runPath();
     }
 }

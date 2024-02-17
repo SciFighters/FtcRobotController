@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States;
 
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 /**
  * The GoToState class represents the state where the arm moves to a target position using proportional control.

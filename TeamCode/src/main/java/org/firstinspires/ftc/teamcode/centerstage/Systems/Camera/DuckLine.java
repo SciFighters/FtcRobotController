@@ -17,41 +17,32 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 public class DuckLine extends OpenCvPipeline {
+    public int width;
+    public int height;
+    volatile public double propPos;
     Mat hsv;
     Mat mask;
     Mat subMat;
     Rect subRect;
-    public int width;
-    public int height;
     AutoFlow.Alliance alliance;
     Telemetry telemetry;
-    volatile private Point targetPos = null;
-    volatile public double propPos;
-    //Rect(x, y, width, height)             x, y - position. width, height - dimensions.
-    volatile private Rect targetRect = null;
     Scalar min_red = new Scalar(0, 100, 100);
     Scalar max_red = new Scalar(10, 255, 255);
-
     Scalar min_blue = new Scalar(90, 100, 100);
     Scalar max_blue = new Scalar(130, 255, 255);
-
-
-    public Point getTargetPos() {
-        return targetPos;
-    }
+    volatile private Point targetPos = null;
+    //Rect(x, y, width, height)             x, y - position. width, height - dimensions.
+    volatile private Rect targetRect = null;
+    private double divider_bottom_middle;
+    private double divider_middle_top;
 
     public DuckLine(AutoFlow.Alliance alliance, Telemetry telemetry) {
         this.alliance = alliance;
         this.telemetry = telemetry;
     }
 
-    public Rect getTargetRect() {
-        return targetRect;
-    }
-
-    // SH - Shipping Hub
-    public enum SH_Levels {
-        Top, Middle, Bottom, Collect, CollectAuto, TopTeleop, ReleaseShared, EndGamePark
+    public Point getTargetPos() {
+        return targetPos;
     }
 
 //	public ABC getDuck(int screenWidth) {
@@ -66,8 +57,9 @@ public class DuckLine extends OpenCvPipeline {
 //		}
 //	}
 
-    private double divider_bottom_middle;
-    private double divider_middle_top;
+    public Rect getTargetRect() {
+        return targetRect;
+    }
 
     public SH_Levels getDuck() {
         if (targetPos == null) return null;
@@ -144,12 +136,14 @@ public class DuckLine extends OpenCvPipeline {
 
         int biggestIndex = 0;
         double biggestArea = 0;
-
+        double highestY = 0;
         // Find the biggest rectangle
         for (int i = 0; i < rects.size(); i++) {
-            if (rects.get(i).area() > biggestArea) {
+            Rect curr = rects.get(i);
+            if (curr.area() > biggestArea) {
                 biggestIndex = i;
-                biggestArea = rects.get(i).area();
+                biggestArea = curr.area();
+                highestY = curr.y + curr.height;
             }
         }
 
@@ -169,17 +163,20 @@ public class DuckLine extends OpenCvPipeline {
             targetPos = new Point(centerX, centerY);
 
             // Draw x-coordinate next to the rectangle
-            String xCoordinateText = "X: " + centerX;
+            String xCoordinateText = "X: " + centerX + ", " + "Y: " + targetRect.y + height;
             propPos = centerX;
             if (MathUtil.approximately(propPos, 292, 10)) {
                 AutoFlow.propPos = AutoFlow.PropPos.MID;
-            } else if (propPos <= 100) {
+            } else if (propPos <= 200) {
                 AutoFlow.propPos = AutoFlow.PropPos.LEFT;
-            } else if (MathUtil.approximately(propPos, 500, 30))
-                AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
-            AutoFlow.dashboardTelemetry.addData("PROP POS", AutoFlow.propPos);
-            AutoFlow.dashboardTelemetry.addData("PROP X POS", propPos);
-            AutoFlow.dashboardTelemetry.update();
+            } else if (propPos >= 550) AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
+            AutoFlow.telemetry.addData("PROP POS", AutoFlow.propPos);
+            AutoFlow.telemetry.addData("PROP X POS", propPos);
+            AutoFlow.telemetry.addData("PROP Y POS", targetRect.y + height);
+            AutoFlow.telemetry.addData("PROP HEIGHT", height);
+            AutoFlow.telemetry.addData("PROP WIDTH", width);
+            AutoFlow.telemetry.update();
+            xCoordinateText += "L: " + propPos;
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed
             Imgproc.putText(smallFrame, xCoordinateText, textPoint, Imgproc.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 100, 100), 1);
         } else {
@@ -187,11 +184,16 @@ public class DuckLine extends OpenCvPipeline {
             targetRect = null;
         }
 
-        // Draw lines on the frame
+//        // Draw lines on the frame
         Imgproc.line(smallFrame, new Point(this.divider_bottom_middle, 0), new Point(this.divider_bottom_middle, this.height), new Scalar(86, 123, 47));
         Imgproc.line(smallFrame, new Point(this.divider_middle_top, 0), new Point(this.divider_middle_top, this.height), new Scalar(86, 123, 47));
 
         return smallFrame;
+    }
+
+    // SH - Shipping Hub
+    public enum SH_Levels {
+        Top, Middle, Bottom, Collect, CollectAuto, TopTeleop, ReleaseShared, EndGamePark
     }
 
 }

@@ -8,22 +8,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
-import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.opencv.core.Mat;
-import org.opencv.core.CvType;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Scalar;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.Core;
 import org.opencv.core.Point;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.video.Video;
 
 import java.util.List;
 
@@ -127,6 +115,10 @@ public class AprilTagDetector {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
+    public void stop() {
+        visionPortal.close();
+    }
+
     /**
      * Enumeration of AprilTags.
      */
@@ -143,6 +135,7 @@ public class AprilTagDetector {
      * Configuration for the Vision Portal.
      */
     public static class PortalConfiguration {
+        public final static PortalConfiguration DEFAULT = new PortalConfiguration();
         public final boolean DRAW_AXES = true;
         public final boolean DRAW_CUBE_PROJECTION = false;
         public final boolean DRAW_TAG_ID = true;
@@ -151,7 +144,5 @@ public class AprilTagDetector {
 
         public PortalConfiguration() {
         }
-
-        public final static PortalConfiguration DEFAULT = new PortalConfiguration();
     }
 }
