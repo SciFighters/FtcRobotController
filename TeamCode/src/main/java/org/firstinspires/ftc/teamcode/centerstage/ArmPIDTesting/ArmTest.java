@@ -65,7 +65,7 @@
 //        this.opMode = opMode;
 //    }
 //
-//    public void init(HardwareMap hw) {
+//    public void init(HardwareMap hardwareMap) {
 //        gotoState = new GoToState();
 //        graceHoldTimeState = new GraceHoldTimeState();
 //        holdState = new HoldState();
@@ -74,8 +74,8 @@
 //        timer = new ElapsedTime();
 //        stateMachine = new StateMachine<>(this);
 //        opMode.telemetry.addLine("Head Rail Init");
-//        rail = hw.get(DcMotorEx.class, "rail");// Getting from hardware map
-//        hand = hw.get(DcMotorEx.class, "hand");
+//        rail = hardwareMap.get(DcMotorEx.class, "rail");// Getting from hardware map
+//        hand = hardwareMap.get(DcMotorEx.class, "hand");
 //
 //        rail.setDirection(DcMotorEx.Direction.REVERSE);// Setting directions
 //        hand.setDirection(DcMotorEx.Direction.FORWARD);
@@ -87,11 +87,11 @@
 //
 ////        grabbers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //
-//        grabber_right = hw.get(CRServo.class, "grabber_right");
-//        grabber_left = hw.get(CRServo.class, "grabber_left");
-////        grabbers = hw.get(DcMotor.class, "grabbers");
+//        grabber_right = hardwareMap.get(CRServo.class, "grabber_right");
+//        grabber_left = hardwareMap.get(CRServo.class, "grabber_left");
+////        grabbers = hardwareMap.get(DcMotor.class, "grabbers");
 //
-//        capping_servo = hw.get(Servo.class, "capping_servo");
+//        capping_servo = hardwareMap.get(Servo.class, "capping_servo");
 //
 //        // Setting directions
 //        grabber_left.setDirection(CRServo.Direction.FORWARD);
@@ -99,18 +99,18 @@
 //        capping_servo.setDirection(Servo.Direction.FORWARD);
 //        capping_servo.scaleRange(0.0, 1.0);
 //
-//        grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
-////       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
-//        rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
-//        rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
+//        grabber_switch = hardwareMap.get(DigitalChannel.class, "grabber_switch");
+////       hand_limit = hardwareMap.get(DigitalChannel.class, "hand_limit_front");
+//        rail_limit_B = hardwareMap.get(DigitalChannel.class, "rail_limit_back");
+//        rail_limit_F = hardwareMap.get(DigitalChannel.class, "rail_limit_front");
 //
-//        hand_limit_B = hw.get(DigitalChannel.class, "hand_limit_back");
-//        hand_limit_F = hw.get(DigitalChannel.class, "hand_limit_front");
+//        hand_limit_B = hardwareMap.get(DigitalChannel.class, "hand_limit_back");
+//        hand_limit_F = hardwareMap.get(DigitalChannel.class, "hand_limit_front");
 //
-//        carousel = hw.get(DcMotorEx.class, "carousel");
+//        carousel = hardwareMap.get(DcMotorEx.class, "carousel");
 //        carousel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //
-//        potentiometer = hw.get(AnalogInput.class, "potentiometer");
+//        potentiometer = hardwareMap.get(AnalogInput.class, "potentiometer");
 //        stateMachine.changeState(idleState);
 //
 //

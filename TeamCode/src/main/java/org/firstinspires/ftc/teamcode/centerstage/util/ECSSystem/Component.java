@@ -21,7 +21,7 @@ public abstract class Component implements Runnable {
     /**
      * The hardware map providing access to robot hardware.
      */
-    public HardwareMap hw;
+    public HardwareMap hardwareMap;
 
     /**
      * The telemetry object for logging information.
@@ -83,7 +83,7 @@ public abstract class Component implements Runnable {
      */
     public void attach(Robot robot, Telemetry telemetry) {
         this.robot = robot;
-        this.hw = robot.hardwareMap;
+        this.hardwareMap = robot.hardwareMap;
         this.telemetry = telemetry;
     }
 }

@@ -54,6 +54,8 @@ public class RobotControl extends Component {
 
     @Override
     public void start() {
+        intakeSystem.stopIntake();
+        intakeSystem.spinMotor();
         // Initialize input and start subsystems
         Input.init(robot, robot.gamepad1, robot.gamepad2);
         targetHeading = drive.getHeading();
@@ -101,6 +103,8 @@ public class RobotControl extends Component {
             armGotoLevel(Arm.Position.One);
         } else if (gamepad2.x) {
             armGotoLevel(Arm.Position.Home);
+        } else if (gamepad1.b && !gamepad1.start) {
+            arm.hang();
         } else {
             arm.setMotorsPower(0);
         }
@@ -194,8 +198,6 @@ public class RobotControl extends Component {
         //region hang and drone
         if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
             droneLauncher.launch();
-        } else if (gamepad1.b && !gamepad1.start) {
-            arm.hang();
         }
         //endregion
     }
@@ -212,9 +214,6 @@ public class RobotControl extends Component {
         intakeSystem = robot.getComponent(IntakeSystem.class);
         drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
 
-        // Set intake system state and start motors
-        intakeSystem.stopIntake();
-        intakeSystem.spinMotor();
         robot.addComponent(DroneLauncher.class, new DroneLauncher());
         droneLauncher = robot.getComponent(DroneLauncher.class);
         // Initialize AprilTag detector

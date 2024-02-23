@@ -34,8 +34,9 @@ public class Location {
         this.x *= -1;
     }
 
-    public void flipY() {
+    public Location flipY() {
         this.y *= -1;
+        return this;
     }
 
     public void flipAngle() {

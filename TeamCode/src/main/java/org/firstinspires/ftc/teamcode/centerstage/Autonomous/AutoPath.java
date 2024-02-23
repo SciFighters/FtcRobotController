@@ -141,8 +141,9 @@ public class AutoPath {
             }
             if (type == Type.Step) {
                 location = prevLocation.add(new Location(locationDelta.x, locationDelta.y, locationDelta.angle));
+                location.angle = locationDelta.angle;
             }
-            drive.goToLocation(new Location(location.x, location.y), location.angle, settings);
+            drive.goToLocation(location, settings);
         }
 
         /**

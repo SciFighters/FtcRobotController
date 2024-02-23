@@ -118,12 +118,12 @@ public class DriveClass {
     }
 
     public void init(HardwareMap hw) {
-        //region get from hw
+        //region get from hardwareMap
         fl = hw.get(DcMotorEx.class, "fl");
         fr = hw.get(DcMotorEx.class, "fr");
         bl = hw.get(DcMotorEx.class, "bl");
         br = hw.get(DcMotorEx.class, "br");
-        //endregion get from hw
+        //endregion get from hardwareMap
 
         //region setDirection
         fl.setDirection(DcMotorEx.Direction.REVERSE);

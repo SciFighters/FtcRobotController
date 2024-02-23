@@ -55,7 +55,7 @@ public class GameClass {
 	}
 
 	public void init(HardwareMap hw) {
-		//region get from hw
+		//region get from hardwareMap
 		shooter = hw.get(DcMotorEx.class, "shooter");
 		lifter = hw.get(DcMotorEx.class, "lifter");
 		intake = hw.get(DcMotorEx.class, "collector");
@@ -70,7 +70,7 @@ public class GameClass {
 
 		wiperLeft = hw.get(Servo.class, "wiper_left");
 		wiperRight = hw.get(Servo.class, "wiper_right");
-		//endregion get from hw
+		//endregion get from hardwareMap
 
 		//region setDirection
 		intake.setDirection(DcMotorEx.Direction.REVERSE);

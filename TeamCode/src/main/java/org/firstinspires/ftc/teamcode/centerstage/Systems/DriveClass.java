@@ -125,14 +125,14 @@ public class DriveClass extends Component {
     public void init() {
         RobotLog.d("motors init start");
 
-        //region get from hw
-        fl = hw.get(DcMotorEx.class, "fl");
-        fr = hw.get(DcMotorEx.class, "fr");
-        bl = hw.get(DcMotorEx.class, "bl");
-        br = hw.get(DcMotorEx.class, "br");
-        rightDistanceSensor = hw.get(DistanceSensor.class, "rearRightDistanceSensor");
-        leftDistanceSensor = hw.get(DistanceSensor.class, "rearLeftDistanceSensor");
-        //endregion get from hw
+        //region get from hardwareMap
+        fl = hardwareMap.get(DcMotorEx.class, "fl");
+        fr = hardwareMap.get(DcMotorEx.class, "fr");
+        bl = hardwareMap.get(DcMotorEx.class, "bl");
+        br = hardwareMap.get(DcMotorEx.class, "br");
+        rightDistanceSensor = hardwareMap.get(DistanceSensor.class, "rearRightDistanceSensor");
+        leftDistanceSensor = hardwareMap.get(DistanceSensor.class, "rearLeftDistanceSensor");
+        //endregion get from hardwareMap
 
         //region setDirection
         fl.setDirection(DcMotorEx.Direction.REVERSE);
@@ -175,7 +175,7 @@ public class DriveClass extends Component {
         robot.telemetry.update();
         RobotLog.d("imu init start");
 
-        initIMU(hw);
+        initIMU(hardwareMap);
     }
 
     private void initIMU(HardwareMap hw) {

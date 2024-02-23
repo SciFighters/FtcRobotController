@@ -5,14 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
-@Autonomous(group = "BLUE", name = "Blue: Backdrop - Full P-Right")
-public class BlueBackdropkFullParkRight extends Robot {
-    AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.BLUE,
-            AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.RIGHT);
+@Autonomous(group = "BLUE", name = "Blue: Backdrop - Full P-Far")
+public class BlueBackdropkFullParkFar extends Robot {
+    AutoFlow auto;
 
     @Override
     public void initRobot() {
-        auto.init();
+        auto = addComponent(AutoFlow.class, new AutoFlow(this, AutoFlow.Alliance.BLUE,
+                AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.LEFT));
     }
 
     @Override

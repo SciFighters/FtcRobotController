@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
-import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -105,7 +104,8 @@ public class DuckLine extends OpenCvPipeline {
         Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
 
 
-        Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ? min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
+        Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ?
+                min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
 
         Core.inRange(hsv, min_, max_, mask);   // Mask all orange
 //        Scalar min_yellow = new Scalar(8, 130, 160);
@@ -122,7 +122,7 @@ public class DuckLine extends OpenCvPipeline {
 
         ArrayList<Rect> rects = new ArrayList<>();
         Rect rect;
-        double minArea = 300;
+        double minArea = 600;
 
         // Find and store rectangles
         for (int i = 0; i < contours.size(); i++) {
@@ -165,16 +165,18 @@ public class DuckLine extends OpenCvPipeline {
             // Draw x-coordinate next to the rectangle
             String xCoordinateText = "X: " + centerX + ", " + "Y: " + targetRect.y + height;
             propPos = centerX;
-            if (MathUtil.approximately(propPos, 292, 10)) {
-                AutoFlow.propPos = AutoFlow.PropPos.MID;
-            } else if (propPos <= 200) {
+            if (propPos <= 200) {
                 AutoFlow.propPos = AutoFlow.PropPos.LEFT;
-            } else if (propPos >= 550) AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
+            } else if (propPos >= 430) AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
+            else {
+                AutoFlow.propPos = AutoFlow.PropPos.MID;
+            }
             AutoFlow.telemetry.addData("PROP POS", AutoFlow.propPos);
             AutoFlow.telemetry.addData("PROP X POS", propPos);
             AutoFlow.telemetry.addData("PROP Y POS", targetRect.y + height);
             AutoFlow.telemetry.addData("PROP HEIGHT", height);
             AutoFlow.telemetry.addData("PROP WIDTH", width);
+            AutoFlow.telemetry.addData("PROP AREA", biggestArea);
             AutoFlow.telemetry.update();
             xCoordinateText += "L: " + propPos;
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed

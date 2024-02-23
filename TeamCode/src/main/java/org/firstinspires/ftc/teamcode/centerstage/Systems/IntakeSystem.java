@@ -44,10 +44,10 @@ public class IntakeSystem extends Component {
     @Override
     public void init() {
         initTime = true;
-        motor = hw.get(DcMotorEx.class, "intakeWheelsMotor");
+        motor = hardwareMap.get(DcMotorEx.class, "intakeWheelsMotor");
 
-        intakeServo1 = hw.get(Servo.class, "intakeServo1");
-        intakeServo2 = hw.get(Servo.class, "intakeServo2");
+        intakeServo1 = hardwareMap.get(Servo.class, "intakeServo1");
+        intakeServo2 = hardwareMap.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
         stopIntake();
         initTime = false;

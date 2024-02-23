@@ -36,7 +36,7 @@ public class Lift {
 
     public void init(HardwareMap hw, LinearOpMode opMode) {
         this.opMode = opMode;
-//        jointMotor = hw.get(DcMotorEx.class, "JM"); // The Flip Motor
+//        jointMotor = hardwareMap.get(DcMotorEx.class, "JM"); // The Flip Motor
         touchDown = hw.get(DigitalChannel.class, "touchDown"); // Touch Sensor , bottom lift
         //region Set Elevator Motors
         rightElevator = hw.get(DcMotorEx.class, "RE");
@@ -68,12 +68,12 @@ public class Lift {
         grabberLeft = hw.get(Servo.class, "grabber_left");
         grabberLeft.setDirection(Servo.Direction.FORWARD);
         grabberRight.setDirection(Servo.Direction.REVERSE);
-//        flipTouchSwitch = hw.get(DigitalChannel.class, "JT");
-//        flipTouchSwitch2 = hw.get(DigitalChannel.class, "JT2");
-//        rotateServo = hw.get(Servo.class, "rotateServo");
+//        flipTouchSwitch = hardwareMap.get(DigitalChannel.class, "JT");
+//        flipTouchSwitch2 = hardwareMap.get(DigitalChannel.class, "JT2");
+//        rotateServo = hardwareMap.get(Servo.class, "rotateServo");
         armServoLeft = hw.get(Servo.class, "servoArmLeft");
         armServoRight = hw.get(Servo.class, "servoArmRight");
-//        camServo = hw.get(Servo.class, "CamServo");
+//        camServo = hardwareMap.get(Servo.class, "CamServo");
         //endregion
         ResetArmPos();
         grabber(true);

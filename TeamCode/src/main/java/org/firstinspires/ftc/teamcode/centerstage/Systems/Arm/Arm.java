@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.State;
 import org.firstinspires.ftc.teamcode.centerstage.util.StateMachine.StateMachine;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
+
 /**
  * The Arm class controls the movement of an arm using two DC motors.
  */
@@ -35,7 +36,7 @@ public class Arm extends Component {
     private final double graceTimeLimit = 0.25;
     public State<Arm> gotoState, graceHoldTimeState, holdState, idleState, manualState;
     public DcMotorEx lift1, lift2;
-    public TouchSensor limitSensor1;
+    public TouchSensor touchSensor;
     public StateMachine<Arm> stateMachine;
     public boolean isPlacePixelBusy = false;
     DriveClass drive;
@@ -56,14 +57,14 @@ public class Arm extends Component {
     public void init() {
         initStateMachine();
         this.timer = new ElapsedTime();
-        this.lift1 = hw.get(DcMotorEx.class, "lift1");
-        this.limitSensor1 = hw.get(TouchSensor.class, "armLimitSensor1");
-        this.lift2 = hw.get(DcMotorEx.class, "lift2");
+        this.lift1 = hardwareMap.get(DcMotorEx.class, "lift1");
+        this.touchSensor = hardwareMap.get(TouchSensor.class, "armLimitSensor1");
+        this.lift2 = hardwareMap.get(DcMotorEx.class, "lift2");
         this.lift1.setDirection(DcMotorEx.Direction.FORWARD);
         this.lift2.setDirection(DcMotorSimple.Direction.REVERSE);
-        this.frontServo = hw.get(Servo.class, "frontClawServo");
-        this.backServo = hw.get(Servo.class, "backClawServo");
-        this.distanceSensor = hw.get(DistanceSensor.class, "armDistanceSensor");
+        this.frontServo = hardwareMap.get(Servo.class, "frontClawServo");
+        this.backServo = hardwareMap.get(Servo.class, "backClawServo");
+        this.distanceSensor = hardwareMap.get(DistanceSensor.class, "armDistanceSensor");
         initMotors();
         resetClaw();
         resetArm();
@@ -113,25 +114,17 @@ public class Arm extends Component {
         timer.reset();
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        if (!limitSensor1.isPressed()) {
-            while (!limitSensor1.isPressed() && (!robot.isStopRequested()) && timer.seconds() < 1.5 && lift1.getPower() < 0) {
-                lift1.setPower(-0.3);
-                lift2.setPower(-0.3);
-                telemetry.addData("BUTTON STATUS: ", limitSensor1.isPressed());
+        if (!touchSensor.isPressed()) {
+            while (!touchSensor.isPressed() && (!robot.isStopRequested())) {
+                setMotorsPower(-0.3);
+                telemetry.addData("BUTTON STATUS: ", touchSensor.isPressed());
                 telemetry.update();
             }
         }
-        if (!outOfDeadZone(robot.gamepad2.left_stick_y)) {
-            lift1.setPower(0);
-            lift2.setPower(0);
-        }
+        lift1.setPower(0);
+        lift2.setPower(0);
 
-        lift1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        lift2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-
-        lift1.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        lift2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        setTargetPositions(0);
+        resetArmPos();
     }
 
     /**
@@ -196,9 +189,8 @@ public class Arm extends Component {
         double targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180 - (robot.type == Robot.TYPE.Auto ? 90 : 0);
         ElapsedTime timer = new ElapsedTime();
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
-
         while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5) && timer.seconds() < 3) {
-            double gain = 0.016 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
+            double gain = 0.018 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double deltaAngle = drive.getDeltaHeading(targetHeading);
             double turn = deltaAngle * gain / 2;
             double delta = position.distanceFromBackboard - distance;
@@ -272,7 +264,8 @@ public class Arm extends Component {
         } else {
             lift1.setTargetPosition(targetPos);
             lift2.setTargetPosition(targetPos);
-
+            lift1.setTargetPositionTolerance(4);
+            lift2.setTargetPositionTolerance(4);
             lift1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             lift2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             setMotorsPower(power);
@@ -284,7 +277,9 @@ public class Arm extends Component {
      */
     public void handleStates() {
         stateMachine.execute();
-        if (limitSensor1.isPressed()) {
+        if (targetPos() == 0 && !touchSensor.isPressed() && (int) timer.seconds() % 2 == 0 && lift1.getPower() == 0) {
+            resetArm();
+        } else if (touchSensor.isPressed() && pos() != 0 && targetPos() == 0) {
 //            resetArm();
             resetArmPos();
         }
@@ -337,14 +332,11 @@ public class Arm extends Component {
     public void setMotorsPower(double power) {
         int higherLimit = 40, lowerLimit = 5;
         if (stateMachine.getCurrentState() == gotoState) {
-            higherLimit = 70;
-            if (pos() > 2700) {
-                power /= 1.5;
-            }
+            higherLimit = 60;
         }
-        if (Math.abs(power) < 0.05) {
+        if (!outOfDeadZone(power)) {
             power = 0;
-        } else if ((power < 0) && (limitSensor1.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
+        } else if ((power < 0) && (touchSensor.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
             return;
         } else if (pos() < 800 && outOfDeadZone(power)) {
 //            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
@@ -362,9 +354,7 @@ public class Arm extends Component {
 //            setClawPosition(true);
 //            intakeSystem.setStateIdle();
 //        }
-        else if (targetPos() == 0) {
-//            resetArm();
-        }
+
         lift1.setPower(power);
         lift2.setPower(power);
     }
@@ -444,8 +434,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(3600, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
-        // Todo: put actual values
+        Home(0, -1), One(4200, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
         public final int liftPos;
         public final double distanceFromBackboard;
 

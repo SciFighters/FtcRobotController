@@ -20,6 +20,6 @@ public class ManualState extends State<Arm> {
 
     @Override
     public void exit() {
-
+        owner.setTargetPositions(owner.pos());
     }
 }

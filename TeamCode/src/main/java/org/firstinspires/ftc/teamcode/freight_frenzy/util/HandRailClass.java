@@ -57,7 +57,7 @@ public class HandRailClass {
 
         grabber_right = hw.get(CRServo.class, "grabber_right");
         grabber_left = hw.get(CRServo.class, "grabber_left");
-//        grabbers = hw.get(DcMotor.class, "grabbers");
+//        grabbers = hardwareMap.get(DcMotor.class, "grabbers");
 
         capping_servo = hw.get(Servo.class, "capping_servo");
 
@@ -68,7 +68,7 @@ public class HandRailClass {
         capping_servo.scaleRange(0.0,1.0);
 
         grabber_switch = hw.get(DigitalChannel.class, "grabber_switch");
-//       hand_limit = hw.get(DigitalChannel.class, "hand_limit_front");
+//       hand_limit = hardwareMap.get(DigitalChannel.class, "hand_limit_front");
         rail_limit_B = hw.get(DigitalChannel.class, "rail_limit_back");
         rail_limit_F = hw.get(DigitalChannel.class, "rail_limit_front");
 
