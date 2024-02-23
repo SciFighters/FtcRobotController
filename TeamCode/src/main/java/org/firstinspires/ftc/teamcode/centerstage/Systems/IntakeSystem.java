@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,9 +15,12 @@ public class IntakeSystem extends Component {
     Servo intakeServo1, intakeServo2;
     DcMotorEx motor;
     ElapsedTime timer;
+    ElapsedTime pixelHereTimer;
     Arm arm;
     private boolean justStopped;
     private boolean isBusy;
+    ColorSensor farPixelColorSensor;
+    boolean pixelHere;
 
     public IntakeSystem() {
     }
@@ -45,6 +49,7 @@ public class IntakeSystem extends Component {
     public void init() {
         initTime = true;
         motor = hardwareMap.get(DcMotorEx.class, "intakeWheelsMotor");
+        farPixelColorSensor = hardwareMap.get(ColorSensor.class, "armColorSensor");
 
         intakeServo1 = hardwareMap.get(Servo.class, "intakeServo1");
         intakeServo2 = hardwareMap.get(Servo.class, "intakeServo2");
@@ -57,6 +62,7 @@ public class IntakeSystem extends Component {
     public void start() {
         this.arm = Arm.instance;
         timer = new ElapsedTime();
+        pixelHereTimer = new ElapsedTime();
     }
 
     @Override
@@ -68,6 +74,18 @@ public class IntakeSystem extends Component {
             justStopped = false;
             setState(State.Idle);
         }
+        if (farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000 && state() == State.Collect) {
+            if (!pixelHere && pixelHereTimer == null) {
+                pixelHereTimer = new ElapsedTime();
+            } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1.3) {
+                pixelHereTimer = null;
+                pixelHere = true;
+                stopIntake();
+            }
+        } else {
+            pixelHere = false;
+        }
+        telemetry.addData("pixelHere: ", pixelHere);
     }
 
     public void setServoPos(double pos) {
@@ -83,6 +101,9 @@ public class IntakeSystem extends Component {
 //        if (state == WheelsState.AvoidArm) return;
         prevState = state;
         this.state = state;
+        if (state == State.Idle) {
+            arm.closeClaw(true);
+        }
     }
 
     public void setStateAvoidArm() {

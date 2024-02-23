@@ -116,7 +116,6 @@ public class RobotControl extends Component {
             arm.closeClaw(false); // open claw
         } else if (gamepad2.dpad_up) {
             intakeSystem.stopIntake(); // stop intake
-            arm.closeClaw(true);
         } else if (gamepad2.dpad_down) {
             intakeSystem.collect(); // start intake
             arm.closeClaw(false);

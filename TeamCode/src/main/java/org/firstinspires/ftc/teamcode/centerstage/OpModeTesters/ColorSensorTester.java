@@ -8,11 +8,12 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 @TeleOp(group = "TESTER")
 public class ColorSensorTester extends Robot {
-    ColorSensor armSensor;
+    ColorSensor farPixelColorSensor;
+    boolean pixelHere;
 
     @Override
     public void initRobot() {
-        armSensor = hardwareMap.get(ColorSensor.class, "armColorSensor");
+        farPixelColorSensor = hardwareMap.get(ColorSensor.class, "armColorSensor");
     }
 
     @Override
@@ -22,7 +23,14 @@ public class ColorSensorTester extends Robot {
 
     @Override
     public void updateLoop() {
-        telemetry.addData("Color sensor rgb", String.format("%d, %d, %d", armSensor.red(), armSensor.green(), armSensor.blue()));
+        sleep(10);
+        if (farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000) {
+            pixelHere = true;
+        } else {
+            pixelHere = false;
+        }
+        telemetry.addData("pixelHere: ", pixelHere);
+        telemetry.addData("Color sensor rgb", String.format("%d, %d, %d", farPixelColorSensor.red(), farPixelColorSensor.green(), farPixelColorSensor.blue()));
         telemetry.update();
     }
 }
