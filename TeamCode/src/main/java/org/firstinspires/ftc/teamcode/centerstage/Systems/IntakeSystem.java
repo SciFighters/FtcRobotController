@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 
 public class IntakeSystem extends Component {
-    public WheelsState state = WheelsState.Idle, prevState = WheelsState.Idle;
+    public State state = State.Idle, prevState = State.Idle;
     public boolean initTime = true;
     Servo intakeServo1, intakeServo2;
     DcMotorEx motor;
@@ -26,19 +26,19 @@ public class IntakeSystem extends Component {
     }
 
     public void stopIntake() {
-        if (state() == WheelsState.Collect) {
+        if (state() == State.Collect) {
             justStopped = true;
             timer.reset();
         }
-        setState(WheelsState.Idle);
+        setState(State.Idle);
     }
 
     public void spit() {
-        setState(WheelsState.Spit);
+        setState(State.Spit);
     }
 
     public void collect() {
-        setState(WheelsState.Collect);
+        setState(State.Collect);
     }
 
     @Override
@@ -62,11 +62,11 @@ public class IntakeSystem extends Component {
     @Override
     public void update() {
         spinMotor();
-        if (timer.seconds() >= 0.4 && justStopped && state() == WheelsState.Idle) {
+        if (timer.seconds() >= 0.4 && justStopped && state() == State.Idle) {
             spit();
-        } else if (timer.seconds() >= 2 && state() == WheelsState.Spit && justStopped) {
+        } else if (timer.seconds() >= 2 && state() == State.Spit && justStopped) {
             justStopped = false;
-            setState(WheelsState.Idle);
+            setState(State.Idle);
         }
     }
 
@@ -75,18 +75,18 @@ public class IntakeSystem extends Component {
         intakeServo2.setPosition(pos);
     }
 
-    public void setServoPos(ServoPos pos) {
-        setServoPos(pos.servoPos);
+    public void setServoPos(State state) {
+        setServoPos(state.servoPos);
     }
 
-    void setState(WheelsState state) {
+    void setState(State state) {
 //        if (state == WheelsState.AvoidArm) return;
         prevState = state;
         this.state = state;
     }
 
     public void setStateAvoidArm() {
-        state = WheelsState.AvoidArm;
+        state = State.AvoidArm;
     }
 
     /**
@@ -100,43 +100,33 @@ public class IntakeSystem extends Component {
 //            state = WheelsState.AvoidArm;
 //        } else {
 //        state = prevState;
-        if (state == WheelsState.Spit) {
-            setServoPos(ServoPos.Close);
+        if (state == State.Spit) {
+            setServoPos(State.Spit);
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
             motor.setPower(spitPower);
-        } else if (state == WheelsState.Idle) {
-            setServoPos(ServoPos.Close);
+        } else if (state == State.Idle) {
+            setServoPos(State.Idle);
             motor.setPower(0);
-        } else if (state == WheelsState.Collect) {
-            setServoPos(ServoPos.Open);
+        } else if (state == State.Collect) {
+            setServoPos(State.Collect);
             motor.setDirection(DcMotorSimple.Direction.REVERSE);
             motor.setPower(normalPower);
         }
     }
 
-    public WheelsState state() {
+    public State state() {
         return this.state;
     }
 
-    public enum ServoPos {
-        Open(1), Close(0), Mid(0.5);
+    public enum State {
+        Collect(1),
+        Spit(0),
+        Idle(0),
+        AvoidArm(0.5);
         private final double servoPos;
 
-        ServoPos(double servoPos) {
+        State(double servoPos) {
             this.servoPos = servoPos;
         }
-    }
-//        if (state == WheelsState.AvoidArm && !initTime) {
-//            setServoPos(ServoPos.Mid);
-//            motor.setDirection(DcMotorSimple.Direction.FORWARD);
-//            motor.setPower(normalPower);
-//        }
-//    }
-
-    public enum WheelsState {
-        Collect,
-        Spit,
-        Idle,
-        AvoidArm
     }
 }

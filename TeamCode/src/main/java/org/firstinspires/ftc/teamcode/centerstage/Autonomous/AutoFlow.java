@@ -92,7 +92,7 @@ public class AutoFlow extends Component {
         initWebcam();
         drive.resetOrientation(startLocation.angle);
         dashboardTelemetry.update();
-        intakeSystem.setServoPos(IntakeSystem.ServoPos.Close);
+        intakeSystem.setServoPos(IntakeSystem.State.Idle);
         intakeSystem.start();
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
