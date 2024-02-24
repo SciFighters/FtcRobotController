@@ -434,7 +434,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(4200, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
+        Home(0, -1), One(4000, 41), Two(3130, 27), Hang(500, -1), Three(2780, 7);
         public final int liftPos;
         public final double distanceFromBackboard;
 

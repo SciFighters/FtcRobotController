@@ -47,6 +47,7 @@ public class IntakeSystem extends Component {
 
     @Override
     public void init() {
+        this.arm = robot.getComponent(Arm.class);
         initTime = true;
         motor = hardwareMap.get(DcMotorEx.class, "intakeWheelsMotor");
         farPixelColorSensor = hardwareMap.get(ColorSensor.class, "armColorSensor");
@@ -60,7 +61,6 @@ public class IntakeSystem extends Component {
 
     @Override
     public void start() {
-        this.arm = Arm.instance;
         timer = new ElapsedTime();
         pixelHereTimer = new ElapsedTime();
     }

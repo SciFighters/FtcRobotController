@@ -100,10 +100,10 @@ public class DuckLine extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat frame) {
         Mat smallFrame = new Mat(frame, new Range(frame.height() / 2, frame.height()));
-//        Mat smallFrame = frame;
+        if (alliance == AutoFlow.Alliance.RED)
+            Core.flip(smallFrame, smallFrame, 1);
+        //        Mat smallFrame = frame;
         Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
-
-
         Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ?
                 min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
 
