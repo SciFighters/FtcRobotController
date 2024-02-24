@@ -49,7 +49,11 @@ public class AutoPath {
             for (int i = 0; i < steps; i++) {
                 Waypoint current = path.get(currentLocationIndex);
                 current.run();
-                prevLocation = prevLocation.add(current.locationDelta);
+                if (current.type == Waypoint.Type.Step)
+                    prevLocation = prevLocation.add(current.locationDelta);
+                else {
+                    prevLocation = current.locationDelta;
+                }
                 skip();
             }
         }
@@ -142,6 +146,8 @@ public class AutoPath {
             if (type == Type.Step) {
                 location = prevLocation.add(new Location(locationDelta.x, locationDelta.y, locationDelta.angle));
                 location.angle = locationDelta.angle;
+            } else if (type == Type.Location) {
+                prevLocation = location;
             }
             drive.goToLocation(location, settings);
         }

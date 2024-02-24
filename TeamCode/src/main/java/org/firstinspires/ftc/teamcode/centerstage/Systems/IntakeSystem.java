@@ -115,7 +115,7 @@ public class IntakeSystem extends Component {
      */
     public void spinMotor() {
         double normalPower = 0.7;
-        double spitPower = 0.6;
+        double spitPower = 0.75;
         if (isBusy) return; // Don't move if the system is busy
 //        if (arm != null && arm.pos() < 800 && arm.pos() > 50 && state != WheelsState.Collect && !initTime) {
 //            state = WheelsState.AvoidArm;

@@ -381,10 +381,10 @@ public class DriveClass extends Component {
 
             setPower(0, power, 0);
 
-            robot.telemetry.addData("target", targetAngle);
-            robot.telemetry.addData("current", getHeading());
-            robot.telemetry.addData("delta", delta);
-            robot.telemetry.addData("power", power);
+//            robot.telemetry.addData("target", targetAngle);
+//            robot.telemetry.addData("current", getHeading());
+//            robot.telemetry.addData("delta", delta);
+//            robot.telemetry.addData("power", power);
             robot.telemetry.update();
         }
         stopPower();

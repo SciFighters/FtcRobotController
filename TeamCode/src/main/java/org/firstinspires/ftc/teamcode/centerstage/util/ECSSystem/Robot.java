@@ -74,7 +74,7 @@ public abstract class Robot extends LinearOpMode {
      * Stops the robot. Override this method to define actions that should be
      * taken when the robot is stopped.
      */
-    public void stopRobot() {
+    public void onStop() {
     }
 
     /**
