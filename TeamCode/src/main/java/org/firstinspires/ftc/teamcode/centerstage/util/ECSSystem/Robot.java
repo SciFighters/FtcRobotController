@@ -38,8 +38,8 @@ public abstract class Robot extends LinearOpMode {
         initRobot();
         waitForStart();
         startComponents();
-        startRobot();
         startComponentThreads();
+        startRobot();
         while (opModeIsActive() && !isStopRequested()) {
             updateLoop();
             components.forEach((c, t) -> {

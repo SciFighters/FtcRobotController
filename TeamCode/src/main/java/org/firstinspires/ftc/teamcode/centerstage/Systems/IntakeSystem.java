@@ -17,10 +17,10 @@ public class IntakeSystem extends Component {
     ElapsedTime timer;
     ElapsedTime pixelHereTimer;
     Arm arm;
-    private boolean justStopped;
-    private boolean isBusy;
     ColorSensor farPixelColorSensor;
     boolean pixelHere;
+    private boolean justStopped;
+    private boolean isBusy;
 
     public IntakeSystem() {
     }
@@ -68,12 +68,7 @@ public class IntakeSystem extends Component {
     @Override
     public void update() {
         spinMotor();
-        if (timer.seconds() >= 0.4 && justStopped && state() == State.Idle) {
-            spit();
-        } else if (timer.seconds() >= 2 && state() == State.Spit && justStopped) {
-            justStopped = false;
-            setState(State.Idle);
-        }
+
         if (farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000 && state() == State.Collect) {
             if (!pixelHere && pixelHereTimer == null) {
                 pixelHereTimer = new ElapsedTime();
@@ -121,6 +116,13 @@ public class IntakeSystem extends Component {
 //            state = WheelsState.AvoidArm;
 //        } else {
 //        state = prevState;
+        if (timer.seconds() >= 0.4 && justStopped && state() == State.Idle) {
+            spit();
+        } else if (timer.seconds() >= 2 && state() == State.Spit && justStopped) {
+            justStopped = false;
+            setState(State.Idle);
+        }
+
         if (state == State.Spit) {
             setServoPos(State.Spit);
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
