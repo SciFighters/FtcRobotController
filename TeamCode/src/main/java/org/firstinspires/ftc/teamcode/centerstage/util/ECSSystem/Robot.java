@@ -86,14 +86,19 @@ public abstract class Robot extends LinearOpMode {
      * @return The added component or null if an error occurred
      */
     public <T extends Component> T addComponent(Class<T> componentClass, T componentInstance) {
+        if (componentInstance == null) {
+            throw new IllegalArgumentException("Component instance cannot be null");
+        }
+
         try {
-            initializeComponent(componentInstance);
+            initializeComponent(componentInstance); // <-- Potential cause of NullPointerException
             return getComponent(componentClass);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
 
     /**
      * Adds a component to the robot.
@@ -140,6 +145,9 @@ public abstract class Robot extends LinearOpMode {
     }
 
     private void initializeComponent(Component component) {
+        if (component == null) {
+            throw new NullPointerException("COMPONENT IS NULL");
+        }
         component.attach(this, robotTelemetry);
         Thread thread = createComponentThread(component);
         components.put(component, thread);

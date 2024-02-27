@@ -354,7 +354,9 @@ public class Arm extends Component {
 //            setClawPosition(true);
 //            intakeSystem.setStateIdle();
 //        }
-
+        if (targetPos() == 0 && pos() < 400 && !robot.opModeInInit()) {
+            power = -0.2;
+        }
         lift1.setPower(power);
         lift2.setPower(power);
     }

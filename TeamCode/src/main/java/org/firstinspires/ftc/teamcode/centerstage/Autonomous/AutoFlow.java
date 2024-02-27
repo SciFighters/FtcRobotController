@@ -81,9 +81,11 @@ public class AutoFlow extends Component {
     @Override
     public void init() {
         timer = new ElapsedTime();
-        arm = robot.addComponent(Arm.class);
+        robot.addComponent(Arm.class, new Arm());
+        arm = robot.getComponent(Arm.class);
         this.drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT));
-        intakeSystem = robot.addComponent(IntakeSystem.class);
+        intakeSystem = robot.addComponent(IntakeSystem.class, new IntakeSystem());
+        intakeSystem = robot.getComponent(IntakeSystem.class);
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();
         telemetry = new MultipleTelemetry(dashboardTelemetry, robot.telemetry);
@@ -91,7 +93,6 @@ public class AutoFlow extends Component {
         drive.resetOrientation(startLocation.angle);
         dashboardTelemetry.update();
         intakeSystem.setServoPos(IntakeSystem.State.Idle);
-        intakeSystem.start();
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
@@ -201,11 +202,7 @@ public class AutoFlow extends Component {
         double yOffset = tile * 1.85 * Math.signum(-startLocation.y);
         Location mid = new Location(startLocation.x, startLocation.y + yOffset, startLocation.angle);
         Location left = new Location(startLocation.x + 0.12, startLocation.y + (tile + 0.2 * Math.signum(-startLocation.y)) * Math.signum(-startLocation.y), startLocation.angle);
-        Location right = new Location(startLocation.x - tile + 0.05, startLocation.y + tile * 1.5 * Math.signum(-startLocation.y), startLocation.angle);
-        if (robot.alliance == Alliance.RED) {
-            right = right.addY(0.1);
-            right = right.addX(0.15);
-        }
+        Location right = new Location(startLocation.x - tile + 0.05, startLocation.y + tile * Math.signum(-startLocation.y), startLocation.angle);
         if (startPos == StartPos.PIXEL_STACK) {
             left = new Location(startLocation.x - 0.1, startLocation.y + (tile * Math.signum(-startLocation.y) + 0.15 * Math.signum(-startLocation.y)), startLocation.angle);
             right = new Location(startLocation.x + 0.2, startLocation.y + tile * 2 * Math.signum(-startLocation.y) - 0.15 * Math.signum(-startLocation.y), startLocation.angle);
@@ -225,7 +222,7 @@ public class AutoFlow extends Component {
             }
             drive.goToLocation(target, normalDriveSettings);
             if (startPos == StartPos.BACKSTAGE) {
-                drive.goToLocation(new Location(target.addX(0.15).x, target.addY(0.7).y, angle), normalDriveSettings);
+                drive.goToLocation(new Location(target.addX(0.15).x, target.addY(0.2).y, angle), normalDriveSettings);
             }
         } else if (pos == PropPos.RIGHT) {
             Location target = right;
@@ -234,7 +231,7 @@ public class AutoFlow extends Component {
                 target = left;
             }
             if (startPos == StartPos.BACKSTAGE) {
-                Location location = new Location(target.addX(0.05).x, target.addY(0.07).y, angle);
+//                Location location = new Location(target.addX(0.05).x, target.addY(0.07).y, angle);
                 drive.goToLocation(new Location(target.addX(0.09).x, target.addY(0.07).y, angle), lowToleranceSettings);
             }
         }
@@ -265,13 +262,40 @@ public class AutoFlow extends Component {
         }
     }
 
+    public void cycle() {
+        drive.goToLocation(new Location(-tile * 1.5, drive.getPosY(), 90), lowToleranceSettings);
+        drive.goToLocation(new Location(-tile * 1.5, 0, 90), lowToleranceSettings);
+        drive.goToLocation(new Location(tile * 3 - 0.2, 0, 90), lowToleranceSettings);
+        timer.reset();
+        intakeSystem.collect();
+        while (timer.seconds() < 2) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.spit();
+        timer.reset();
+        while (timer.seconds() < 2) {
+            intakeSystem.spinMotor();
+        }
+        intakeSystem.stopIntake();
+        intakeSystem.spinMotor();
+        drive.goToLocation(new Location(-tile * 1.5, 0, 90), lowToleranceSettings);
+        arm.goToPos(2000);
+        goToBoard();
+        arm.goToPos(Arm.Position.One); // makes the arm go yee
+        robot.sleep(1500);
+        arm.closeClaw(false);
+        robot.sleep(500);
+        arm.goToPos(Arm.Position.Home);
+    }
 
     public void runPath() {
         closeWebcam();
-        arm.goToPos(2000);
+        if (auto != Auto.PARK) {
+            arm.goToPos(2000);
+        }
+        startAprilTagDetection();
         placePurplePixelByProp(propPos);
         buildPath();
-        startAprilTagDetection();
         if (auto != Auto.PARK) {
             if (path != null) path.run(); // moves to the backboard
 //            arm.alignToBoard(Arm.Position.One); // aligns to the board
@@ -279,10 +303,13 @@ public class AutoFlow extends Component {
             arm.goToPos(Arm.Position.One); // makes the arm go yee
             robot.sleep(1500);
             arm.closeClaw(false);
-            robot.sleep(300);
+            robot.sleep(500);
             arm.goToPos(Arm.Position.Home);
 //            robot.sleep(2000);
             aprilTagDetector.stop();
+            if (auto == Auto.CYCLING) {
+                cycle();
+            }
         }
         park();
         robot.requestOpModeStop(); // stops the program
@@ -312,6 +339,10 @@ public class AutoFlow extends Component {
 
             }
         }); // closes the prop detection webcam
+    }
+
+    public void goToBoard() {
+        drive.goToLocation(backdropLocation, lowToleranceSettings);
     }
 
     public enum StartPos {

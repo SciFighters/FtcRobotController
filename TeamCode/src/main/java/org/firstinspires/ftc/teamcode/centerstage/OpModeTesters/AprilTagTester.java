@@ -26,8 +26,9 @@ public class AprilTagTester extends Robot {
 
     @Override
     public void updateLoop() {
-        AprilTagDetection tag = aprilTagDetector.getSpecificTag(2);
+        AprilTagDetection tag = aprilTagDetector.getDetections().get(0);
         if (tag != null) {
+            telemetry.addData("TAG ID", tag.id);
             telemetry.addData("TAG X", tag.rawPose.x);
             telemetry.addData("TAG Y", tag.rawPose.y);
             telemetry.addData("TAG Z", tag.rawPose.z);

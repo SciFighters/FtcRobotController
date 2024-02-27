@@ -51,7 +51,6 @@ public abstract class Component implements Runnable {
      * Override this method to define the behavior that should be executed repeatedly.
      */
     public void update() {
-        return;
     }
 
     /**
@@ -59,7 +58,6 @@ public abstract class Component implements Runnable {
      * Override this method to define actions that should be taken when the component is stopped.
      */
     public void stop() {
-        return;
     }
 
     /**
@@ -67,10 +65,10 @@ public abstract class Component implements Runnable {
      * This method continuously calls the loop() method while the op mode is active.
      */
     public final void run() {
-        while (robot.opModeIsActive() && !robot.isStopRequested()) {
+        while (robot.opModeIsActive() && !robot.isStopRequested() && !robot.opModeInInit()) {
             update();
-            robot.idle();
-            robot.sleep(1);
+//            robot.idle();
+//            robot.sleep(1);
         }
     }
 

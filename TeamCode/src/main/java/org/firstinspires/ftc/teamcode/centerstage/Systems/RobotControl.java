@@ -209,7 +209,7 @@ public class RobotControl extends Component {
         robot.addComponent(Arm.class, new Arm());
         arm = robot.getComponent(Arm.class);
         // Add robot components
-        robot.addComponent(IntakeSystem.class, new IntakeSystem());
+        robot.addComponent(IntakeSystem.class);
         intakeSystem = robot.getComponent(IntakeSystem.class);
         drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
 
