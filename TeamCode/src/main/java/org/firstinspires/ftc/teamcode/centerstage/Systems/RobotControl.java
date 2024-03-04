@@ -17,6 +17,9 @@ import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 @ThreadedComponent
 public class RobotControl extends Component {
+    public static int boardAlignSensor = -1;
+    @RobotTelemetry
+    public static MultipleTelemetry multipleTelemetry;
     Gamepad gamepad1, gamepad2;
     // Robot components
     DriveClass drive;
@@ -25,16 +28,12 @@ public class RobotControl extends Component {
     // Telemetry and dashboard
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
-    @RobotTelemetry
-    MultipleTelemetry multipleTelemetry;
-
     // Control variables
     boolean fieldOriented = true;
     double angle = 0;
     double targetHeading;
     int turningCount = 0;
     Gamepad.RumbleEffect rumbleEffect;
-
     Toggle turningToggle = new Toggle();
     Toggle robotOrientedToggle = new Toggle();
     double armBoost;
@@ -42,6 +41,8 @@ public class RobotControl extends Component {
     double allianceDefaultHeading = 90;
     ElapsedTime lastFrameTimer;
     double lastTime;
+    Toggle boardAlignToggle = new Toggle();
+
     @Override
     public void init() {
         gamepad1 = robot.gamepad1;
@@ -49,13 +50,13 @@ public class RobotControl extends Component {
 // Initialize robot components
         initSystems();
         rumbleEffect = new Gamepad.RumbleEffect.Builder().addStep(1.0, 1.0, 300).build();
+        telemetry.addData(">", "Init finished. Press START");
+        telemetry.update();
     }
 
     @Override
     public void start() {
         lastFrameTimer = new ElapsedTime();
-        telemetry.addData(">", "Init finished. Press START");
-        telemetry.update();
 
         telemetry.addData(">", "DRIVE START");
         telemetry.update();
@@ -78,7 +79,7 @@ public class RobotControl extends Component {
         gamepad1.runRumbleEffect(rumbleEffect);
         Thread armControlThread = new Thread(() -> {
             while (robot.opModeIsActive() && !robot.isStopRequested()) {
-                this.updateArmAndIntake();
+                this.updateArmAndIntakeJoystick();
             }
         });
         armControlThread.start();
@@ -98,12 +99,12 @@ public class RobotControl extends Component {
     @Override
     public void update() {
         lastTime = lastFrameTimer.seconds();
-        updateDriving();
+        updateDriverJoystick();
         updateTelemetry();
     }
 
     // Method to update Arm and Intake subsystems
-    private void updateArmAndIntake() {
+    private void updateArmAndIntakeJoystick() {
         armBoost = (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) ? 0.4 : 1;
 
         if (gamepad2.start) {
@@ -138,7 +139,8 @@ public class RobotControl extends Component {
     }
 
     // Method to update driving controls
-    private void updateDriving() {
+    private void updateDriverJoystick() {
+        boardAlignToggle.update(gamepad1.a || gamepad1.b || gamepad1.y);
         double fixToBackdropTuple = 0;
         robotOrientedToggle.update(gamepad1.ps);
         // Check for reorientation command
@@ -156,14 +158,16 @@ public class RobotControl extends Component {
         } else if (gamepad1.y) {
             fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.Three);
         }
+        if (boardAlignToggle.isReleased()) {
+            boardAlignSensor = -1;
+        }
         // Boost factor for driving speed
         double boost = (gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1.5 : 0.6;
 
         // Drive control based on gamepad input
         double y = pow(-gamepad1.left_stick_y) * boost;
         double x = pow(gamepad1.left_stick_x) * boost;
-        double turn = pow(gamepad1.right_stick_x
-                / ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
+        double turn = pow(gamepad1.right_stick_x / ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
@@ -224,7 +228,9 @@ public class RobotControl extends Component {
         telemetryInit();
         arm = robot.addComponent(Arm.class);
         intakeSystem = robot.addComponent(IntakeSystem.class);
-        drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
+        drive = robot.addComponent(DriveClass.class,
+                new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180),
+                        DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
         droneLauncher = robot.addComponent(DroneLauncher.class);
     }
 
@@ -243,8 +249,8 @@ public class RobotControl extends Component {
     // Method to initialize telemetry
     private void telemetryInit() {
         dashboard = FtcDashboard.getInstance();
-//        dashboardTelemetry = dashboard.getTelemetry();
-        multipleTelemetry = new MultipleTelemetry(telemetry, telemetry);
+        dashboardTelemetry = dashboard.getTelemetry();
+        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
     }
 
     // Method to update telemetry data
@@ -255,10 +261,9 @@ public class RobotControl extends Component {
 //        multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
 //        multipleTelemetry.addData("Field Oriented state", fieldOriented);
 //        multipleTelemetry.addData("Arm pos", arm.pos());
-//        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower() * 1000);
+//        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower() * 100);
 //        multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
-//        multipleTelemetry.addData("Arm velocity", arm.calculateVelocity());
-//        multipleTelemetry.addData("Arm distance velocity", arm.calculateMaxVelocityToDistance());
+//        multipleTelemetry.addData("Arm velocity", arm.calculateVelocity() / 10);
 //        multipleTelemetry.addData("Arm target pos", arm.targetPos());
         multipleTelemetry.update();
     }

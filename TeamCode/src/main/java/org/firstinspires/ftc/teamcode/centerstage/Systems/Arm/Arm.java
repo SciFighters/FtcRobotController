@@ -11,12 +11,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
+import org.firstinspires.ftc.teamcode.centerstage.GLaDOSBlue;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GoToState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GraceHoldTimeState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.HoldState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.IdleState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.ManualState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
+import org.firstinspires.ftc.teamcode.centerstage.Systems.RobotControl;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
@@ -222,12 +224,18 @@ public class Arm extends Component {
     }
 
     public double alignToBoardTeleOp(Position position) {
-        double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
+        if (RobotControl.boardAlignSensor == -1) {
+            RobotControl.boardAlignSensor = Math.min(drive.getDistanceLeftSensorDistance(),
+                    drive.getDistanceRightSensorDistance()) == drive.getDistanceLeftSensorDistance() ? 1 : 2;
+        }
+
+        double distance = RobotControl.boardAlignSensor == 1 ?
+                drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
         double deltaDistance = position.distanceFromBackboard - distance;
 
         double gain = 0.023;
 
-        return MathUtil.clamp(deltaDistance * gain, -0.5, 0.5);
+        return MathUtil.clamp(deltaDistance * gain, -0.4, 0.4);
     }
 
     public double pow(double x) {
@@ -358,17 +366,24 @@ public class Arm extends Component {
         }
         if (!outOfDeadZone(power)) {
             power = 0;
-        } else if ((power < 0) && (touchSensor.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
-            return;
-        } else if (power > 0 && distanceSensorDistance() < higherLimit && pos() > 2000) {
-            if (power > 0.8) {
-                power = 0.3;
-            }
-            if (stateMachine.getCurrentState() == manualState) {
-                power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
+        } else if ((power < 0) && (touchSensor.isPressed())) {
+            power = 0;
+        } else if (power > 0 && pos() > 2000) {
+            double distanceSensorDist = distanceSensorDistance();
+            if (distanceSensorDist < lowerLimit)
+                power = 0.1;
+            else if (distanceSensorDist < higherLimit) {
+                if (power > 0.8) {
+                    power = 0.3;
+                }
+//                if (stateMachine.getCurrentState() == manualState) {
+//                    power = calculateMotorsPower(power, distanceSensorDist);
+//
+//                }
             }
         }
-        if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 && !robot.opModeInInit() && stateMachine.getCurrentState() == gotoState) {
+        if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 &&
+                !robot.opModeInInit() && stateMachine.getCurrentState() == gotoState) {
             power = -0.2;
         }
 //    power = calculateMotorsPower(power);
@@ -436,18 +451,19 @@ public class Arm extends Component {
         backServo.setPosition(0);
     }
 
-    public double calculateMotorsPower(double power) {
+    public double calculateMotorsPower(double power, double distance) {
         if (power == 0) {
             return 0;
         } else if (pos() < 1000) {
             return power;
         }
         double finalPower = power;
-        double kY = 0.03;
-        double avgMaxVelocity = 2700;
-        double minDist = 70;
+        double kY = GLaDOSBlue.kY;
+        double avgMaxVelocity = GLaDOSBlue.avgMaxVelocity;
+        double minDist = GLaDOSBlue.minDist;
         double kDistance = avgMaxVelocity / minDist;
-        finalPower = Math.min(power, distanceSensorDistance() * kY) - Math.max(0, calculateVelocity() - calculateMaxVelocityToDistance()) * 1 / 2900;
+        finalPower = Math.min(power, distance * kY) -
+                Math.max(0, calculateVelocity() - calculateMaxVelocityToDistance(distance)) * kDistance;
         return finalPower;
     }
 
@@ -455,8 +471,11 @@ public class Arm extends Component {
         return (pos() - lastArmPos) / (elapsedTime.seconds() - lastTime);
     }
 
-    public double calculateMaxVelocityToDistance() {
-        return distanceSensorDistance() * 45;
+    public double calculateMaxVelocityToDistance(double distance) {
+        double result = distance * GLaDOSBlue.avgMaxVelocityGain;
+        RobotControl.multipleTelemetry
+                .addData("Arm distance velocity", result / 10);
+        return result;
     }
 
     /**
