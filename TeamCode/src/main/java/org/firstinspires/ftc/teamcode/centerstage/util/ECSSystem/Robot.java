@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,11 +17,33 @@ import java.util.Map;
  * @see LinearOpMode
  */
 public abstract class Robot extends LinearOpMode {
+    /**
+     * The mapping of components to their corresponding threads.
+     * This map holds the components attached to the robot and their respective threads (if threaded).
+     */
     private final Map<Component, Thread> components = new HashMap<>();
+
+    /**
+     * The alliance of the robot (e.g., BLUE or RED).
+     * This field indicates the alliance color of the robot.
+     */
     public AutoFlow.Alliance alliance = AutoFlow.Alliance.BLUE;
+
+    /**
+     * The type of the robot program (e.g., Autonomous or TeleOp).
+     * This field denotes the type of the robot program being executed.
+     */
     public TYPE type;
-    public ElapsedTime elapsedTime;
-    protected Telemetry robotTelemetry = telemetry;
+
+    /**
+     * The elapsed time since the initialization of the robot.
+     */
+    private ElapsedTime elapsedTime;
+
+    /**
+     * The telemetry object used for communication with the driver station.
+     */
+    private Telemetry robotTelemetry;
 
     /**
      * Runs the main loop of the robot program.
@@ -32,47 +53,51 @@ public abstract class Robot extends LinearOpMode {
      */
     @Override
     public final void runOpMode() throws InterruptedException {
-        elapsedTime = new ElapsedTime();
-        elapsedTime.reset();
-        getTelemetry();
-        initRobot();
+        initialize();
         waitForStart();
         startComponents();
-        startComponentThreads();
         startRobot();
+        startComponentThreads();
         while (opModeIsActive() && !isStopRequested()) {
             updateLoop();
-            components.forEach((c, t) -> {
-                if (t == null && c.enabled) c.update();
-            });
+            updateComponents();
+            sleep(1);
         }
-
-        stopComponentThreads();
+        stopComponents();
     }
 
     /**
-     * Initializes the robot. Override this method to perform any necessary
-     * initialization steps for the robot.
+     * Initializes the robot and sets up essential components.
+     */
+    private void initialize() {
+        elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
+        retrieveTelemetry();
+        initRobot();
+    }
+
+    /**
+     * Initializes the robot.
+     * Override this method to perform any necessary initialization steps for the robot.
      */
     public abstract void initRobot();
 
     /**
-     * Starts the robot. Override this method to define actions that should
-     * be taken when the robot starts running.
+     * Starts the robot.
+     * Override this method to define actions that should be taken when the robot starts running.
      */
     public abstract void startRobot();
 
     /**
-     * The main update loop of the robot. Override this method to define the
-     * behavior that should be executed repeatedly during the program.
+     * The main update loop of the robot.
+     * Override this method to define the behavior that should be executed repeatedly during the program.
      */
     public void updateLoop() {
-//        requestOpModeStop();
     }
 
     /**
-     * Stops the robot. Override this method to define actions that should be
-     * taken when the robot is stopped.
+     * Stops the robot.
+     * Override this method to define actions that should be taken when the robot is stopped.
      */
     public void onStop() {
     }
@@ -91,14 +116,12 @@ public abstract class Robot extends LinearOpMode {
         }
 
         try {
-            initializeComponent(componentInstance); // <-- Potential cause of NullPointerException
+            initializeComponent(componentInstance);
             return getComponent(componentClass);
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Error adding component: " + e.getMessage(), e);
         }
     }
-
 
     /**
      * Adds a component to the robot.
@@ -120,44 +143,79 @@ public abstract class Robot extends LinearOpMode {
      * @return The component of the specified type or null if not found
      */
     public <T extends Component> T getComponent(Class<T> componentClass) {
-        for (Component component : components.keySet()) {
-            if (componentClass.isInstance(component)) {
-                return componentClass.cast(component);
+        synchronized (components) {
+            for (Component component : components.keySet()) {
+                if (component != null && componentClass.isInstance(component)) {
+                    return componentClass.cast(component);
+                }
             }
         }
         return null;
     }
 
+    /**
+     * Starts all the attached components.
+     */
     private void startComponents() {
-        components.keySet().forEach(Component::start);
+        synchronized (components) {
+            components.keySet().forEach(c -> {
+                c.componentState = Component.ComponentState.START;
+                c.start();
+                c.componentState = Component.ComponentState.IDLE;
+            });
+        }
     }
 
+    /**
+     * Starts threads for components that require them.
+     */
     private void startComponentThreads() {
-        components.values().forEach(t -> {
-            if (t != null) t.start();
-        });
+        synchronized (components) {
+            components.values().forEach(t -> {
+                if (t != null) t.start();
+            });
+        }
     }
 
-    private void stopComponentThreads() {
-        components.values().forEach(t -> {
-            if (t != null) t.interrupt();
-        });
+    /**
+     * Stops all the attached components and interrupts their threads.
+     */
+    private void stopComponents() {
+        synchronized (components) {
+            components.forEach((c, t) -> {
+                c.stop();
+                if (t != null) t.interrupt();
+            });
+        }
     }
 
+    /**
+     * Initializes a component and attaches it to the robot.
+     */
     private void initializeComponent(Component component) {
         if (component == null) {
-            throw new NullPointerException("COMPONENT IS NULL");
+            throw new IllegalArgumentException("Component cannot be null");
         }
+        component.componentState = Component.ComponentState.INIT;
         component.attach(this, robotTelemetry);
         Thread thread = createComponentThread(component);
-        components.put(component, thread);
-        component.init();
+        synchronized (components) {
+            components.put(component, thread);
+            component.init();
+            component.componentState = Component.ComponentState.IDLE;
+        }
     }
 
+    /**
+     * Creates a thread for the given component if it requires threading.
+     */
     private Thread createComponentThread(Component component) {
         return component.getClass().isAnnotationPresent(ThreadedComponent.class) ? new Thread(component) : null;
     }
 
+    /**
+     * Creates an instance of the given component class.
+     */
     private <T extends Component> T createComponentInstance(Class<T> componentClass) {
         try {
             return componentClass.getDeclaredConstructor().newInstance();
@@ -167,28 +225,43 @@ public abstract class Robot extends LinearOpMode {
     }
 
     /**
-     * Finds and sets the robot telemetry field using reflection.
-     * This method is called during initialization to set the telemetry object.
+     * Retrieves telemetry based on the type of the robot program.
      */
-    void getTelemetry() {
+    void retrieveTelemetry() {
         if (this.getClass().isAnnotationPresent(Autonomous.class)) {
             this.type = TYPE.Auto;
         } else {
             this.type = TYPE.TeleOp;
         }
-        for (Field f : getClass().getDeclaredFields()) {
-            try {
-                f.setAccessible(true);
-                if (f.isAnnotationPresent(RobotTelemetry.class) && f.get(this) instanceof Telemetry) {
-                    robotTelemetry = (Telemetry) f.get(this);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        robotTelemetry = telemetry;
     }
 
+    /**
+     * Updates all the attached components.
+     */
+    private void updateComponents() {
+//        synchronized (components) {
+            components.forEach((c, t) -> {
+                if (t == null && c.enabled) {
+                    c.update();
+                    c.componentState = Component.ComponentState.LOOPING;
+                }
+            });
+//        }
+    }
+
+    /**
+     * Represents the type of the robot program.
+     * It can be either Autonomous or TeleOp.
+     */
     public enum TYPE {
-        Auto, TeleOp
+        /**
+         * Represents an Autonomous robot program.
+         */
+        Auto,
+        /**
+         * Represents a TeleOp robot program.
+         */
+        TeleOp
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.util;
 
 import org.firstinspires.ftc.robotcore.external.Supplier;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 /**
  * Utility class.
@@ -31,6 +32,21 @@ public class Util {
 
         // Reset the interrupted status of the thread
         Thread.currentThread().interrupt();
+    }
+
+    public static Thread doAsync(Runnable runnable) {
+        Thread thread = new Thread(runnable);
+        thread.start();
+        return thread;
+    }
+
+    public static Thread loopAsync(Runnable runnable, Robot robot) {
+        return doAsync(() -> {
+            while (!robot.isStopRequested() && robot.opModeIsActive()) {
+                runnable.run();
+            }
+            Thread.currentThread().interrupt();
+        });
     }
 
     /**

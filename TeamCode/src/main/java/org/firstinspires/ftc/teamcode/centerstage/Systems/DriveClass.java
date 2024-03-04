@@ -19,8 +19,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
-import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
+import org.firstinspires.ftc.teamcode.centerstage.util.Util;
+import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
 import org.firstinspires.ftc.teamcode.power_play.util.RodLine;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvWebcam;
@@ -32,27 +33,27 @@ public class DriveClass extends Component {
     public final int MAX_IDLE_BREAK = 20;
     final double tile = 0.6;
     private final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+    private final boolean useEncoders;
+    private final boolean useBrake;
+    private final boolean useDashboardField;
+    private final boolean fieldOriented = true;
+    private final RodLine rodPipline = new RodLine().useYellow();
+    private final RodLine towerPipline = new RodLine();
+    private final ROBOT robotType;
+    private final Location startingPosition;
     public boolean busy;
     volatile public DcMotorEx fl = null;
     DriveMode mode;
     ElapsedTime timer = new ElapsedTime();
-    private boolean useEncoders;
-    private boolean useBrake;
-    private boolean useDashboardField;
     volatile private DcMotorEx fr = null;
     volatile private DcMotorEx bl = null;
     volatile private DcMotorEx br = null;
     private BNO055IMU imu = null;
-    private boolean fieldOriented = true;
     private double angleOffset = 0;
     private int fl_startPos = 0;
     private int fr_startPos = 0;
     private int bl_startPos = 0;
     private int br_startPos = 0;
-    private RodLine rodPipline = new RodLine().useYellow();
-    private RodLine towerPipline = new RodLine();
-    private ROBOT robotType;
-    private Location startingPosition;
     private double forwardTicksPerMeter;
     private double strafeTicksPerMeter;
     private DistanceSensor leftDistanceSensor, rightDistanceSensor;
@@ -394,6 +395,17 @@ public class DriveClass extends Component {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, false);
     }
 
+    public double goToLocation(Location location, GotoSettings settings, Runnable midwayAction) {
+        return goToAndOperate(location, settings, midwayAction);
+    }
+
+    private double goToAndOperate(Location location, GotoSettings settings, Runnable midwayAction) {
+        Thread thread = Util.loopAsync(midwayAction, robot);
+        double goToResult = goToLocation(location, settings);
+        thread.interrupt();
+        return goToResult;
+    }
+
     public double goToLocation(Location location, double power, double targetHeading, double tolerance, double timeout, boolean noSlowdown) {
         return goTo(location.x, location.y, power, targetHeading, tolerance, timeout, noSlowdown);
     }
@@ -434,7 +446,9 @@ public class DriveClass extends Component {
 
     public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout, boolean superSpeed) {
         int goToIdle = 0; //if not moving
+        int stuckTries = 0;
         boolean isCheckingIdle = false;
+
         double lastX = 0;
         double lastY = 0;
 
@@ -447,6 +461,7 @@ public class DriveClass extends Component {
         double remainDist = 0;
 
 
+        Location returnToPosAfterStuck = new Location(startX, startY);
         //double totalDist = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
         double totalDist = Math.hypot(deltaX, deltaY);
         double currentDist = 0;
@@ -462,8 +477,7 @@ public class DriveClass extends Component {
         // timer delta variables
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
-
-        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance))) {
+        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance)) && !robot.isStopRequested() && stuckTries < 15) {
 
             double power = targetPower;
 
@@ -532,7 +546,18 @@ public class DriveClass extends Component {
             double dy = lastY - currentY;
             double velocity = Math.hypot(dx, dy) / timeDelta;
             //Log.d("velocity", String.valueOf(velocity));
-            if (remainDist < 0.25 && Math.abs(velocity) < velocityRange) goToIdle += 1;
+            if (remainDist < 0.25 && Math.abs(velocity) < velocityRange) {
+                goToIdle += 1;
+            }
+
+            if (Math.abs(currentX - lastX) < 0.02 && Math.abs(velocity) < velocityRange) {
+                stuckTries += 1;
+                returnToPosAfterStuck = new Location(getPosX(), getPosY());
+            }
+            if (stuckTries >= 14) {
+                goToLocation(returnToPosAfterStuck, targetPower, targetHeading, tolerance, timeout, superSpeed);
+                break;
+            }
             lastX = currentX;
             lastY = currentY;
             if (goToIdle >= MAX_IDLE_BREAK) {
@@ -702,7 +727,7 @@ public class DriveClass extends Component {
             if (zeroOnTargetOnes()) break;
             robot.sleep(10);
         }
-        Log.d("Sci", String.format("zeroOnTarget =============================================================="));
+        Log.d("Sci", "zeroOnTarget ==============================================================");
         setPower(0, 0, 0);
     }
 
@@ -711,7 +736,7 @@ public class DriveClass extends Component {
         COBALT,
         JACCOUSE,
         CONSTANTIN,
-        GLADOS;
+        GLADOS
     }
 
     // DriveMode - (direction & origin of IMU_Integrator)
@@ -731,7 +756,7 @@ public class DriveClass extends Component {
     }
 
     public enum Axis {
-        x, y;
+        x, y
     }
 
     public static class GotoSettings {

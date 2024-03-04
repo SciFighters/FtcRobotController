@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
@@ -10,7 +11,6 @@ import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
-import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 
@@ -21,8 +21,6 @@ public class RobotControl extends Component {
     DriveClass drive;
     Arm arm;
     IntakeSystem intakeSystem;
-//    AprilTagDetector aprilTagDetector;
-
     // Telemetry and dashboard
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
@@ -31,7 +29,6 @@ public class RobotControl extends Component {
 
     // Control variables
     boolean fieldOriented = true;
-    boolean allowMovement = true;
     double angle = 0;
     double targetHeading;
     int turningCount = 0;
@@ -42,6 +39,8 @@ public class RobotControl extends Component {
     double armBoost;
     DroneLauncher droneLauncher;
     double allianceDefaultHeading = 90;
+    ElapsedTime lastFrameTimer;
+    double lastTime;
 
     @Override
     public void init() {
@@ -54,14 +53,35 @@ public class RobotControl extends Component {
 
     @Override
     public void start() {
+        lastFrameTimer = new ElapsedTime();
+        telemetry.addData(">", "Init finished. Press START");
+        telemetry.update();
+
+        telemetry.addData(">", "DRIVE START");
+        telemetry.update();
+        drive.start();
+        drive.resetOrientation(allianceDefaultHeading);
+        telemetry.addData(">", "DRIVE START DONE");
+
+        telemetry.addData(">", "INTAKE SYSTEM START");
+        telemetry.update();
+        intakeSystem.start();
         intakeSystem.stopIntake();
         intakeSystem.spinMotor();
-        // Initialize input and start subsystems
-        Input.init(robot, robot.gamepad1, robot.gamepad2);
-        targetHeading = drive.getHeading();
-        drive.resetOrientation(allianceDefaultHeading);
-        intakeSystem.start();
+        telemetry.addData(">", "INTAKE SYSTEM START DONE");
+        telemetry.update();
+
         arm.start();
+        // Initialize input and start subsystems
+//        Input.init(robot, robot.gamepad1, robot.gamepad2);
+        targetHeading = drive.getHeading();
+        gamepad1.runRumbleEffect(rumbleEffect);
+        Thread armControlThread = new Thread(() -> {
+            while (robot.opModeIsActive() && !robot.isStopRequested()) {
+                this.updateArmAndIntake();
+            }
+        });
+        armControlThread.start();
     }
 
 
@@ -77,33 +97,24 @@ public class RobotControl extends Component {
 
     @Override
     public void update() {
-        // Handle force quit command
-        handleForceQuit();
-        // Update Arm and Intake subsystems
-        updateArmAndIntake();
-
-        // Update driving controls
+        lastTime = lastFrameTimer.seconds();
         updateDriving();
+        updateTelemetry();
     }
 
     // Method to update Arm and Intake subsystems
     private void updateArmAndIntake() {
+        armBoost = (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) ? 0.4 : 1;
+
         if (gamepad2.start) {
             return;
         }
         // Arm control based on gamepad input
-        armBoost = (gamepad2.left_trigger > 0 || gamepad2.right_trigger > 0) ? 0.4 : 1;
-        if (Math.abs(gamepad2.left_stick_y) > 0.05) {
+        else if (Math.abs(gamepad2.left_stick_y) > 0.05) {
             arm.setPower(pow(-gamepad2.left_stick_y) * armBoost);
-        } else if (gamepad2.y) {
-            armGotoLevel(Arm.Position.Three);
-        } else if (gamepad2.b) {
-            armGotoLevel(Arm.Position.Two);
         } else if (gamepad2.a) {
-            armGotoLevel(Arm.Position.One);
-        } else if (gamepad2.x) {
             armGotoLevel(Arm.Position.Home);
-        } else if (gamepad1.b && !gamepad1.start) {
+        } else if (gamepad2.b) {
             arm.hang();
         } else {
             arm.setMotorsPower(0);
@@ -121,7 +132,7 @@ public class RobotControl extends Component {
             arm.closeClaw(false);
         } else if (gamepad2.right_stick_button) {
             intakeSystem.spit(); // start spit
-        } else if (gamepad2.dpad_left) {
+        } else if (gamepad2.y) {
             arm.dropBottomPixel();
         }
     }
@@ -130,11 +141,19 @@ public class RobotControl extends Component {
     private void updateDriving() {
         robotOrientedToggle.update(gamepad1.ps);
         // Check for reorientation command
-        if (gamepad1.start && gamepad1.x) {
-            drive.resetHeading(allianceDefaultHeading);
-//            gamepad1.runRumbleEffect(rumbleEffect);
-            targetHeading = drive.getHeading();
+        if (gamepad1.start) {
+            if (gamepad1.x) {
+                drive.resetHeading(allianceDefaultHeading);
+                gamepad1.runRumbleEffect(rumbleEffect);
+                targetHeading = drive.getHeading();
+            }
             return;
+        } else if (gamepad1.a) {
+            arm.alignToBoard(Arm.Position.One);
+        } else if (gamepad1.b) {
+            arm.alignToBoard(Arm.Position.Two);
+        } else if (gamepad1.y) {
+            arm.alignToBoard(Arm.Position.Three);
         }
         // Boost factor for driving speed
         double boost = (gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1.5 : 0.6;
@@ -142,18 +161,18 @@ public class RobotControl extends Component {
         // Drive control based on gamepad input
         double y = pow(-gamepad1.left_stick_y) * boost;
         double x = pow(gamepad1.left_stick_x) * boost;
-        double turn = pow(gamepad1.right_stick_x) * boost;
+        double turn = pow(gamepad1.right_stick_x / 1.7) * boost;
 
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
 //         Reset turning count if toggle is released
         if (turningToggle.isReleased()) {
-            turningCount = 8;
+            turningCount = 12;
         }
 
         // Decrease turning count if toggle is not pressed
-        if (!turningToggle.isPressed()) {
+        else if (!turningToggle.isPressed()) {
             turningCount--;
         }
 
@@ -162,9 +181,14 @@ public class RobotControl extends Component {
             targetHeading = drive.getHeading();
         }
         // Apply rotation fix if turning count is less than zero
-        if (gamepad1.a && !gamepad1.share) {
-            double delta = drive.getDeltaHeading(robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180);
+        if (gamepad1.right_bumper) {
             targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180;
+            double delta = drive.getDeltaHeading(targetHeading);
+            double gain = 0.02;
+            turn = delta * gain;
+        } else if (gamepad1.left_bumper) {
+            targetHeading = 90 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
+            double delta = drive.getDeltaHeading(targetHeading);
             double gain = 0.02;
             turn = delta * gain;
         } else if (!turningToggle.isPressed() && turningCount < 0 && !gamepad1.a) {
@@ -173,29 +197,17 @@ public class RobotControl extends Component {
             turn = delta * gain;
         }
 
-        if (gamepad1.touchpad_finger_1) {
-            if (gamepad1.b) setAlliance(AutoFlow.Alliance.RED);
-            else if (gamepad1.a) setAlliance(AutoFlow.Alliance.BLUE);
-            drive.resetHeading(allianceDefaultHeading);
-        }
         if (robotOrientedToggle.isClicked()) {
             fieldOriented = !fieldOriented;
         }
         // Perform dpad-specific actions
-        if (gamepad1.dpad_left) drive.setPowerOriented(0, -0.3, 0, fieldOriented);
+        else if (gamepad1.dpad_left) drive.setPowerOriented(0, -0.3, 0, fieldOriented);
         else if (gamepad1.dpad_right) drive.setPowerOriented(0, 0.3, 0, fieldOriented);
         else if (gamepad1.dpad_up) drive.setPowerOriented(0.3, 0, 0, fieldOriented);
         else if (gamepad1.dpad_down) drive.setPowerOriented(-0.3, 0, 0, fieldOriented);
-        else if (!arm.isPlacePixelBusy) {
-            drive.setPowerOriented(y, x, turn, fieldOriented);
-            allowMovement = true;
-            // Update telemetry
-            telemetry.addData("Y POWER", y);
-            updateTelemetry();
-        }
-
+        else drive.setPowerOriented(y, x, turn, fieldOriented);
         //region hang and drone
-        if (gamepad1.y && !gamepad1.start && !gamepad1.share) {
+        if (gamepad1.share) {
             droneLauncher.launch();
         }
         //endregion
@@ -204,24 +216,13 @@ public class RobotControl extends Component {
     // Method to initialize robot subsystems
     private void initSystems() {
         telemetry.addData(">", "Init in progress...");
+        telemetry.update();
         // Initialize telemetry
         telemetryInit();
-        robot.addComponent(Arm.class, new Arm());
-        arm = robot.getComponent(Arm.class);
-        // Add robot components
-        robot.addComponent(IntakeSystem.class);
-        intakeSystem = robot.getComponent(IntakeSystem.class);
+        arm = robot.addComponent(Arm.class);
+        intakeSystem = robot.addComponent(IntakeSystem.class);
         drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
-
-        robot.addComponent(DroneLauncher.class, new DroneLauncher());
-        droneLauncher = robot.getComponent(DroneLauncher.class);
-        // Initialize AprilTag detector
-//        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), hardwareMap, multipleTelemetry,
-//                AprilTagDetector.PortalConfiguration.DEFAULT);
-
-        // Display initialization completion message
-        telemetry.addData(">", "Init finished. Press START");
-        telemetry.update();
+        droneLauncher = robot.addComponent(DroneLauncher.class);
     }
 
     // Method to apply power function
@@ -246,19 +247,16 @@ public class RobotControl extends Component {
     // Method to update telemetry data
     private void updateTelemetry() {
         // Display relevant telemetry data
+        multipleTelemetry.addData("Time since last update", (lastFrameTimer.seconds() - lastTime));
         multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
-//        multipleTelemetry.addData("tags detected ", aprilTagDetector.getDetections().size());
-        multipleTelemetry.addData("Allow Movement", allowMovement);
-        multipleTelemetry.addData("Motor ticks: ", drive.fl.getCurrentPosition());
         multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
         multipleTelemetry.addData("Field Oriented state", fieldOriented);
         multipleTelemetry.addData("Arm pos", arm.pos());
-        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower());
-        multipleTelemetry.addData("Arm target pos", arm.targetPos());
-        multipleTelemetry.addData("Field oriented", fieldOriented);
-        multipleTelemetry.addData("Arm controlled power", pow(-robot.gamepad2.left_stick_y) * armBoost);
+//        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower() * 1000);
         multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
-        multipleTelemetry.addData("Alliance", robot.alliance.toString());
+//        multipleTelemetry.addData("Arm velocity", arm.calculateVelocity());
+//        multipleTelemetry.addData("Arm distance velocity", arm.calculateMaxVelocityToDistance());
+//        multipleTelemetry.addData("Arm target pos", arm.targetPos());
         multipleTelemetry.update();
     }
 
@@ -269,10 +267,6 @@ public class RobotControl extends Component {
             arm.closeClaw(true);
             intakeSystem.stopIntake();
         }
-        if (position.distanceFromBackboard != -1) {
-            arm.placePixels(position);
-        } else {
-            arm.goToPos(position);
-        }
+        arm.goToPos(position);
     }
 }

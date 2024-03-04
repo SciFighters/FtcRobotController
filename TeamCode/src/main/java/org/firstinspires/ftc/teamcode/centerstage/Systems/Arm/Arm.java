@@ -40,11 +40,14 @@ public class Arm extends Component {
     public StateMachine<Arm> stateMachine;
     public boolean isPlacePixelBusy = false;
     DriveClass drive;
+    ElapsedTime elapsedTime;
     private int targetPos;
     private ElapsedTime timer;
     // Constants for proportional control in GoToState
     private Servo frontServo, backServo;
     private DistanceSensor distanceSensor;
+    private int lastArmPos;
+    private double lastTime = 0;
 
     public Arm() {
 
@@ -55,6 +58,7 @@ public class Arm extends Component {
      */
     @Override
     public void init() {
+        elapsedTime = new ElapsedTime();
         initStateMachine();
         this.timer = new ElapsedTime();
         this.lift1 = hardwareMap.get(DcMotorEx.class, "lift1");
@@ -115,7 +119,7 @@ public class Arm extends Component {
         lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (!touchSensor.isPressed()) {
-            while (!touchSensor.isPressed() && (!robot.isStopRequested())) {
+            while (!touchSensor.isPressed() && (!robot.isStopRequested()) && timer.seconds() < 2) {
                 setMotorsPower(-0.3);
                 telemetry.addData("BUTTON STATUS: ", touchSensor.isPressed());
                 telemetry.update();
@@ -132,13 +136,16 @@ public class Arm extends Component {
      */
     @Override
     public void update() {
+        lastArmPos = pos();
+        lastTime = elapsedTime.seconds();
+
         handleStates();
 //        if (pos() < 800 && pos() > 60 && intakeSystem.state() != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
 //            intakeSystem.setStateAvoidArm();
 //        }
-        if ((Math.abs(robot.gamepad2.left_stick_x) > 0.05 || Math.abs(robot.gamepad2.left_stick_y) > 0.05) && holdPower != 0.1) {
-            holdPower = 0.1;
-        }
+//        if ((Math.abs(robot.gamepad2.left_stick_x) > 0.05 || Math.abs(robot.gamepad2.left_stick_y) > 0.05) && holdPower != 0.1) {
+//            holdPower = 0.1;
+//        }
     }
 
     /**
@@ -186,14 +193,17 @@ public class Arm extends Component {
     }
 
     public void alignToBoard(Position position) {
-        double targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180 - (robot.type == Robot.TYPE.Auto ? 90 : 0);
+        double targetHeading = (robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180) - (robot.type == Robot.TYPE.Auto ? 90 : 0);
         ElapsedTime timer = new ElapsedTime();
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
         while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5) && timer.seconds() < 3) {
-            double gain = 0.018 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
+            double gain = 0.023 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double deltaAngle = drive.getDeltaHeading(targetHeading);
             double turn = deltaAngle * gain / 2;
             double delta = position.distanceFromBackboard - distance;
+            if (delta > 100) {
+                break;
+            }
             if (robot.type == Robot.TYPE.Auto) {
                 gain *= -1;
             }
@@ -208,8 +218,11 @@ public class Arm extends Component {
 //                break;
 //            }
         }
-        if (robot.type == Robot.TYPE.Auto)
-            drive.setPowerOriented(0, 0, 0, true);
+        if (robot.type == Robot.TYPE.Auto) drive.setPowerOriented(0, 0, 0, true);
+    }
+
+    public void alignToBoardIter(Position position) {
+
     }
 
     public double pow(double x) {
@@ -264,8 +277,8 @@ public class Arm extends Component {
         } else {
             lift1.setTargetPosition(targetPos);
             lift2.setTargetPosition(targetPos);
-            lift1.setTargetPositionTolerance(4);
-            lift2.setTargetPositionTolerance(4);
+            lift1.setTargetPositionTolerance(10);
+            lift2.setTargetPositionTolerance(10);
             lift1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             lift2.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             setMotorsPower(power);
@@ -277,11 +290,15 @@ public class Arm extends Component {
      */
     public void handleStates() {
         stateMachine.execute();
-        if (targetPos() == 0 && !touchSensor.isPressed() && (int) timer.seconds() % 2 == 0 && lift1.getPower() == 0) {
-            resetArm();
-        } else if (touchSensor.isPressed() && pos() != 0 && targetPos() == 0) {
+        if (targetPos() == 0) {
+            if (!touchSensor.isPressed() &&
+                    (int) timer.seconds() % 2 == 0 &&
+                    (lift1.getPower() == 0 || stateMachine.getCurrentState() == holdState)) {
+                resetArm();
+            } else if (touchSensor.isPressed() && pos() != 0) {
 //            resetArm();
-            resetArmPos();
+                resetArmPos();
+            }
         }
     }
 
@@ -330,33 +347,26 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        int higherLimit = 40, lowerLimit = 5;
+        int higherLimit = 65, lowerLimit = 10;
         if (stateMachine.getCurrentState() == gotoState) {
-            higherLimit = 60;
+            higherLimit = 100;
         }
         if (!outOfDeadZone(power)) {
             power = 0;
         } else if ((power < 0) && (touchSensor.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
             return;
-        } else if (pos() < 800 && outOfDeadZone(power)) {
-//            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
         } else if (distanceSensorDistance() < higherLimit && pos() > 2000 && power > 0) {
-            if (stateMachine.getCurrentState() == gotoState && targetPos() < pos()) {
-            } else {
+            if (power > 0.8) {
+                power = 0.3;
+            }
+            if (stateMachine.getCurrentState() == manualState) {
                 power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
             }
-        } // else if (pos() < 1000 && pos() > 60 && intakeSystem.state != IntakeSystem.WheelsState.Collect && !intakeSystem.initTime) {
-//            intakeSystem.state = IntakeSystem.WheelsState.AvoidArm;
-//            intakeSystem.setServoPos(IntakeSystem.ServoPos.Mid);
-//            intakeSystem.spinMotor();
-//        }
-//        if (outOfDeadZone(power) && power > 0 && intakeSystem.state == IntakeSystem.WheelsState.Collect) {
-//            setClawPosition(true);
-//            intakeSystem.setStateIdle();
-//        }
-        if (targetPos() == 0 && pos() < 400 && !robot.opModeInInit()) {
+        }
+        if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 && !robot.opModeInInit() && stateMachine.getCurrentState() == gotoState) {
             power = -0.2;
         }
+//    power = calculateMotorsPower(power);
         lift1.setPower(power);
         lift2.setPower(power);
     }
@@ -412,17 +422,6 @@ public class Arm extends Component {
         return this.deadZone;
     }
 
-    public void goHome() {
-        closeClaw(false);
-        goToPos(0);
-    }
-
-    public void dropAndReturn() {
-        closeClaw(false);
-        robot.sleep(300);
-        goToPos(0);
-    }
-
     public void hang() {
         holdPower = 0.15;
         goToPos(Position.Hang);
@@ -430,6 +429,29 @@ public class Arm extends Component {
 
     public void dropBottomPixel() {
         backServo.setPosition(0);
+    }
+
+    public double calculateMotorsPower(double power) {
+        if (power == 0) {
+            return 0;
+        } else if (pos() < 1000) {
+            return power;
+        }
+        double finalPower = power;
+        double kY = 0.03;
+        double avgMaxVelocity = 2700;
+        double minDist = 70;
+        double kDistance = avgMaxVelocity / minDist;
+        finalPower = Math.min(power, distanceSensorDistance() * kY) - Math.max(0, calculateVelocity() - calculateMaxVelocityToDistance()) * 1 / 2900;
+        return finalPower;
+    }
+
+    public double calculateVelocity() {
+        return (pos() - lastArmPos) / (elapsedTime.seconds() - lastTime);
+    }
+
+    public double calculateMaxVelocityToDistance() {
+        return distanceSensorDistance() * 45;
     }
 
     /**

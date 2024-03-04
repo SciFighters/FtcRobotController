@@ -8,22 +8,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Represents a sequence of waypoints to navigate through during autonomous mode.
+ * Represents a sequence of steps to navigate through during autonomous mode.
  * This class provides methods to execute the path step by step or all at once.
  */
 public class AutoPath {
     private static DriveClass drive;
     private static Location prevLocation;
-    private final ArrayList<Waypoint> path;
+    private final ArrayList<Marker> path;
     public Location startLocation;
     private int currentLocationIndex = 0;
 
     /**
-     * Constructs an AutoPath object with the specified drive system, start location, and waypoints.
+     * Constructs an AutoPath object with the specified drive system, start location, and steps.
      *
      * @param robot         The robot instance to control robot movement.
      * @param startLocation The starting location of the robot.
-     * @param waypoints     The list of waypoints defining the path.
+     * @param waypoints     The list of steps defining the path.
      * @see Waypoint
      */
     private AutoPath(Robot robot, Location startLocation, Waypoint... waypoints) {
@@ -47,12 +47,15 @@ public class AutoPath {
             throw new RuntimeException("Cannot go negative amount of steps");
         } else {
             for (int i = 0; i < steps; i++) {
-                Waypoint current = path.get(currentLocationIndex);
-                current.run();
-                if (current.type == Waypoint.Type.Step)
-                    prevLocation = prevLocation.add(current.locationDelta);
-                else {
-                    prevLocation = current.locationDelta;
+                Marker current = path.get(currentLocationIndex);
+                if (path.get(currentLocationIndex) instanceof Waypoint) {
+                    Waypoint currentWaypoint = (Waypoint) current;
+                    current.run();
+                    if (currentWaypoint.type == Waypoint.Type.Step)
+                        prevLocation = prevLocation.add(currentWaypoint.locationDelta);
+                    else {
+                        prevLocation = currentWaypoint.locationDelta;
+                    }
                 }
                 skip();
             }
@@ -67,9 +70,9 @@ public class AutoPath {
     }
 
     /**
-     * Skips a specified number of waypoints in the path.
+     * Skips a specified number of steps in the path.
      *
-     * @param amount The number of waypoints to skip.
+     * @param amount The number of steps to skip.
      */
     public void skip(int amount) {
         currentLocationIndex += amount;
@@ -90,20 +93,23 @@ public class AutoPath {
     }
 
     /**
-     * Flips the Y axis of all waypoints in the path.
+     * Flips the Y axis of all steps in the path.
      */
     public void flipY() {
         for (int i = 0; i < path.size(); i++) {
-            Waypoint newW = path.get(i);
-            if (newW.type == Waypoint.Type.StaticWaypoint)
-                continue;
-            newW.locationDelta.flipY();
-            path.set(i, newW);
+            Marker marker = path.get(i);
+            if (marker instanceof Waypoint) {
+                Waypoint newW = (Waypoint) marker;
+                if (newW.type == Waypoint.Type.StaticWaypoint)
+                    continue;
+                newW.locationDelta.flipY();
+                path.set(i, newW);
+            }
         }
     }
 
     /**
-     * Flips the X axis of all waypoints in the path.
+     * Flips the X axis of all steps in the path.
      */
     public void flipX() {
         for (Waypoint waypoint : path.toArray(new Waypoint[0])) {
@@ -114,7 +120,7 @@ public class AutoPath {
     /**
      * Represents a single waypoint in the path.
      */
-    public static class Waypoint {
+    public static class Waypoint extends Marker {
         public Location locationDelta;
         public DriveClass.GotoSettings settings;
         public Type type = Type.Step;
@@ -132,12 +138,13 @@ public class AutoPath {
             this.locationDelta = locationDelta;
             this.settings = settings;
             this.type = type;
+            this.runFunction = this::runWaypoint;
         }
 
         /**
          * Executes movement to reach the waypoint's location using the specified settings.
          */
-        public void run() {
+        public void runWaypoint() {
             Location location = locationDelta;
             if (locationDelta.x == 0 && locationDelta.y == 0) {
                 drive.turnTo(locationDelta.angle, settings.power / 2);
@@ -164,7 +171,7 @@ public class AutoPath {
      * Builder class for constructing AutoPath objects.
      */
     public static class Builder {
-        private final ArrayList<Waypoint> waypoints = new ArrayList<>();
+        private final ArrayList<Marker> steps = new ArrayList<>();
 
         /**
          * Adds a waypoint to the path with the specified movement settings.
@@ -175,7 +182,7 @@ public class AutoPath {
          * @see Location
          */
         public Builder addStep(Location location, DriveClass.GotoSettings settings) {
-            return add(location, settings, Waypoint.Type.Step);
+            return addWaypointInternal(location, settings, Waypoint.Type.Step);
         }
 
         /**
@@ -187,7 +194,7 @@ public class AutoPath {
          * @see Location
          */
         public Builder addLocation(Location location, DriveClass.GotoSettings settings) {
-            return add(location, settings, Waypoint.Type.Location);
+            return addWaypointInternal(location, settings, Waypoint.Type.Location);
         }
 
         /**
@@ -199,38 +206,7 @@ public class AutoPath {
          * @see Location
          */
         public Builder addStaticWaypoint(Location location, DriveClass.GotoSettings settings) {
-            return add(location, settings, Waypoint.Type.StaticWaypoint);
-        }
-
-        /**
-         * Cuts a section of the path defined by indices from 'from' to 'to'.
-         *
-         * @param from The starting index of the section to cut.
-         * @param to   The ending index of the section to cut.
-         * @param path The {@link AutoPath} object from which to cut the section.
-         * @return A new {@link Builder} instance containing the cut section.
-         */
-        public Builder cut(int from, int to, AutoPath path) {
-            Builder builder = new Builder();
-            for (int i = from; i <= to; i++) {
-                Waypoint waypoint = path.path.get(i);
-                builder.add(waypoint.locationDelta, waypoint.settings, waypoint.type);
-            }
-            return builder;
-        }
-
-        /**
-         * Combines another {@link Builder} instance with this one.
-         *
-         * @param other The other {@link Builder} instance to combine.
-         * @return This {@link Builder} instance after combining.
-         */
-        public Builder combine(Builder other) {
-            for (int i = 0; i < other.waypoints.size(); i++) {
-                Waypoint waypoint = other.waypoints.get(i);
-                this.add(waypoint.locationDelta, waypoint.settings, waypoint.type);
-            }
-            return this;
+            return addWaypointInternal(location, settings, Waypoint.Type.StaticWaypoint);
         }
 
         /**
@@ -244,8 +220,18 @@ public class AutoPath {
          * @see #addStep(Location, DriveClass.GotoSettings)
          * @see #addStaticWaypoint(Location, DriveClass.GotoSettings)
          */
-        private Builder add(Location location, DriveClass.GotoSettings settings, Waypoint.Type type) {
-            waypoints.add(new Waypoint(location, settings, type));
+        private Builder addWaypointInternal(Location location, DriveClass.GotoSettings settings, Waypoint.Type type) {
+            steps.add(new Waypoint(location, settings, type));
+            return this;
+        }
+
+        public Builder addAction(Runnable action) {
+            steps.add(new Marker() {
+                @Override
+                public void run() {
+                    action.run();
+                }
+            });
             return this;
         }
 
@@ -258,10 +244,18 @@ public class AutoPath {
          */
         public AutoPath build(Robot robot, Location startLocation) {
             try {
-                return new AutoPath(robot, startLocation, waypoints.toArray(new Waypoint[0]));
+                return new AutoPath(robot, startLocation, steps.toArray(new Waypoint[0]));
             } catch (Exception e) {
                 return null;
             }
+        }
+    }
+
+    public static abstract class Marker {
+        Runnable runFunction;
+
+        public void run() {
+            runFunction.run();
         }
     }
 }

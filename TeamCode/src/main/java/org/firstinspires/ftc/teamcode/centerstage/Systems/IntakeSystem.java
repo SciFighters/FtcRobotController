@@ -8,7 +8,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 
+@ThreadedComponent
 public class IntakeSystem extends Component {
     public State state = State.Idle, prevState = State.Idle;
     public boolean initTime = true;
@@ -18,6 +20,7 @@ public class IntakeSystem extends Component {
     ElapsedTime pixelHereTimer;
     Arm arm;
     ColorSensor farPixelColorSensor;
+    ColorSensor nearPixelColorSensor;
     boolean pixelHere;
     private boolean justStopped;
     private boolean isBusy;
@@ -33,6 +36,7 @@ public class IntakeSystem extends Component {
         if (state() == State.Collect) {
             justStopped = true;
             timer.reset();
+            arm.closeClaw(true);
         }
         setState(State.Idle);
     }
@@ -48,31 +52,36 @@ public class IntakeSystem extends Component {
     @Override
     public void init() {
         initTime = true;
+        this.arm = robot.getComponent(Arm.class);
         motor = hardwareMap.get(DcMotorEx.class, "intakeWheelsMotor");
+
         farPixelColorSensor = hardwareMap.get(ColorSensor.class, "farPixelColorSensor");
+        nearPixelColorSensor = hardwareMap.get(ColorSensor.class, "nearPixelColorSensor");
 
         intakeServo1 = hardwareMap.get(Servo.class, "intakeServo1");
         intakeServo2 = hardwareMap.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
+        timer = new ElapsedTime();
         stopIntake();
         initTime = false;
     }
 
     @Override
     public void start() {
-        timer = new ElapsedTime();
         pixelHereTimer = new ElapsedTime();
-        this.arm = robot.getComponent(Arm.class);
     }
 
     @Override
     public void update() {
         spinMotor();
 
-        if (farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000 && state() == State.Collect) {
+        boolean farPixelDetected = farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.blue() > 1000;
+        boolean nearPixelDetected = nearPixelColorSensor.red() > 1000 || nearPixelColorSensor.green() > 1000 || nearPixelColorSensor.blue() > 1000;
+
+        if ((farPixelDetected && nearPixelDetected) && state() == State.Collect) {
             if (!pixelHere && pixelHereTimer == null) {
                 pixelHereTimer = new ElapsedTime();
-            } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1.3) {
+            } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1) {
                 pixelHereTimer = null;
                 pixelHere = true;
                 stopIntake();
@@ -80,8 +89,8 @@ public class IntakeSystem extends Component {
         } else {
             pixelHere = false;
         }
-        telemetry.addData("pixelHere: ", pixelHere);
     }
+
 
     public void setServoPos(double pos) {
         intakeServo1.setPosition(pos);

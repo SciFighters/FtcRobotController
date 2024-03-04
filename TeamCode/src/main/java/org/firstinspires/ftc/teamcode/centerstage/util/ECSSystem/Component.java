@@ -32,6 +32,7 @@ public abstract class Component implements Runnable {
      * Flag indicating whether the component is enabled.
      */
     public boolean enabled = true;
+    public ComponentState componentState = ComponentState.IDLE;
 
     /**
      * Initializes the component.
@@ -66,9 +67,9 @@ public abstract class Component implements Runnable {
      */
     public final void run() {
         while (robot.opModeIsActive() && !robot.isStopRequested() && !robot.opModeInInit()) {
-            update();
-//            robot.idle();
-//            robot.sleep(1);
+            if (this.enabled) {
+                update();
+            }
         }
     }
 
@@ -83,5 +84,9 @@ public abstract class Component implements Runnable {
         this.robot = robot;
         this.hardwareMap = robot.hardwareMap;
         this.telemetry = telemetry;
+    }
+
+    public enum ComponentState {
+        IDLE, INIT, START, LOOPING, STOPPED
     }
 }

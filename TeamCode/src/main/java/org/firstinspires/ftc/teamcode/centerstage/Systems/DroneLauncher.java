@@ -12,15 +12,15 @@ public class DroneLauncher extends Component {
     @Override
     public void init() {
         droneLauncherServo = hardwareMap.get(Servo.class, "droneLauncherServo");
-        droneLauncherServo.setPosition(0);
+        droneLauncherServo.setPosition(0.5);
     }
 
     public void launch() {
         droneLauncherServo.setPosition(1);
     }
 
-    @Override
-    public void stop() {
-        droneLauncherServo.setPosition(0);
-    }
+//    @Override
+//    public void stop() {
+//        droneLauncherServo.setPosition(0);
+//    }
 }
