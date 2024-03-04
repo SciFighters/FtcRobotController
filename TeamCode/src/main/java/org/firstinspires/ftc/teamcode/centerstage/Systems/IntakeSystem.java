@@ -74,20 +74,21 @@ public class IntakeSystem extends Component {
     @Override
     public void update() {
         spinMotor();
+        if (state == State.Collect) {
+            boolean farPixelDetected = farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.blue() > 1000;
+            boolean nearPixelDetected = nearPixelColorSensor.red() > 1000 || nearPixelColorSensor.green() > 1000 || nearPixelColorSensor.blue() > 1000;
 
-        boolean farPixelDetected = farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.blue() > 1000;
-        boolean nearPixelDetected = nearPixelColorSensor.red() > 1000 || nearPixelColorSensor.green() > 1000 || nearPixelColorSensor.blue() > 1000;
-
-        if ((farPixelDetected && nearPixelDetected) && state() == State.Collect) {
-            if (!pixelHere && pixelHereTimer == null) {
-                pixelHereTimer = new ElapsedTime();
-            } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1) {
-                pixelHereTimer = null;
-                pixelHere = true;
-                stopIntake();
+            if ((farPixelDetected && nearPixelDetected) && state() == State.Collect) {
+                if (!pixelHere && pixelHereTimer == null) {
+                    pixelHereTimer = new ElapsedTime();
+                } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1) {
+                    pixelHereTimer = null;
+                    pixelHere = true;
+                    stopIntake();
+                }
+            } else {
+                pixelHere = false;
             }
-        } else {
-            pixelHere = false;
         }
     }
 

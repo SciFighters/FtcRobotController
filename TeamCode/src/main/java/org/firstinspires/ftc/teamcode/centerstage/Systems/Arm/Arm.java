@@ -221,8 +221,13 @@ public class Arm extends Component {
         if (robot.type == Robot.TYPE.Auto) drive.setPowerOriented(0, 0, 0, true);
     }
 
-    public void alignToBoardIter(Position position) {
+    public double alignToBoardTeleOp(Position position) {
+        double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
+        double deltaDistance = position.distanceFromBackboard - distance;
 
+        double gain = 0.023;
+
+        return MathUtil.clamp(deltaDistance * gain, -0.5, 0.5);
     }
 
     public double pow(double x) {
@@ -355,7 +360,7 @@ public class Arm extends Component {
             power = 0;
         } else if ((power < 0) && (touchSensor.isPressed()) || (power > 0 && distanceSensorDistance() < lowerLimit && pos() > 1000)) {
             return;
-        } else if (distanceSensorDistance() < higherLimit && pos() > 2000 && power > 0) {
+        } else if (power > 0 && distanceSensorDistance() < higherLimit && pos() > 2000) {
             if (power > 0.8) {
                 power = 0.3;
             }

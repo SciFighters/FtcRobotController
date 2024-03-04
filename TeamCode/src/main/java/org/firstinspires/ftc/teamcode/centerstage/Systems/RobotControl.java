@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.RobotTelemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Toggle;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
+import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 
 @ThreadedComponent
 public class RobotControl extends Component {
@@ -41,7 +42,6 @@ public class RobotControl extends Component {
     double allianceDefaultHeading = 90;
     ElapsedTime lastFrameTimer;
     double lastTime;
-
     @Override
     public void init() {
         gamepad1 = robot.gamepad1;
@@ -139,6 +139,7 @@ public class RobotControl extends Component {
 
     // Method to update driving controls
     private void updateDriving() {
+        double fixToBackdropTuple = 0;
         robotOrientedToggle.update(gamepad1.ps);
         // Check for reorientation command
         if (gamepad1.start) {
@@ -149,11 +150,11 @@ public class RobotControl extends Component {
             }
             return;
         } else if (gamepad1.a) {
-            arm.alignToBoard(Arm.Position.One);
+            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.One);
         } else if (gamepad1.b) {
-            arm.alignToBoard(Arm.Position.Two);
+            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.Two);
         } else if (gamepad1.y) {
-            arm.alignToBoard(Arm.Position.Three);
+            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.Three);
         }
         // Boost factor for driving speed
         double boost = (gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1.5 : 0.6;
@@ -161,8 +162,8 @@ public class RobotControl extends Component {
         // Drive control based on gamepad input
         double y = pow(-gamepad1.left_stick_y) * boost;
         double x = pow(gamepad1.left_stick_x) * boost;
-        double turn = pow(gamepad1.right_stick_x / 1.7) * boost;
-
+        double turn = pow(gamepad1.right_stick_x
+                / ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
@@ -184,8 +185,8 @@ public class RobotControl extends Component {
         if (gamepad1.right_bumper) {
             targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180;
             double delta = drive.getDeltaHeading(targetHeading);
-            double gain = 0.02;
-            turn = delta * gain;
+            double gain = 0.015;
+            turn = MathUtil.clamp(delta * gain, -0.5, 0.5);
         } else if (gamepad1.left_bumper) {
             targetHeading = 90 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double delta = drive.getDeltaHeading(targetHeading);
@@ -196,7 +197,9 @@ public class RobotControl extends Component {
             double gain = 0.02;
             turn = delta * gain;
         }
-
+        if (fixToBackdropTuple != 0) {
+            x += fixToBackdropTuple;
+        }
         if (robotOrientedToggle.isClicked()) {
             fieldOriented = !fieldOriented;
         }
@@ -240,20 +243,20 @@ public class RobotControl extends Component {
     // Method to initialize telemetry
     private void telemetryInit() {
         dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
-        multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
+//        dashboardTelemetry = dashboard.getTelemetry();
+        multipleTelemetry = new MultipleTelemetry(telemetry, telemetry);
     }
 
     // Method to update telemetry data
     private void updateTelemetry() {
         // Display relevant telemetry data
-        multipleTelemetry.addData("Time since last update", (lastFrameTimer.seconds() - lastTime));
-        multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
-        multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
-        multipleTelemetry.addData("Field Oriented state", fieldOriented);
-        multipleTelemetry.addData("Arm pos", arm.pos());
+        multipleTelemetry.addData("Time since last update", 1 / (lastFrameTimer.seconds() - lastTime));
+//        multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
+//        multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
+//        multipleTelemetry.addData("Field Oriented state", fieldOriented);
+//        multipleTelemetry.addData("Arm pos", arm.pos());
 //        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower() * 1000);
-        multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
+//        multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
 //        multipleTelemetry.addData("Arm velocity", arm.calculateVelocity());
 //        multipleTelemetry.addData("Arm distance velocity", arm.calculateMaxVelocityToDistance());
 //        multipleTelemetry.addData("Arm target pos", arm.targetPos());
