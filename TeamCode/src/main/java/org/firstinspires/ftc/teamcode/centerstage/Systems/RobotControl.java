@@ -257,6 +257,7 @@ public class RobotControl extends Component {
     private void updateTelemetry() {
         // Display relevant telemetry data
         multipleTelemetry.addData("Time since last update", 1 / (lastFrameTimer.seconds() - lastTime));
+        multipleTelemetry.addData("DISTANCE SENSOR", boardAlignSensor);
 //        multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
 //        multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
 //        multipleTelemetry.addData("Field Oriented state", fieldOriented);

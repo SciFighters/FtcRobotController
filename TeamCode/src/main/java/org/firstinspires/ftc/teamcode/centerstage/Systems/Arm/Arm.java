@@ -184,7 +184,7 @@ public class Arm extends Component {
     public void placePixels(Position position) {
         isPlacePixelBusy = true;
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
-        if (distance < position.distanceFromBackboard && pos() > position.liftPos) {
+        if (distance < position.distanceFromBackdrop && pos() > position.liftPos) {
             alignToBoard(position);
             goToPos(position);
         } else {
@@ -198,11 +198,11 @@ public class Arm extends Component {
         double targetHeading = (robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180) - (robot.type == Robot.TYPE.Auto ? 90 : 0);
         ElapsedTime timer = new ElapsedTime();
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
-        while (!MathUtil.approximately(distance, position.distanceFromBackboard, 0.5) && timer.seconds() < 3) {
+        while (!MathUtil.approximately(distance, position.distanceFromBackdrop, 0.5) && timer.seconds() < 3) {
             double gain = 0.023 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double deltaAngle = drive.getDeltaHeading(targetHeading);
             double turn = deltaAngle * gain / 2;
-            double delta = position.distanceFromBackboard - distance;
+            double delta = position.distanceFromBackdrop - distance;
             if (delta > 100) {
                 break;
             }
@@ -225,13 +225,14 @@ public class Arm extends Component {
 
     public double alignToBoardTeleOp(Position position) {
         if (RobotControl.boardAlignSensor == -1) {
-            RobotControl.boardAlignSensor = Math.min(drive.getDistanceLeftSensorDistance(),
-                    drive.getDistanceRightSensorDistance()) == drive.getDistanceLeftSensorDistance() ? 1 : 2;
+            double rightDistance = drive.getDistanceRightSensorDistance();
+            double leftDistance = drive.getDistanceLeftSensorDistance();
+            RobotControl.boardAlignSensor = rightDistance > leftDistance ? 1 : 2;
         }
 
         double distance = RobotControl.boardAlignSensor == 1 ?
                 drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
-        double deltaDistance = position.distanceFromBackboard - distance;
+        double deltaDistance = position.distanceFromBackdrop - distance;
 
         double gain = 0.023;
 
@@ -304,7 +305,7 @@ public class Arm extends Component {
     public void handleStates() {
         stateMachine.execute();
         if (targetPos() == 0) {
-            if (!touchSensor.isPressed() &&
+            if (!touchSensor.isPressed() && pos() < 500 &&
                     (int) timer.seconds() % 2 == 0 &&
                     (lift1.getPower() == 0 || stateMachine.getCurrentState() == holdState)) {
                 resetArm();
@@ -369,17 +370,20 @@ public class Arm extends Component {
         } else if ((power < 0) && (touchSensor.isPressed())) {
             power = 0;
         } else if (power > 0 && pos() > 2000) {
-            double distanceSensorDist = distanceSensorDistance();
-            if (distanceSensorDist < lowerLimit)
-                power = 0.1;
-            else if (distanceSensorDist < higherLimit) {
-                if (power > 0.8) {
-                    power = 0.3;
-                }
+            if ((stateMachine.getCurrentState() == gotoState && targetPos() >= pos())
+                    || (stateMachine.getCurrentState() == manualState)) {
+                double distanceSensorDist = distanceSensorDistance();
+                if (distanceSensorDist < lowerLimit)
+                    power = 0.1;
+                else if (distanceSensorDist < higherLimit) {
+                    if (power > 0.8) {
+                        power = 0.3;
+                    }
 //                if (stateMachine.getCurrentState() == manualState) {
 //                    power = calculateMotorsPower(power, distanceSensorDist);
 //
 //                }
+                }
             }
         }
         if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 &&
@@ -484,11 +488,11 @@ public class Arm extends Component {
     public enum Position {
         Home(0, -1), One(4170, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
         public final int liftPos;
-        public final double distanceFromBackboard;
+        public final double distanceFromBackdrop;
 
-        Position(int liftPos, double distanceFromBackboard) {
+        Position(int liftPos, double distanceFromBackdrop) {
             this.liftPos = liftPos;
-            this.distanceFromBackboard = distanceFromBackboard;
+            this.distanceFromBackdrop = distanceFromBackdrop;
         }
     }
 }

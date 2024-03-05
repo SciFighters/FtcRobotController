@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
+import android.os.Build;
+
 import org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
@@ -121,6 +123,7 @@ public class AutoPath {
      * Represents a single waypoint in the path.
      */
     public static class Waypoint extends Marker {
+        public Runnable midwayAction;
         public Location locationDelta;
         public DriveClass.GotoSettings settings;
         public Type type = Type.Step;
@@ -135,9 +138,14 @@ public class AutoPath {
          * @see org.firstinspires.ftc.teamcode.centerstage.Systems.DriveClass.GotoSettings
          */
         public Waypoint(Location locationDelta, DriveClass.GotoSettings settings, Type type) {
+            this(locationDelta, settings, type, null);
+        }
+
+        public Waypoint(Location locationDelta, DriveClass.GotoSettings settings, Type type, Runnable midwayAction) {
             this.locationDelta = locationDelta;
             this.settings = settings;
             this.type = type;
+            this.midwayAction = midwayAction;
             this.runFunction = this::runWaypoint;
         }
 
@@ -156,7 +164,10 @@ public class AutoPath {
             } else if (type == Type.Location) {
                 prevLocation = location;
             }
-            drive.goToLocation(location, settings);
+            if (midwayAction != null)
+                drive.goToLocation(location, settings, midwayAction);
+            else
+                drive.goToLocation(location, settings);
         }
 
         /**
@@ -173,6 +184,10 @@ public class AutoPath {
     public static class Builder {
         private final ArrayList<Marker> steps = new ArrayList<>();
 
+        public Builder addStep(Location location, DriveClass.GotoSettings settings, Runnable midwayAction) {
+            return addWaypointInternal(location, settings, Waypoint.Type.Step, midwayAction);
+        }
+
         /**
          * Adds a waypoint to the path with the specified movement settings.
          *
@@ -182,8 +197,9 @@ public class AutoPath {
          * @see Location
          */
         public Builder addStep(Location location, DriveClass.GotoSettings settings) {
-            return addWaypointInternal(location, settings, Waypoint.Type.Step);
+            return addStep(location, settings, null);
         }
+
 
         /**
          * Adds a location to the path with the specified location settings.
@@ -220,9 +236,13 @@ public class AutoPath {
          * @see #addStep(Location, DriveClass.GotoSettings)
          * @see #addStaticWaypoint(Location, DriveClass.GotoSettings)
          */
-        private Builder addWaypointInternal(Location location, DriveClass.GotoSettings settings, Waypoint.Type type) {
-            steps.add(new Waypoint(location, settings, type));
+        private Builder addWaypointInternal(Location location, DriveClass.GotoSettings settings, Waypoint.Type type, Runnable midwayAction) {
+            steps.add(new Waypoint(location, settings, type, midwayAction));
             return this;
+        }
+
+        private Builder addWaypointInternal(Location location, DriveClass.GotoSettings settings, Waypoint.Type type) {
+            return addWaypointInternal(location, settings, type, null);
         }
 
         public Builder addAction(Runnable action) {
