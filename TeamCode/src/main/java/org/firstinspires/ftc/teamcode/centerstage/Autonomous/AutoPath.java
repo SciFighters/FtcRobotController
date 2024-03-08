@@ -159,7 +159,7 @@ public class AutoPath {
                 return;
             }
             if (type == Type.Step) {
-                location = prevLocation.add(new Location(locationDelta.x, locationDelta.y, locationDelta.angle));
+                location = prevLocation.add(locationDelta);
                 location.angle = locationDelta.angle;
             } else if (type == Type.Location) {
                 prevLocation = location;

@@ -122,15 +122,15 @@ public class RobotControl extends Component {
         }
         // Claw control based on gamepad input
         if (gamepad2.right_bumper) {
-            arm.closeClaw(true); // close claw
+            arm.openClaw(true); // close claw
 //            gamepad2.runRumbleEffect(rumbleEffect);
         } else if (gamepad2.left_bumper) {
-            arm.closeClaw(false); // open claw
+            arm.openClaw(false); // open claw
         } else if (gamepad2.dpad_up) {
             intakeSystem.stopIntake(); // stop intake
         } else if (gamepad2.dpad_down) {
             intakeSystem.collect(); // start intake
-            arm.closeClaw(false);
+            arm.openClaw(false);
         } else if (gamepad2.right_stick_button) {
             intakeSystem.spit(); // start spit
         } else if (gamepad2.y) {
@@ -140,10 +140,6 @@ public class RobotControl extends Component {
 
     // Method to update driving controls
     private void updateDriverJoystick() {
-        boardAlignToggle.update(gamepad1.a || gamepad1.b || gamepad1.y);
-        double fixToBackdropTuple = 0;
-        robotOrientedToggle.update(gamepad1.ps);
-        // Check for reorientation command
         if (gamepad1.start) {
             if (gamepad1.x) {
                 drive.resetHeading(allianceDefaultHeading);
@@ -151,12 +147,19 @@ public class RobotControl extends Component {
                 targetHeading = drive.getHeading();
             }
             return;
-        } else if (gamepad1.a) {
-            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.One);
+        }
+
+        boardAlignToggle.update(gamepad1.a || gamepad1.b || gamepad1.y);
+        robotOrientedToggle.update(gamepad1.ps);
+
+        double fixToBackdrop = 0;
+        // Check for reorientation command
+        if (gamepad1.a) {
+            fixToBackdrop = arm.alignToBoardTeleOp(Arm.Position.One);
         } else if (gamepad1.b) {
-            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.Two);
+            fixToBackdrop = arm.alignToBoardTeleOp(Arm.Position.Two);
         } else if (gamepad1.y) {
-            fixToBackdropTuple = arm.alignToBoardTeleOp(Arm.Position.Three);
+            fixToBackdrop = arm.alignToBoardTeleOp(Arm.Position.Three);
         }
         if (boardAlignToggle.isReleased()) {
             boardAlignSensor = -1;
@@ -166,8 +169,9 @@ public class RobotControl extends Component {
 
         // Drive control based on gamepad input
         double y = pow(-gamepad1.left_stick_y) * boost;
-        double x = pow(gamepad1.left_stick_x) * boost;
-        double turn = pow(gamepad1.right_stick_x / ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
+        double x = pow(gamepad1.left_stick_x) * boost + fixToBackdrop;
+        double turn = pow(gamepad1.right_stick_x /
+                ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
@@ -200,9 +204,6 @@ public class RobotControl extends Component {
             double delta = drive.getDeltaHeading(targetHeading);
             double gain = 0.02;
             turn = delta * gain;
-        }
-        if (fixToBackdropTuple != 0) {
-            x += fixToBackdropTuple;
         }
         if (robotOrientedToggle.isClicked()) {
             fieldOriented = !fieldOriented;
@@ -261,7 +262,7 @@ public class RobotControl extends Component {
 //        multipleTelemetry.addData("drive distance", drive.getDistanceRightSensorDistance());
 //        multipleTelemetry.addData("Gather state", intakeSystem.state().toString());
 //        multipleTelemetry.addData("Field Oriented state", fieldOriented);
-//        multipleTelemetry.addData("Arm pos", arm.pos());
+        multipleTelemetry.addData("Arm pos", arm.pos());
 //        multipleTelemetry.addData("Arm lift1 power", arm.lift1.getPower() * 100);
 //        multipleTelemetry.addData("Arm distance", arm.distanceSensorDistance());
 //        multipleTelemetry.addData("Arm velocity", arm.calculateVelocity() / 10);
@@ -271,9 +272,9 @@ public class RobotControl extends Component {
 
     public void armGotoLevel(Arm.Position position) {
         if (position == Arm.Position.Home) {
-            arm.closeClaw(false);
+            arm.openClaw(false);
         } else {
-            arm.closeClaw(true);
+            arm.openClaw(true);
             intakeSystem.stopIntake();
         }
         arm.goToPos(position);

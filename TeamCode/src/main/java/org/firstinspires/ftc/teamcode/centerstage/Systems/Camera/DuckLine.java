@@ -16,9 +16,10 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 public class DuckLine extends OpenCvPipeline {
+    private static AutoFlow.PropPos propPos;
     public int width;
     public int height;
-    volatile public double propPos;
+    volatile public double propPosX;
     Mat hsv;
     Mat mask;
     Mat subMat;
@@ -40,8 +41,8 @@ public class DuckLine extends OpenCvPipeline {
         this.telemetry = telemetry;
     }
 
-    public Point getTargetPos() {
-        return targetPos;
+    public static AutoFlow.PropPos getPropPos() {
+        return propPos;
     }
 
 //	public ABC getDuck(int screenWidth) {
@@ -55,6 +56,10 @@ public class DuckLine extends OpenCvPipeline {
 //			return null;
 //		}
 //	}
+
+    public Point getTargetPos() {
+        return targetPos;
+    }
 
     public Rect getTargetRect() {
         return targetRect;
@@ -164,21 +169,21 @@ public class DuckLine extends OpenCvPipeline {
 
             // Draw x-coordinate next to the rectangle
             String xCoordinateText = "X: " + centerX + ", " + "Y: " + targetRect.y + height;
-            propPos = centerX;
-            if (propPos <= 200) {
-                AutoFlow.propPos = AutoFlow.PropPos.LEFT;
-            } else if (propPos >= 430) AutoFlow.propPos = AutoFlow.PropPos.RIGHT;
+            propPosX = centerX;
+            if (propPosX <= 200) {
+                propPos = AutoFlow.PropPos.LEFT;
+            } else if (propPosX >= 430) propPos = AutoFlow.PropPos.RIGHT;
             else {
-                AutoFlow.propPos = AutoFlow.PropPos.MID;
+                propPos = AutoFlow.PropPos.MID;
             }
-            AutoFlow.telemetry.addData("PROP POS", AutoFlow.propPos);
-            AutoFlow.telemetry.addData("PROP X POS", propPos);
+            AutoFlow.telemetry.addData("PROP POS", propPos);
+            AutoFlow.telemetry.addData("PROP X POS", propPosX);
             AutoFlow.telemetry.addData("PROP Y POS", targetRect.y + height);
             AutoFlow.telemetry.addData("PROP HEIGHT", height);
             AutoFlow.telemetry.addData("PROP WIDTH", width);
             AutoFlow.telemetry.addData("PROP AREA", biggestArea);
             AutoFlow.telemetry.update();
-            xCoordinateText += "L: " + propPos;
+            xCoordinateText += "L: " + propPosX;
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed
             Imgproc.putText(smallFrame, xCoordinateText, textPoint, Imgproc.FONT_HERSHEY_PLAIN, 1, new Scalar(0, 100, 100), 1);
         } else {
@@ -189,7 +194,6 @@ public class DuckLine extends OpenCvPipeline {
 //        // Draw lines on the frame
         Imgproc.line(smallFrame, new Point(this.divider_bottom_middle, 0), new Point(this.divider_bottom_middle, this.height), new Scalar(86, 123, 47));
         Imgproc.line(smallFrame, new Point(this.divider_middle_top, 0), new Point(this.divider_middle_top, this.height), new Scalar(86, 123, 47));
-
         return smallFrame;
     }
 

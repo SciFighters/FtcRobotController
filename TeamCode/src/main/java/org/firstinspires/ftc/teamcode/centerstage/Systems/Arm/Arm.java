@@ -70,11 +70,12 @@ public class Arm extends Component {
         this.lift2.setDirection(DcMotorSimple.Direction.REVERSE);
         this.frontServo = hardwareMap.get(Servo.class, "frontClawServo");
         this.backServo = hardwareMap.get(Servo.class, "backClawServo");
+        this.backServo.setDirection(Servo.Direction.REVERSE);
         this.distanceSensor = hardwareMap.get(DistanceSensor.class, "armDistanceSensor");
         initMotors();
         resetClaw();
         resetArm();
-        closeClaw(true);
+        openClaw(true);
         stateMachine.changeState(idleState);
         instance = this;
     }
@@ -224,14 +225,16 @@ public class Arm extends Component {
     }
 
     public double alignToBoardTeleOp(Position position) {
+        double distance = 0;
         if (RobotControl.boardAlignSensor == -1) {
             double rightDistance = drive.getDistanceRightSensorDistance();
             double leftDistance = drive.getDistanceLeftSensorDistance();
-            RobotControl.boardAlignSensor = rightDistance > leftDistance ? 1 : 2;
+            RobotControl.boardAlignSensor = leftDistance < rightDistance ? 1 : 2;
+            distance = RobotControl.boardAlignSensor == 1 ? leftDistance : rightDistance;
+        } else {
+            distance = RobotControl.boardAlignSensor == 1 ?
+                    drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
         }
-
-        double distance = RobotControl.boardAlignSensor == 1 ?
-                drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
         double deltaDistance = position.distanceFromBackdrop - distance;
 
         double gain = 0.023;
@@ -379,6 +382,9 @@ public class Arm extends Component {
                     if (power > 0.8) {
                         power = 0.3;
                     }
+                    if (stateMachine.getCurrentState() == manualState) {
+                        power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
+                    }
 //                if (stateMachine.getCurrentState() == manualState) {
 //                    power = calculateMotorsPower(power, distanceSensorDist);
 //
@@ -424,7 +430,7 @@ public class Arm extends Component {
      *
      * @param position The position to set the claw servos to.
      */
-    public void closeClaw(double position) {
+    public void openClaw(double position) {
         frontServo.setPosition(position);
         backServo.setPosition(position);
     }
@@ -432,10 +438,10 @@ public class Arm extends Component {
     /**
      * Sets the position of the claw servos based on open or closed state.
      *
-     * @param close True to close the claw, false to open it.
+     * @param open True to close the claw, false to open it.
      */
-    public void closeClaw(boolean close) {
-        closeClaw(close ? 1 : 0);
+    public void openClaw(boolean open) {
+        openClaw(open ? 0 : 1);
     }
 
     public double clawPosition() {

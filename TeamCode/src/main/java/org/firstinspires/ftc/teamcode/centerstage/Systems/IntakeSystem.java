@@ -36,7 +36,7 @@ public class IntakeSystem extends Component {
         if (state() == State.Collect) {
             justStopped = true;
             timer.reset();
-            arm.closeClaw(true);
+            arm.openClaw(true);
         }
         setState(State.Idle);
     }
@@ -107,7 +107,7 @@ public class IntakeSystem extends Component {
         prevState = state;
         this.state = state;
         if (state == State.Idle) {
-            arm.closeClaw(true);
+            arm.openClaw(true);
         }
     }
 

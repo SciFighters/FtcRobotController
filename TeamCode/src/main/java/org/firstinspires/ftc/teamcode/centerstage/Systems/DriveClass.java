@@ -420,6 +420,11 @@ public class DriveClass extends Component {
         return goToLocation(location, power, tolerance, timeout);
     }
 
+    public double goToLocationOnAxis(Location location, GotoSettings settings, Axis axis) {
+
+        return goToLocationOnAxis(location, settings.power, settings.tolerance, settings.timeout, axis, settings.noSlowdown, settings.noSlowdown);
+    }
+
     public double goToLocationOnAxis(Location location, double power, double tolerance, double timeout, Axis axis) {
         return this.goToLocationOnAxis(location, power, tolerance, timeout, axis, false, false);
     }
@@ -554,10 +559,7 @@ public class DriveClass extends Component {
                 stuckTries += 1;
                 returnToPosAfterStuck = new Location(getPosX(), getPosY());
             }
-            if (stuckTries >= 14) {
-                goToLocation(returnToPosAfterStuck, targetPower, targetHeading, tolerance, timeout, superSpeed);
-                break;
-            }
+
             lastX = currentX;
             lastY = currentY;
             if (goToIdle >= MAX_IDLE_BREAK) {
