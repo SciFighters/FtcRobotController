@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
+import android.icu.text.RelativeDateTimeFormatter;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -101,15 +102,11 @@ public class AutoFlow extends Component {
 //        backdropLocation = new Location(-tile * 2 + 0.3, -tile - Math.abs(startLocation.y), startLocation.angle);
         backdropLocation = new Location(-tile * 2 + robotLength / 2, -tile - 0.15, 90);
         if (startPos == StartPos.PIXEL_STACK) {
-            path = new AutoPath.Builder()
-                    .addStep(new Location(0, tile * 2 + 0.15, drive.getHeading()), lowToleranceSettings)
-                    .addStep(new Location(-tile * 3, 0, 90), lowToleranceSettings, () -> {
-                        if (drive.getPosX() < -tile) {
-                            arm.goToPos(2300);
-                        }
-                    })
-                    .addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings)
-                    .addStep(new Location(0, 0, 90), lowToleranceSettings).build(robot, startLocation);
+            path = new AutoPath.Builder().addStep(new Location(0, tile * 2 + 0.15, drive.getHeading()), lowToleranceSettings).addStep(new Location(-tile * 3, 0, 90), lowToleranceSettings, () -> {
+                if (drive.getPosX() < -tile) {
+                    arm.goToPos(2300);
+                }
+            }).addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings).addStep(new Location(0, 0, 90), lowToleranceSettings).build(robot, startLocation);
         } else {
             if (propPos == PropPos.LEFT || propPos == PropPos.RIGHT) {
 //                path = new AutoPath.Builder().addStep(new Location(0, 0, 90), normalDriveSettings)
@@ -126,7 +123,7 @@ public class AutoFlow extends Component {
 
     public void lockOnTag(int tagID) {
         drive.turnTo(90, 1);
-        double yOffset = 0.2;
+        double yOffset = 0.18;
         if (tagID == 2 || tagID == 5) {
             yOffset = 0;
         } else if (tagID == 1 || tagID == 4) {
@@ -135,10 +132,7 @@ public class AutoFlow extends Component {
         if (robot.alliance == Alliance.RED) {
             yOffset *= -1;
         }
-        drive.goToLocation(new Location(backdropLocation.x,
-                        robot.alliance == Alliance.BLUE ? backdropLocation.y + yOffset :
-                                backdropLocation.flipY().y + yOffset, 90),
-                lowToleranceSettings);
+        drive.goToLocation(new Location(backdropLocation.x, robot.alliance == Alliance.BLUE ? backdropLocation.y + yOffset : backdropLocation.flipY().y + yOffset, 90), lowToleranceSettings);
         AprilTagDetection tag = aprilTagDetector.getSpecificTag(tagID);
         double targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 90 : -90;
         double leftDist = drive.getDistanceLeftSensorDistance(), rightDist = drive.getDistanceRightSensorDistance();
@@ -147,11 +141,10 @@ public class AutoFlow extends Component {
 
         robot.telemetry.clearAll();
 
-        while (tag != null &&
-                (!MathUtil.approximately(tag.rawPose.x, 0, 1))) // in inches
+        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 1))) // in inches
 //                        || !MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5))) // in cm
         {
-            double gainY = 0.016;
+            double gainY = -0.016 * (robot.alliance == Alliance.RED ? -1 : 1);
 //            double gainX = 0.018 / 2;
 
             double deltaAngle = drive.getDeltaHeading(targetHeading);
@@ -164,7 +157,6 @@ public class AutoFlow extends Component {
 
             telemetry.addData("DISTANCE X", tag.rawPose.x);
             telemetry.addData("DISTANCE Y", tag.rawPose.y);
-            telemetry.addData("TAG VISIBLE", tag == null);
             telemetry.addData("left right DISTANCE", MathUtil.approximately(tag.rawPose.x, 0, 1));
             telemetry.addData("backdrop DISTANCE", MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5));
             telemetry.update();
@@ -226,7 +218,7 @@ public class AutoFlow extends Component {
      * @param pos The prop position
      */
     public void placePurplePixelByProp(PropPos pos) {
-        double yOffset = tile * 1.85 * Math.signum(startLocation.y);
+        double yOffset = tile * 1 * Math.signum(startLocation.y);
         Location mid = new Location(startLocation.x, startLocation.y - yOffset, startLocation.angle);
         Location right = new Location(startLocation.x + 0.12, -tile, 90);
         Location left = new Location(startLocation.x - tile + 0.15, -tile, 90);
@@ -250,7 +242,7 @@ public class AutoFlow extends Component {
             drive.turnTo(angle, 1);
         } else if (pos == PropPos.RIGHT) {
             drive.goToLocation(right, lowToleranceSettings);
-            drive.turnTo(90, 1);
+            if (startPos == StartPos.BACKSTAGE) drive.turnTo(90, 1);
         }
 //        drive.turnTo(angle, 1);
         intakeSystem.spit();

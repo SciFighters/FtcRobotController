@@ -20,6 +20,7 @@ public class RobotControl extends Component {
     public static int boardAlignSensor = -1;
     @RobotTelemetry
     public static MultipleTelemetry multipleTelemetry;
+    public static Gamepad.RumbleEffect rumbleEffect;
     Gamepad gamepad1, gamepad2;
     // Robot components
     DriveClass drive;
@@ -33,7 +34,6 @@ public class RobotControl extends Component {
     double angle = 0;
     double targetHeading;
     int turningCount = 0;
-    Gamepad.RumbleEffect rumbleEffect;
     Toggle turningToggle = new Toggle();
     Toggle robotOrientedToggle = new Toggle();
     double armBoost;

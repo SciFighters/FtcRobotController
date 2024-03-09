@@ -9,12 +9,13 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 @TeleOp(group = "TESTER")
 public class ColorSensorTester extends Robot {
-    ColorSensor farPixelColorSensor;
+    ColorSensor farPixelColorSensor, nearPixelColorSensor;
     boolean pixelHere;
 
     @Override
     public void initRobot() {
-        farPixelColorSensor = hardwareMap.get(ColorSensor.class, "armColorSensor");
+        farPixelColorSensor = hardwareMap.get(ColorSensor.class, "farPixelColorSensor");
+        nearPixelColorSensor = hardwareMap.get(ColorSensor.class, "nearPixelColorSensor");
     }
 
     @Override
@@ -25,13 +26,10 @@ public class ColorSensorTester extends Robot {
     @Override
     public void updateLoop() {
         sleep(10);
-        if (farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000) {
-            pixelHere = true;
-        } else {
-            pixelHere = false;
-        }
+        pixelHere = farPixelColorSensor.red() > 1000 || farPixelColorSensor.green() > 1000 || farPixelColorSensor.green() > 1000;
         telemetry.addData("pixelHere: ", pixelHere);
-        telemetry.addData("Color sensor rgb", String.format("%d, %d, %d", farPixelColorSensor.red(), farPixelColorSensor.green(), farPixelColorSensor.blue()));
+        telemetry.addData("Color far sensor rgb", String.format("%d, %d, %d", farPixelColorSensor.red(), farPixelColorSensor.green(), farPixelColorSensor.blue()));
+        telemetry.addData("Color near sensor rgb", String.format("%d, %d, %d", nearPixelColorSensor.red(), nearPixelColorSensor.green(), nearPixelColorSensor.blue()));
         telemetry.update();
     }
 }

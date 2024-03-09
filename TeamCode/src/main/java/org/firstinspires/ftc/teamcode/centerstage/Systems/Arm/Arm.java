@@ -107,9 +107,9 @@ public class Arm extends Component {
     }
 
     public void resetClaw() {
-        double minServoPos = 0.35;
-        frontServo.scaleRange(minServoPos, 1);
-        backServo.scaleRange(minServoPos, 1);
+//        double minServoPos = 0.35;
+//        frontServo.scaleRange(minServoPos, 1);
+//        backServo.scaleRange(minServoPos, 1);
     }
 
     /**
@@ -237,7 +237,7 @@ public class Arm extends Component {
         }
         double deltaDistance = position.distanceFromBackdrop - distance;
 
-        double gain = 0.023;
+        double gain = 0.023 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
 
         return MathUtil.clamp(deltaDistance * gain, -0.4, 0.4);
     }
@@ -364,7 +364,7 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        int higherLimit = 65, lowerLimit = 10;
+        int higherLimit = 70, lowerLimit = 3;
         if (stateMachine.getCurrentState() == gotoState) {
             higherLimit = 100;
         }
@@ -377,17 +377,16 @@ public class Arm extends Component {
                     || (stateMachine.getCurrentState() == manualState)) {
                 double distanceSensorDist = distanceSensorDistance();
                 if (distanceSensorDist < lowerLimit)
-                    power = 0.1;
+                    power = 0;
                 else if (distanceSensorDist < higherLimit) {
                     if (power > 0.8) {
                         power = 0.3;
                     }
                     if (stateMachine.getCurrentState() == manualState) {
-                        power = Math.abs(MathUtil.map(power, lowerLimit, higherLimit, 0, 1));
+                        power = Math.abs(MathUtil.map(distanceSensorDist, lowerLimit, higherLimit, 0, 1)) * power;
                     }
 //                if (stateMachine.getCurrentState() == manualState) {
 //                    power = calculateMotorsPower(power, distanceSensorDist);
-//
 //                }
                 }
             }
@@ -438,10 +437,16 @@ public class Arm extends Component {
     /**
      * Sets the position of the claw servos based on open or closed state.
      *
-     * @param open True to close the claw, false to open it.
+     * @param close True to close the claw, false to open it.
      */
-    public void openClaw(boolean open) {
-        openClaw(open ? 0 : 1);
+    public void openClaw(boolean close) {
+        openClaw(close ? 0 : 1);
+        if (robot.type == Robot.TYPE.TeleOp) {
+            if (!close && pos() > 1000 && robot.opModeIsActive() && !robot.opModeInInit()) {
+                robot.gamepad1.runRumbleEffect(RobotControl.rumbleEffect);
+                robot.gamepad2.runRumbleEffect(RobotControl.rumbleEffect);
+            }
+        }
     }
 
     public double clawPosition() {
