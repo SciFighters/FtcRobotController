@@ -64,6 +64,29 @@ public class AutoFlow extends Component {
         robot.alliance = alliance;
     }
 
+    public static int getTagIDAccordingToTeamPropLocation(PropPos pos, Alliance alliance) {
+        if (alliance == Alliance.RED) {
+            if (pos == PropPos.LEFT) {
+                pos = PropPos.RIGHT;
+            } else if (pos == PropPos.RIGHT) {
+                pos = PropPos.LEFT;
+            }
+        }
+        int id = 2;
+        switch (pos) {
+            case LEFT:
+                id = 1;
+                break;
+            case RIGHT:
+                id = 3;
+                break;
+        }
+        if (alliance == Alliance.RED) {
+            id += 3;
+        }
+        return id;
+    }
+
     void initWebcam() {
         int cameraMonitorViewID = robot.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robot.hardwareMap.appContext.getPackageName());
 
@@ -84,6 +107,7 @@ public class AutoFlow extends Component {
     public void init() {
         timer = new ElapsedTime();
         arm = robot.addComponent(Arm.class);
+        arm.telemetry = telemetry;
         this.drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, startLocation, DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE | DriveClass.USE_DASHBOARD_FIELD, DriveClass.DriveMode.LEFT));
         intakeSystem = robot.addComponent(IntakeSystem.class);
         dashboard = FtcDashboard.getInstance();
@@ -102,18 +126,23 @@ public class AutoFlow extends Component {
 //        backdropLocation = new Location(-tile * 2 + 0.3, -tile - Math.abs(startLocation.y), startLocation.angle);
         backdropLocation = new Location(-tile * 2 + robotLength / 2, -tile - 0.15, 90);
         if (startPos == StartPos.PIXEL_STACK) {
-            path = new AutoPath.Builder().addStep(new Location(0, tile * 2 + 0.15, drive.getHeading()), lowToleranceSettings).addStep(new Location(-tile * 3, 0, 90), lowToleranceSettings, () -> {
-                if (drive.getPosX() < -tile) {
-                    arm.goToPos(2300);
-                }
-            }).addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings).addStep(new Location(0, 0, 90), lowToleranceSettings).build(robot, startLocation);
+            path = new AutoPath.Builder()
+                    .addStep(new Location(0, tile * 2 + 0.2, drive.getHeading()), lowToleranceSettings)
+                    .addStep(new Location(-tile * 3, 0, 90), lowToleranceSettings, () -> {
+                        if (drive.getPosX() < -0.5 * tile) {
+                            arm.goToPos(2300);
+                        }
+                    }).addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings)
+                    .addStep(new Location(0, 0, 90), lowToleranceSettings).build(robot, startLocation);
         } else {
             if (propPos == PropPos.LEFT || propPos == PropPos.RIGHT) {
 //                path = new AutoPath.Builder().addStep(new Location(0, 0, 90), normalDriveSettings)
 //                        .addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), normalDriveSettings)
 //                        .build(robot, startLocation);
             } else
-                path = new AutoPath.Builder().addLocation(new Location(drive.getPosX(), drive.getPosY(), drive.getHeading()), lowToleranceSettings).addStep(new Location(-tile / 2, 0, 90), lowToleranceSettings).build(robot, startLocation);
+                path = new AutoPath.Builder()
+                        .addLocation(new Location(drive.getPosX(), drive.getPosY(), drive.getHeading()), lowToleranceSettings).
+                        addStep(new Location(-tile / 2, 0, 90), lowToleranceSettings).build(robot, startLocation);
         }
         if (robot.alliance == Alliance.RED) {
             if (path != null) path.flipY();
@@ -129,9 +158,9 @@ public class AutoFlow extends Component {
         } else if (tagID == 1 || tagID == 4) {
             yOffset *= -1;
         }
-        if (robot.alliance == Alliance.RED) {
-            yOffset *= -1;
-        }
+//        if (robot.alliance == Alliance.RED) {
+//            yOffset *= -1;
+//        }
         drive.goToLocation(new Location(backdropLocation.x, robot.alliance == Alliance.BLUE ? backdropLocation.y + yOffset : backdropLocation.flipY().y + yOffset, 90), lowToleranceSettings);
         AprilTagDetection tag = aprilTagDetector.getSpecificTag(tagID);
         double targetHeading = robot.alliance == AutoFlow.Alliance.BLUE ? 90 : -90;
@@ -141,10 +170,10 @@ public class AutoFlow extends Component {
 
         robot.telemetry.clearAll();
 
-        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 1))) // in inches
+        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 2))) // in inches
 //                        || !MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5))) // in cm
         {
-            double gainY = -0.016 * (robot.alliance == Alliance.RED ? -1 : 1);
+            double gainY = -0.016;
 //            double gainX = 0.018 / 2;
 
             double deltaAngle = drive.getDeltaHeading(targetHeading);
@@ -189,27 +218,6 @@ public class AutoFlow extends Component {
         lockOnTag(getTagIDAccordingToTeamPropLocation(pos, robot.alliance));
     }
 
-    public int getTagIDAccordingToTeamPropLocation(PropPos pos, Alliance alliance) {
-        if (alliance == Alliance.RED && pos == PropPos.LEFT) {
-            pos = PropPos.RIGHT;
-        } else if (alliance == Alliance.RED && pos == PropPos.RIGHT) {
-            pos = PropPos.LEFT;
-        }
-        int id = 2;
-        switch (pos) {
-            case LEFT:
-                id = 1;
-                break;
-            case RIGHT:
-                id = 3;
-                break;
-        }
-        if (alliance == Alliance.RED) {
-            id += 3;
-        }
-        return id;
-    }
-
     /**
      * Camera is flipped automatically in order to see the prop correctly in different alliance
      * Note: The flipping (Left => Right) is only for the Red Alliance,
@@ -218,14 +226,14 @@ public class AutoFlow extends Component {
      * @param pos The prop position
      */
     public void placePurplePixelByProp(PropPos pos) {
-        double yOffset = tile * 1 * Math.signum(startLocation.y);
+        double yOffset = tile * Math.signum(startLocation.y) + 0.6 * Math.signum(startLocation.y);
         Location mid = new Location(startLocation.x, startLocation.y - yOffset, startLocation.angle);
         Location right = new Location(startLocation.x + 0.12, -tile, 90);
         Location left = new Location(startLocation.x - tile + 0.15, -tile, 90);
         if (startPos == StartPos.PIXEL_STACK) {
             left = new Location(startLocation.x - 0.1, -tile, startLocation.angle);
             right = new Location(startLocation.x + 0.2, -tile + 0.2, startLocation.angle);
-            mid = new Location(startLocation.x, -0.3, startLocation.angle);
+            mid = new Location(startLocation.x, startLocation.y - yOffset, startLocation.angle);
         }
         if (robot.alliance == Alliance.RED) {
             left.flipY();

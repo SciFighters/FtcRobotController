@@ -232,8 +232,7 @@ public class Arm extends Component {
             RobotControl.boardAlignSensor = leftDistance < rightDistance ? 1 : 2;
             distance = RobotControl.boardAlignSensor == 1 ? leftDistance : rightDistance;
         } else {
-            distance = RobotControl.boardAlignSensor == 1 ?
-                    drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
+            distance = RobotControl.boardAlignSensor == 1 ? drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
         }
         double deltaDistance = position.distanceFromBackdrop - distance;
 
@@ -308,9 +307,7 @@ public class Arm extends Component {
     public void handleStates() {
         stateMachine.execute();
         if (targetPos() == 0) {
-            if (!touchSensor.isPressed() && pos() < 500 &&
-                    (int) timer.seconds() % 2 == 0 &&
-                    (lift1.getPower() == 0 || stateMachine.getCurrentState() == holdState)) {
+            if (!touchSensor.isPressed() && pos() < 500 && (int) timer.seconds() % 2 == 0 && (lift1.getPower() == 0 || stateMachine.getCurrentState() == holdState)) {
                 resetArm();
             } else if (touchSensor.isPressed() && pos() != 0) {
 //            resetArm();
@@ -373,11 +370,9 @@ public class Arm extends Component {
         } else if ((power < 0) && (touchSensor.isPressed())) {
             power = 0;
         } else if (power > 0 && pos() > 2000) {
-            if ((stateMachine.getCurrentState() == gotoState && targetPos() >= pos())
-                    || (stateMachine.getCurrentState() == manualState)) {
+            if ((stateMachine.getCurrentState() == gotoState && targetPos() >= pos()) || (stateMachine.getCurrentState() == manualState)) {
                 double distanceSensorDist = distanceSensorDistance();
-                if (distanceSensorDist < lowerLimit)
-                    power = 0;
+                if (distanceSensorDist < lowerLimit) power = 0;
                 else if (distanceSensorDist < higherLimit) {
                     if (power > 0.8) {
                         power = 0.3;
@@ -391,8 +386,7 @@ public class Arm extends Component {
                 }
             }
         }
-        if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 &&
-                !robot.opModeInInit() && stateMachine.getCurrentState() == gotoState) {
+        if (targetPos() == 0 && !this.touchSensor.isPressed() && pos() < 740 && !robot.opModeInInit() && stateMachine.getCurrentState() == gotoState) {
             power = -0.2;
         }
 //    power = calculateMotorsPower(power);
@@ -477,8 +471,7 @@ public class Arm extends Component {
         double avgMaxVelocity = GLaDOSBlue.avgMaxVelocity;
         double minDist = GLaDOSBlue.minDist;
         double kDistance = avgMaxVelocity / minDist;
-        finalPower = Math.min(power, distance * kY) -
-                Math.max(0, calculateVelocity() - calculateMaxVelocityToDistance(distance)) * kDistance;
+        finalPower = Math.min(power, distance * kY) - Math.max(0, calculateVelocity() - calculateMaxVelocityToDistance(distance)) * kDistance;
         return finalPower;
     }
 
@@ -488,8 +481,7 @@ public class Arm extends Component {
 
     public double calculateMaxVelocityToDistance(double distance) {
         double result = distance * GLaDOSBlue.avgMaxVelocityGain;
-        RobotControl.multipleTelemetry
-                .addData("Arm distance velocity", result / 10);
+        RobotControl.multipleTelemetry.addData("Arm distance velocity", result / 10);
         return result;
     }
 
@@ -497,7 +489,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(4170, 42), Two(3130, 27), Hang(500, -1), Three(2780, 7);
+        Home(0, -1), One(4200, 43), Two(3130, 27), Hang(500, -1), Three(2780, 7);
         public final int liftPos;
         public final double distanceFromBackdrop;
 

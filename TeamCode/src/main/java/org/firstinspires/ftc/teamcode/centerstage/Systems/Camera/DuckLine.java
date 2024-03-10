@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems.Camera;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
+import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -182,6 +183,7 @@ public class DuckLine extends OpenCvPipeline {
             AutoFlow.telemetry.addData("PROP HEIGHT", height);
             AutoFlow.telemetry.addData("PROP WIDTH", width);
             AutoFlow.telemetry.addData("PROP AREA", biggestArea);
+            AutoFlow.telemetry.addData("TAG ID", AutoFlow.getTagIDAccordingToTeamPropLocation(propPos, alliance));
             AutoFlow.telemetry.update();
             xCoordinateText += "L: " + propPosX;
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed
