@@ -71,7 +71,7 @@ public class AprilTagAlignTester extends Robot {
         int distanceSensorIndex = leftDist == distance ? 1 : 2;
         multipleTelemetry.clearAll();
 
-        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 2))) // in inches
+        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 0.1))) // in inches
 //                        || !MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5))) // in cm
         {
             double gainY = -0.016;
@@ -87,25 +87,9 @@ public class AprilTagAlignTester extends Robot {
 
             multipleTelemetry.addData("DISTANCE X", tag.rawPose.x);
             multipleTelemetry.addData("DISTANCE Y", tag.rawPose.y);
-            multipleTelemetry.addData("left right DISTANCE", MathUtil.approximately(tag.rawPose.x, 0, 1));
-            multipleTelemetry.addData("backdrop DISTANCE", MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5));
+            multipleTelemetry.addData("left right DISTANCE", MathUtil.approximately(tag.rawPose.x, 0, 0.1));
+//            multipleTelemetry.addData("backdrop DISTANCE", MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5));
             multipleTelemetry.update();
-//            powerY = deltaY * -gainY;
-//            if (tag.rawPose.x > 0) {
-//                powerY *= -1;
-//            }
-//            if (tagID == 2) {
-//                powerY = 0;
-//                if (MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
-//                  break;
-//                }
-//            }
-//            if (MathUtil.approximately(tag.rawPose.x, 0, 1)) {
-//                powerY = 0;
-//            }
-//            if (!MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
-//                break;
-//            }
 
             drive.setPower(0, 0, powerY);
             tag = aprilTagDetector.getSpecificTag(tagID);
