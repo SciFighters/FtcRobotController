@@ -457,7 +457,7 @@ public class Arm extends Component {
     }
 
     public void dropBottomPixel() {
-        backServo.setPosition(0);
+        frontServo.setPosition(1);
     }
 
     public double calculateMotorsPower(double power, double distance) {

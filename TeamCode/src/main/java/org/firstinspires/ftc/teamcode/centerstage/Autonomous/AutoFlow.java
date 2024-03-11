@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.centerstage.util.Util;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -43,12 +44,15 @@ public class AutoFlow extends Component {
     Arm arm;
     ElapsedTime timer;
     OpenCvWebcam webcam;
-    DriveClass.GotoSettings normalDriveSettings = new DriveClass.GotoSettings.Builder().setPower(1).setTolerance(0.05).setSlowdownMode(false).setTimeout(0).build();
-    DriveClass.GotoSettings lowToleranceSettings = new DriveClass.GotoSettings.Builder().setPower(1).setTolerance(0.16).setSlowdownMode(true).setTimeout(0).build();
+    DriveClass.GotoSettings normalDriveSettings = new DriveClass.GotoSettings.Builder()
+            .setPower(1).setTolerance(0.05).setSlowdownMode(false).setTimeout(0).build();
+    DriveClass.GotoSettings lowToleranceSettings = new DriveClass.GotoSettings.Builder()
+            .setPower(1).setTolerance(0.16).setSlowdownMode(true).setTimeout(0).build();
     AutoPath path;
     StartPos startPos;
     Location backdropLocation;
     ParkLocation parkLocation;
+
     private DriveClass drive;
 
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto, ParkLocation parkLocation) {
@@ -316,8 +320,8 @@ public class AutoFlow extends Component {
         if (auto != Auto.PARK) {
             path = buildPath();
             if (path != null) path.run(); // moves to the backboard
-            arm.alignToBoard(Arm.Position.One); // fixes distance to the board on the X axis
             lockOnTagByProp(propPos); // aligns on the Y axis
+            arm.alignToBoard(Arm.Position.One); // fixes distance to the board on the X axis
             aprilTagDetector.stop();
             arm.goToPos(Arm.Position.One); // makes the arm go yee
             robot.sleep(2000);
@@ -356,6 +360,7 @@ public class AutoFlow extends Component {
         }
         drive.goToLocation(new Location(drive.getPosX(), y, 90), lowToleranceSettings);
         drive.goToLocation(new Location(x, y, 90), lowToleranceSettings);
+        drive.turnTo(90, 1);
     }
 
     public void closeWebcam() {
