@@ -114,6 +114,7 @@ public class RobotControl extends Component {
         else if (Math.abs(gamepad2.left_stick_y) > 0.05) {
             arm.setPower(pow(-gamepad2.left_stick_y) * armBoost);
         } else if (gamepad2.a) {
+            intakeSystem.setServoPos(IntakeSystem.State.Collect);
             armGotoLevel(Arm.Position.Home);
         } else if (gamepad2.b) {
             arm.hang();
@@ -128,6 +129,7 @@ public class RobotControl extends Component {
             arm.openClaw(false); // open claw
         } else if (gamepad2.dpad_up) {
             intakeSystem.stopIntake(); // stop intake
+            intakeSystem.setServoPos(IntakeSystem.State.Idle);
         } else if (gamepad2.dpad_down) {
             intakeSystem.collect(); // start intake
             arm.openClaw(false);

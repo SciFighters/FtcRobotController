@@ -173,49 +173,49 @@ public class AutoFlow extends Component {
         int distanceSensorIndex = leftDist == distance ? 1 : 2;
 
         robot.telemetry.clearAll();
-
-        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 2))) // in inches
-//                        || !MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5))) // in cm
-        {
-            double gainY = -0.016;
-//            double gainX = 0.018 / 2;
-
-            double deltaAngle = drive.getDeltaHeading(targetHeading);
-//            double deltaX = Arm.Position.One.distanceFromBackdrop - distance;
-            double deltaY = tag.rawPose.x;
-
-//            double powerX = gainX * deltaX;
-            double powerY = deltaY * gainY;
-//            double turn = deltaAngle * gainX;
-
-            telemetry.addData("DISTANCE X", tag.rawPose.x);
-            telemetry.addData("DISTANCE Y", tag.rawPose.y);
-            telemetry.addData("left right DISTANCE", MathUtil.approximately(tag.rawPose.x, 0, 1));
-            telemetry.addData("backdrop DISTANCE", MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5));
-            telemetry.update();
-//            powerY = deltaY * -gainY;
-//            if (tag.rawPose.x > 0) {
-//                powerY *= -1;
-//            }
-//            if (tagID == 2) {
-//                powerY = 0;
-//                if (MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
-//                  break;
-//                }
-//            }
-//            if (MathUtil.approximately(tag.rawPose.x, 0, 1)) {
-//                powerY = 0;
-//            }
-//            if (!MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
-//                break;
-//            }
-
-            drive.setPower(0, 0, powerY);
-            tag = aprilTagDetector.getSpecificTag(tagID);
-//            distance = distanceSensorIndex == 1 ? drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
-//            drive.turnTo(90, MathUtil.map(1, drive.getHeading(), 90, 0, 1));
-        }
+//        while (tag != null && (!MathUtil.approximately(tag.rawPose.x, 0, 2))) // in inches
+////                        || !MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5))) // in cm
+//        {
+//            double gainY = -0.016;
+////            double gainX = 0.018 / 2;
+//
+//            double deltaAngle = drive.getDeltaHeading(targetHeading);
+////            double deltaX = Arm.Position.One.distanceFromBackdrop - distance;
+//            double deltaY = tag.rawPose.x;
+//
+////            double powerX = gainX * deltaX;
+//            double powerY = deltaY * gainY;
+////            double turn = deltaAngle * gainX;
+//
+//            telemetry.addData("DISTANCE X", tag.rawPose.x);
+//            telemetry.addData("DISTANCE Y", tag.rawPose.y);
+//            telemetry.addData("left right DISTANCE", MathUtil.approximately(tag.rawPose.x, 0, 1));
+//            telemetry.addData("backdrop DISTANCE", MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5));
+//            telemetry.update();
+////            powerY = deltaY * -gainY;
+////            if (tag.rawPose.x > 0) {
+////                powerY *= -1;
+////            }
+////            if (tagID == 2) {
+////                powerY = 0;
+////                if (MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
+////                  break;
+////                }
+////            }
+////            if (MathUtil.approximately(tag.rawPose.x, 0, 1)) {
+////                powerY = 0;
+////            }
+////            if (!MathUtil.approximately(distance, Arm.Position.One.distanceFromBackdrop, 0.5)) {
+////                break;
+////            }
+//
+//            drive.setPower(0, 0, powerY);
+//            tag = aprilTagDetector.getSpecificTag(tagID);
+////            distance = distanceSensorIndex == 1 ? drive.getDistanceLeftSensorDistance() : drive.getDistanceRightSensorDistance();
+////            drive.turnTo(90, MathUtil.map(1, drive.getHeading(), 90, 0, 1));
+//        }
         drive.setPower(0, 0, 0);
+//        drive.turnTo(targetHeading, 1);
     }
 
     public void lockOnTagByProp(PropPos pos) {

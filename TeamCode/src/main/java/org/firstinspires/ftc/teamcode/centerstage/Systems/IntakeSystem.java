@@ -138,7 +138,7 @@ public class IntakeSystem extends Component {
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
             motor.setPower(spitPower);
         } else if (state == State.Idle) {
-            setServoPos(State.Idle);
+//            setServoPos(State.Idle);
             motor.setPower(0);
         } else if (state == State.Collect) {
             setServoPos(State.Collect);

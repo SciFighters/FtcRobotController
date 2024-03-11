@@ -199,7 +199,7 @@ public class Arm extends Component {
         double targetHeading = (robot.alliance == AutoFlow.Alliance.BLUE ? 180 : -180) - (robot.type == Robot.TYPE.Auto ? 90 : 0);
         ElapsedTime timer = new ElapsedTime();
         double distance = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
-        while (!MathUtil.approximately(distance, position.distanceFromBackdrop, 0.5) && timer.seconds() < 3) {
+        while (!MathUtil.approximately(distance, position.distanceFromBackdrop, 0.01) && timer.seconds() < 3) {
             double gain = 0.023 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double deltaAngle = drive.getDeltaHeading(targetHeading);
             double turn = deltaAngle * gain / 2;
@@ -374,11 +374,11 @@ public class Arm extends Component {
                 double distanceSensorDist = distanceSensorDistance();
                 if (distanceSensorDist < lowerLimit) power = 0;
                 else if (distanceSensorDist < higherLimit) {
-                    if (power > 0.8) {
-                        power = 0.3;
-                    }
+//                    if (power > 0.8) {
+//                        power = 0.5;
+//                    }
                     if (stateMachine.getCurrentState() == manualState) {
-                        power = Math.abs(MathUtil.map(distanceSensorDist, lowerLimit, higherLimit, 0, 1)) * power;
+                        power = Math.abs(MathUtil.map(distanceSensorDist, lowerLimit, higherLimit, 0, 1)) * (power * 1.3);
                     }
 //                if (stateMachine.getCurrentState() == manualState) {
 //                    power = calculateMotorsPower(power, distanceSensorDist);
@@ -489,7 +489,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(4200, 43), Two(3130, 27), Hang(500, -1), Three(2780, 7);
+        Home(0, -1), One(4200, 43), Two(3530, 41), Hang(500, -1), Three(2780, 39);
         public final int liftPos;
         public final double distanceFromBackdrop;
 
