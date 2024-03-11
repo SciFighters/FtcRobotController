@@ -265,7 +265,7 @@ public class AutoFlow extends Component {
             }
             drive.goToLocation(location, normalDriveSettings);
             drive.turnTo(90, 1);
-//            robot.sleep(2000);
+            robot.sleep(3000);
         }
     }
 
