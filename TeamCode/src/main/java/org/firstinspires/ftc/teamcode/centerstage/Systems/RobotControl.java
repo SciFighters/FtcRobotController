@@ -69,9 +69,9 @@ public class RobotControl extends Component {
         intakeSystem.start();
         intakeSystem.stopIntake();
         intakeSystem.spinMotor();
+        intakeSystem.setServoPos(IntakeSystem.State.Idle);
         telemetry.addData(">", "INTAKE SYSTEM START DONE");
         telemetry.update();
-
         arm.start();
         // Initialize input and start subsystems
 //        Input.init(robot, robot.gamepad1, robot.gamepad2);
@@ -172,8 +172,7 @@ public class RobotControl extends Component {
         // Drive control based on gamepad input
         double y = pow(-gamepad1.left_stick_y) * boost;
         double x = pow(gamepad1.left_stick_x) * boost + fixToBackdrop;
-        double turn = pow(gamepad1.right_stick_x /
-                ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
+        double turn = pow(gamepad1.right_stick_x / ((gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) ? 1 : 1.7)) * boost;
         // Update turning toggle state
         turningToggle.update(Math.abs(turn) > 0.02 || gamepad1.a);
 
@@ -231,9 +230,7 @@ public class RobotControl extends Component {
         telemetryInit();
         arm = robot.addComponent(Arm.class);
         intakeSystem = robot.addComponent(IntakeSystem.class);
-        drive = robot.addComponent(DriveClass.class,
-                new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180),
-                        DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
+        drive = robot.addComponent(DriveClass.class, new DriveClass(DriveClass.ROBOT.GLADOS, new Location(-0.9, 0.4404 / 2, 180), DriveClass.USE_ENCODERS | DriveClass.USE_BRAKE, DriveClass.DriveMode.LEFT));
         droneLauncher = robot.addComponent(DroneLauncher.class);
     }
 

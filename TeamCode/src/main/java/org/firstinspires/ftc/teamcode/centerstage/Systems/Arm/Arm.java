@@ -202,7 +202,7 @@ public class Arm extends Component {
         while (!MathUtil.approximately(distance, position.distanceFromBackdrop, 0.01) && timer.seconds() < 3) {
             double gain = 0.023 * (robot.alliance == AutoFlow.Alliance.RED ? -1 : 1);
             double deltaAngle = drive.getDeltaHeading(targetHeading);
-            double turn = deltaAngle * gain / 2;
+            double turn = deltaAngle * gain / 1.5;
             double delta = position.distanceFromBackdrop - distance;
             if (delta > 100) {
                 break;
@@ -489,7 +489,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(4200, 43), Two(3530, 41), Hang(500, -1), Three(2780, 39);
+        Home(0, -1), One(4000, 41), Two(3530, 40), Hang(500, -1), Three(2780, 39);
         public final int liftPos;
         public final double distanceFromBackdrop;
 

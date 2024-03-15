@@ -482,7 +482,8 @@ public class DriveClass extends Component {
         // timer delta variables
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
-        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance)) && !robot.isStopRequested() && stuckTries < 15) {
+        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance))
+                && !robot.isStopRequested() && stuckTries < 15) {
 
             double power = targetPower;
 
