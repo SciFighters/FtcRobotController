@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 
-@TeleOp
+@TeleOp(group = "TESTER")
 public class AprilTagTester extends Robot {
     final int screenWidth = 640;
     final int screenHeight = 360;

@@ -61,7 +61,7 @@ public class AprilTagDetector {
     /**
      * Get a list of AprilTag detections.
      *
-     * @return RIGHT list of AprilTagDetection objects.
+     * @return NEAR list of AprilTagDetection objects.
      */
     public List<AprilTagDetection> getDetections() {
         return tagProcessor.getDetections();

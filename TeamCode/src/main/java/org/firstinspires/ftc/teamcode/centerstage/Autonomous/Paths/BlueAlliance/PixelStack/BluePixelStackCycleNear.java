@@ -1,18 +1,18 @@
-package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths.BlueAlliance.Backdrop;
+package org.firstinspires.ftc.teamcode.centerstage.Autonomous.Paths.BlueAlliance.PixelStack;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
-@Autonomous(group = "BLUE", name = "Blue: Backdrop - Cycle P-Near")
-public class BlueBackdropkCyclParkNear extends Robot {
+@Autonomous(group = "BLUE", name = "Blue: Pixel Stack - Cycle P-Near")
+public class BluePixelStackCycleNear extends Robot {
     AutoFlow auto;
 
     @Override
     public void initRobot() {
         auto = addComponent(AutoFlow.class, new AutoFlow(this, AutoFlow.Alliance.BLUE,
-                AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.CYCLING, AutoFlow.ParkLocation.RIGHT));
+                AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.CYCLING, AutoFlow.ParkLocation.NEAR));
     }
 
     @Override

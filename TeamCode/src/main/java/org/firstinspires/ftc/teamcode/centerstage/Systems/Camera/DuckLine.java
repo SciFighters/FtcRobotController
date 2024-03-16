@@ -48,11 +48,11 @@ public class DuckLine extends OpenCvPipeline {
 
 //	public ABC getDuck(int screenWidth) {
 //		if (targetPos.x <= screenWidth / 3) { // First 3rd of the screen
-//			return ABC.RIGHT;
+//			return ABC.NEAR;
 //		} else if (targetPos.x <= screenWidth / 3 * 2) { // Second 3rd of the screen
 //			return ABC.MID;
 //		} else if (targetPos.x <= screenWidth) { // Detects on the whole screen
-//			return ABC.LEFT;
+//			return ABC.FAR;
 //		} else {
 //			return null;
 //		}

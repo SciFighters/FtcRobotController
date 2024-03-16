@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@TeleOp
+@TeleOp(group = "TESTER")
 public class AprilTagAlignTester extends Robot {
     final int screenWidth = 640;
     final int screenHeight = 360;

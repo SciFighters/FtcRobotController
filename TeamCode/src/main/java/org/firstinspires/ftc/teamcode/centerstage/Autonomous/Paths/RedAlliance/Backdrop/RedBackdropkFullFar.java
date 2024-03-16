@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 @Autonomous(group = "RED", name = "Red: Backdrop - Full P-Far")
 public class RedBackdropkFullFar extends Robot {
     AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.RED,
-            AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.LEFT);
+            AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.FAR);
 
     @Override
     public void initRobot() {

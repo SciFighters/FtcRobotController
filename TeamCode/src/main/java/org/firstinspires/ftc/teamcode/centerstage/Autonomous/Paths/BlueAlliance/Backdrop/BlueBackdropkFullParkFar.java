@@ -12,7 +12,7 @@ public class BlueBackdropkFullParkFar extends Robot {
     @Override
     public void initRobot() {
         auto = addComponent(AutoFlow.class, new AutoFlow(this, AutoFlow.Alliance.BLUE,
-                AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.LEFT));
+                AutoFlow.StartPos.BACKSTAGE, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.FAR));
     }
 
     @Override

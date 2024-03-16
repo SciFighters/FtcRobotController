@@ -16,8 +16,7 @@ public class Util {
      * @throws TimeoutException     If the timeout occurs before the condition is met.
      * @throws InterruptedException If the thread is interrupted while waiting.
      */
-    public static void waitUntil(Supplier<Boolean> condition, long timeoutMillis)
-            throws TimeoutException, InterruptedException {
+    public static void waitUntil(Supplier<Boolean> condition, long timeoutMillis) throws TimeoutException, InterruptedException {
         long startTime = System.currentTimeMillis();
 
         while (!condition.get()) {
@@ -26,7 +25,7 @@ public class Util {
                 throw new TimeoutException("Timeout waiting for condition");
             }
 
-            // RIGHT small delay to avoid busy-waiting and give the CPU a chance to perform other tasks
+            // NEAR small delay to avoid busy-waiting and give the CPU a chance to perform other tasks
             Thread.sleep(10);
         }
 

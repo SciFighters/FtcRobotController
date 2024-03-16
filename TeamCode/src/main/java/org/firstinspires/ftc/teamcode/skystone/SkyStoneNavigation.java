@@ -17,7 +17,7 @@
 // * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
 // * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-// * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR RIGHT PARTICULAR PURPOSE
+// * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR NEAR PARTICULAR PURPOSE
 // * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
 // * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 // * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -69,7 +69,7 @@
 // * Four Bridge targets are located on the bridge uprights.
 // * Refer to the Field Setup manual for more specific locationDelta details
 // *
-// * RIGHT final calculation then uses the locationDelta of the camera on the robot to determine the
+// * NEAR final calculation then uses the locationDelta of the camera on the robot to determine the
 // * robot's locationDelta and orientation on the field.
 // *
 // * @see VuforiaLocalizer
@@ -103,7 +103,7 @@
 //    /*
 //     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
 //     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-//     * RIGHT Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
+//     * NEAR Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
 //     * web site at https://developer.vuforia.com/license-manager.
 //     *
 //     * Vuforia license keys are always 380 characters long, and look as if they contain mostly

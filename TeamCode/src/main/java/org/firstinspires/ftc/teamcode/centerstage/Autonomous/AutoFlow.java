@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.centerstage.Autonomous;
 
-import android.icu.text.RelativeDateTimeFormatter;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -20,7 +19,6 @@ import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.centerstage.util.Util;
 import org.firstinspires.ftc.teamcode.freight_frenzy.util.MathUtil;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.opencv.core.Scalar;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -36,6 +34,7 @@ public class AutoFlow extends Component {
     public PropPos propPos = PropPos.NONE;
     public DuckLine duckLine;
     public Auto auto;
+    public DriveClass drive;
     Robot robot;
     Location startLocation = new Location(1, robotLength / 2, 180); // PIXEL_STACK
     AprilTagDetector aprilTagDetector;
@@ -50,8 +49,6 @@ public class AutoFlow extends Component {
     StartPos startPos;
     Location backdropLocation;
     ParkLocation parkLocation;
-
-    private DriveClass drive;
 
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto, ParkLocation parkLocation) {
         this.robot = robot;
@@ -101,7 +98,7 @@ public class AutoFlow extends Component {
         webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
     }
 
-    void startAprilTagDetection() {
+    public void startAprilTagDetection() {
         aprilTagDetector = new AprilTagDetector("cam", new Size(screenWidth, screenHeight), robot.hardwareMap, robot.telemetry, AprilTagDetector.PortalConfiguration.DEFAULT);
     }
 
@@ -119,6 +116,7 @@ public class AutoFlow extends Component {
         drive.resetOrientation(startLocation.angle);
         dashboardTelemetry.update();
         intakeSystem.setServoPos(IntakeSystem.State.Idle);
+        backdropLocation = new Location(-tile * 2 + robotLength / 2 + 0.15, -tile - 0.15, 90);
 //        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
@@ -126,13 +124,15 @@ public class AutoFlow extends Component {
         AutoPath path = null;
 //        backdropLocation = new Location(-tile * 2 + 0.3, startLocation.y + ((tile + 0.05) * Math.signum(-startLocation.y)), startLocation.angle);
 //        backdropLocation = new Location(-tile * 2 + 0.3, -tile - Math.abs(startLocation.y), startLocation.angle);
-        backdropLocation = new Location(-tile * 2 + robotLength / 2 + 0.15, -tile - 0.2, 90);
         if (startPos == StartPos.PIXEL_STACK) {
-            path = new AutoPath.Builder().addStep(new Location(0, tile * 2 + 0.2, drive.getHeading()), lowToleranceSettings).addStep(new Location(-tile * 3 - 0.2, 0, 90), lowToleranceSettings, () -> {
-                if (drive.getPosX() < -0.5) {
-                    arm.goToPos(2300);
-                }
-            }).addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings).addStep(new Location(0, 0, 90), lowToleranceSettings).build(robot, startLocation);
+//            path = new AutoPath.Builder()
+////                    .addStep(new Location(0, tile * 2 + 0.2, drive.getHeading()), lowToleranceSettings)
+//                    .addStep(new Location(-tile * 3 - 0.2, 0, 90), lowToleranceSettings, () -> {
+//
+//                    })
+////                    .addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings)
+////                    .addStep(new Location(0, 0, 90), lowToleranceSettings)
+//                    .build(robot, startLocation);
         } else {
             if (propPos == PropPos.LEFT || propPos == PropPos.RIGHT) {
 //                path = new AutoPath.Builder().addStep(new Location(0, 0, 90), normalDriveSettings)
@@ -214,6 +214,7 @@ public class AutoFlow extends Component {
         if (startPos == StartPos.PIXEL_STACK) {
             left = new Location(startLocation.x - 0.08, -tile, startLocation.angle);
             right = new Location(startLocation.x + 0.2, -tile + 0.2, startLocation.angle);
+            yOffset = tile * Math.signum(startLocation.y) + 0.6 * Math.signum(startLocation.y);
             mid = new Location(startLocation.x, startLocation.y - yOffset, startLocation.angle);
         }
         if (robot.alliance == Alliance.RED) {
@@ -243,35 +244,70 @@ public class AutoFlow extends Component {
         intakeSystem.update();
 //        if (propPosX == PropPos.MID) {
 //            drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.15 * Math.signum(-startLocation.y), drive.getHeading()), normalDriveSettings);
+//
 //        }
-        if (startPos == StartPos.PIXEL_STACK && propPos == PropPos.RIGHT && robot.alliance == Alliance.BLUE) {
-            drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
+        if (startPos == StartPos.PIXEL_STACK) {
+            if (robot.alliance == Alliance.BLUE) {
+                if (propPos == PropPos.RIGHT) {
+                    drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
+                } else if (propPos == PropPos.LEFT) {
+                    drive.goToLocation(new Location(drive.getPosX() + 0.15, drive.getPosY(), drive.getHeading()), normalDriveSettings);
+                }
+            } else {
+                if (propPos == PropPos.LEFT) {
+                    drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
+                } else if (propPos == PropPos.RIGHT) {
+                    drive.goToLocation(new Location(drive.getPosX() + 0.15, drive.getPosY(), drive.getHeading()), normalDriveSettings);
+                }
+            }
         }
-        //        if (pos == PropPos.LEFT && robot.alliance == Alliance.BLUE) {
+        //        if (pos == PropPos.FAR && robot.alliance == Alliance.BLUE) {
 //            drive.goToLocation(left.add(new Location(0, tile)), lowToleranceSettings);
 //        }
 //        drive.turnTo(90, 0.5);
 
         if (startPos == StartPos.PIXEL_STACK) {
-            Location location = new Location(drive.getPosX(), -0.15, drive.getHeading());
+            Location location = new Location(drive.getPosX(), -0.1, drive.getHeading());
             if (robot.alliance == Alliance.RED) {
                 location.flipY();
             }
             drive.goToLocation(location, normalDriveSettings);
             drive.turnTo(90, 1);
-            robot.sleep(3000);
+
+            Location pixelStack = new Location(tile * 3 - 0.26, -0.1, 90);
+            if (robot.alliance == Alliance.RED) {
+                pixelStack = pixelStack.flipY();
+            }
+            arm.openClaw(false);
+            drive.goToLocation(pixelStack, normalDriveSettings);
+            intakeSystem.collect();
+            Thread intakeThread = Util.loopAsync(() -> {
+                intakeSystem.update();
+            }, robot);
+            robot.sleep(4000);
+            drive.goToLocation(new Location(tile * 3 - 0.4, -0.1, 90), lowToleranceSettings);
+            robot.sleep(2000);
+            drive.goToLocation(new Location(backdropLocation.x, 0, 90), lowToleranceSettings, () -> {
+                if (drive.getPosX() <= tile * 3) {
+                    arm.openClaw(true);
+                    intakeSystem.stopIntake();
+                }
+                if (drive.getPosX() < -0.5) {
+                    arm.goToPos(2300);
+                }
+            });
+            intakeThread.interrupt();
         }
     }
 
     public void cycle() {
+        intakeSystem.collect();
+        Thread thread = Util.loopAsync(intakeSystem::update, robot);
         drive.goToLocation(new Location(-tile * 1.5, drive.getPosY(), 90), lowToleranceSettings);
         drive.goToLocation(new Location(-tile * 1.5, 0, 90), lowToleranceSettings);
         drive.goToLocation(new Location(tile * 3 - 0.23, -0.15, 90), normalDriveSettings);
-        intakeSystem.collect();
         arm.openClaw(false);
-        robot.sleep(300);
-        Thread thread = Util.loopAsync(intakeSystem::update, robot);
-        robot.sleep(1000);
+        robot.sleep(500);
         //        robot.sleep(4000);
         drive.goToLocation(new Location(-tile * 1.5, 0, 90), lowToleranceSettings, () -> {
             if (drive.getPosX() <= tile * 1.5 && intakeSystem.state() != IntakeSystem.State.Spit) {
@@ -284,7 +320,7 @@ public class AutoFlow extends Component {
         });
         intakeSystem.stopIntake();
         goToBoardByProp(propPos, Arm.Position.Three);
-        arm.goToPos(Arm.Position.One); // makes the arm go yee
+        arm.goToPos(Arm.Position.Three); // makes the arm go yee
         robot.sleep(1300);
         arm.openClaw(false);
         robot.sleep(500);
@@ -293,7 +329,7 @@ public class AutoFlow extends Component {
 
     public void runPath() {
         propPos = DuckLine.getPropPos();
-        closeWebcam();
+        stopPropDetection();
         if (auto != Auto.PARK && startPos == StartPos.BACKSTAGE) {
             arm.goToPos(2300);
         }
@@ -303,12 +339,24 @@ public class AutoFlow extends Component {
             path = buildPath();
             if (path != null) path.run(); // moves to the backboard
 //            lockOnTagByProp(propPos); // aligns on the Y axis
+            if (startPos == StartPos.PIXEL_STACK) {
+                PropPos newPos = PropPos.MID;
+                if (propPos == PropPos.MID) {
+                    newPos = PropPos.RIGHT;
+                }
+                goToBoardByProp(newPos, Arm.Position.One);
+                arm.goToPos(Arm.Position.One); // makes the arm go yee
+                robot.sleep(2000);
+                arm.dropBottomPixel();
+                robot.sleep(200);
+                arm.goToPos(Arm.Position.One.liftPos - 200);
+            }
             goToBoardByProp(propPos, Arm.Position.One);
-            aprilTagDetector.stop();
             arm.goToPos(Arm.Position.One); // makes the arm go yee
-            robot.sleep(2000);
+            robot.sleep(700);
             arm.openClaw(false);
-            robot.sleep(500);
+            aprilTagDetector.stop();
+            robot.sleep(650);
             arm.goToPos(Arm.Position.Home);
 //            robot.sleep(2000);
             if (auto == Auto.CYCLING) {
@@ -321,22 +369,22 @@ public class AutoFlow extends Component {
 
     @Override
     public void stop() {
-        closeWebcam();
+        stopPropDetection();
         aprilTagDetector.stop();
     }
 
     public void park() {
-        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.1 * Math.signum(-startLocation.y);
+        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.2 * Math.signum(-startLocation.y);
         double x = -tile * 2.3 - 0.1;
-        if (parkLocation == ParkLocation.RIGHT) {
-            y = startLocation.y;
+        if (parkLocation == ParkLocation.NEAR) {
+            y = startLocation.y + (0.05 * Math.signum(-startLocation.y));
         }
         drive.goToLocation(new Location(drive.getPosX(), y, 90), lowToleranceSettings);
         drive.goToLocation(new Location(x, y, 90), lowToleranceSettings);
         drive.turnTo(90, 1);
     }
 
-    public void closeWebcam() {
+    public void stopPropDetection() {
         webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
             @Override
             public void onClose() {
@@ -347,19 +395,24 @@ public class AutoFlow extends Component {
     }
 
     public void goToBoardByProp(PropPos propPos, Arm.Position armPos) {
-        double distanceFromBoardX = Math.min(drive.getDistanceLeftSensorDistance(),
-                drive.getDistanceRightSensorDistance());
+        double distanceFromBoardX = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
         distanceFromBoardX /= 100; // Convert from CM to METERS
         double targetDistanceFromBoardX = armPos.distanceFromBackdrop / 100; // Convert from CM to METERS
-
-        if (distanceFromBoardX > 0.3 || propPos == PropPos.MID || propPos == PropPos.NONE) {
-            drive.goToLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings);
-            distanceFromBoardX = Math.min(drive.getDistanceLeftSensorDistance(),
-                    drive.getDistanceRightSensorDistance());
+        double yOffset = 0.08;
+        if (propPos == PropPos.LEFT && robot.alliance == Alliance.BLUE) {
+            yOffset *= -1;
+        } else if (propPos == PropPos.RIGHT && robot.alliance == Alliance.RED) {
+            yOffset *= -1;
+        }
+        if (robot.alliance == Alliance.RED) {
+            yOffset *= -1;
+        }
+        if (distanceFromBoardX > 0.3 || propPos == PropPos.MID || propPos == PropPos.NONE || startPos == StartPos.PIXEL_STACK) {
+            drive.goToLocation(new Location(backdropLocation.x, backdropLocation.y + yOffset, 90), lowToleranceSettings);
+            distanceFromBoardX = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
             distanceFromBoardX /= 100; // Convert from CM to METERS
         }
-        AprilTagDetection tagDetection = aprilTagDetector
-                .getSpecificTag(getTagIDAccordingToTeamPropLocation(propPos, robot.alliance));
+        AprilTagDetection tagDetection = aprilTagDetector.getSpecificTag(getTagIDAccordingToTeamPropLocation(propPos, robot.alliance));
         double tagDistanceY = 0;
         if (tagDetection != null) {
             tagDistanceY = tagDetection.rawPose.x / 100; // Convert from CM to METERS
@@ -406,13 +459,10 @@ public class AutoFlow extends Component {
     }
 
     public enum PropPos {
-        RIGHT, // RIGHT
-        MID, // MID
-        LEFT  // LEFT
-        , NONE
+        RIGHT, MID, LEFT, NONE
     }
 
     public enum ParkLocation {
-        LEFT, RIGHT
+        FAR, NEAR
     }
 }

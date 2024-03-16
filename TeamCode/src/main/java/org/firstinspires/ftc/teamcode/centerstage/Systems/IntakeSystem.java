@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.centerstage.Systems;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
@@ -21,6 +23,7 @@ public class IntakeSystem extends Component {
     Arm arm;
     ColorSensor farPixelColorSensor;
     ColorSensor nearPixelColorSensor;
+    DistanceSensor nearPixelDistanceSensor;
     boolean pixelHere;
     private boolean justStopped;
     private boolean isBusy;
@@ -57,6 +60,7 @@ public class IntakeSystem extends Component {
 
         farPixelColorSensor = hardwareMap.get(ColorSensor.class, "farPixelColorSensor");
         nearPixelColorSensor = hardwareMap.get(ColorSensor.class, "nearPixelColorSensor");
+        nearPixelDistanceSensor = hardwareMap.get(DistanceSensor.class, "nearPixelColorSensor");
 
         intakeServo1 = hardwareMap.get(Servo.class, "intakeServo1");
         intakeServo2 = hardwareMap.get(Servo.class, "intakeServo2");
@@ -74,22 +78,32 @@ public class IntakeSystem extends Component {
     @Override
     public void update() {
         spinMotor();
-//        if (state == State.Collect) {
-//            boolean farPixelDetected = farPixelColorSensor.red() > 900 || farPixelColorSensor.green() > 900 || farPixelColorSensor.blue() > 900;
-//            boolean nearPixelDetected = nearPixelColorSensor.red() > 5000 || nearPixelColorSensor.green() > 5000 || nearPixelColorSensor.blue() > 5000;
-//
-//            if ((farPixelDetected && nearPixelDetected) && state() == State.Collect) {
-//                if (!pixelHere && pixelHereTimer == null) {
-//                    pixelHereTimer = new ElapsedTime();
-//                } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 0.5) {
-//                    pixelHereTimer = null;
-//                    pixelHere = true;
-//                    stopIntake();
-//                }
-//            } else {
-//                pixelHere = false;
-//            }
-//        }
+        if (state == State.Collect) {
+            int farRed = farPixelColorSensor.red();
+            int farGreen = farPixelColorSensor.green();
+            int farBlue = farPixelColorSensor.blue();
+            boolean farPixelDetected = (farRed > 900) && (farGreen > 900) && (farBlue > 900);
+
+            int nearRed = nearPixelColorSensor.red();
+            int nearGreen = nearPixelColorSensor.green();
+            int nearBlue = nearPixelColorSensor.blue();
+            boolean nearPixelDetected = (nearRed > 4000) || (nearGreen > 4000) || (nearBlue > 4000);
+
+            double nearDistanceCM = nearPixelDistanceSensor.getDistance(DistanceUnit.CM);
+
+            if (farPixelDetected && nearPixelDetected && (nearDistanceCM < 6)) {
+                if (!pixelHere && pixelHereTimer == null) {
+                    pixelHereTimer = new ElapsedTime();
+                } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1) {
+                    pixelHereTimer = null;
+                    pixelHere = true;
+                    stopIntake();
+                }
+            } else {
+                pixelHere = false;
+            }
+        }
+        prevState = state;
     }
 
 
@@ -104,7 +118,6 @@ public class IntakeSystem extends Component {
 
     void setState(State state) {
 //        if (state == WheelsState.AvoidArm) return;
-        prevState = state;
         this.state = state;
         if (state == State.Idle) {
             arm.openClaw(true);
@@ -128,11 +141,11 @@ public class IntakeSystem extends Component {
 //        state = prevState;
         if (timer.seconds() >= 0.4 && justStopped && state() == State.Idle) {
             spit();
-        } else if (timer.seconds() >= 2 && state() == State.Spit && justStopped) {
+        } else if (timer.seconds() >= 1 && state() == State.Spit && justStopped) {
             justStopped = false;
             setState(State.Idle);
         }
-
+//        if (prevState != state) {
         if (state == State.Spit) {
             setServoPos(State.Spit);
             motor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -145,6 +158,7 @@ public class IntakeSystem extends Component {
             motor.setDirection(DcMotorSimple.Direction.REVERSE);
             motor.setPower(normalPower);
         }
+//        }
     }
 
     public State state() {
@@ -152,10 +166,7 @@ public class IntakeSystem extends Component {
     }
 
     public enum State {
-        Collect(1),
-        Spit(0),
-        Idle(0),
-        AvoidArm(0.5);
+        Collect(1), Spit(0), Idle(0), AvoidArm(0.5);
         private final double servoPos;
 
         State(double servoPos) {

@@ -17,7 +17,7 @@
  * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
  * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR RIGHT PARTICULAR PURPOSE
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR NEAR PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -164,7 +164,7 @@ public class AutoHub extends LinearOpMode {
 
 			if (abc == ABC.A) {
 //            robot.goTo(a_pos.x,a_pos.y, 0.8,heading);
-				telemetry.addData("Ring", "RIGHT");
+				telemetry.addData("Ring", "NEAR");
 			}
 
 			if (abc == ABC.B) {
@@ -174,7 +174,7 @@ public class AutoHub extends LinearOpMode {
 
 			if (abc == ABC.C) {
 //            robot.goTo(c_pos.x,c_pos.y, 0.8,heading);
-				telemetry.addData("Ring", "LEFT");
+				telemetry.addData("Ring", "FAR");
 			}
 
 			telemetry.update();

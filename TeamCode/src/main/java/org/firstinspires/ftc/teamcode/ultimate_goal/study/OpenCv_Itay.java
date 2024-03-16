@@ -71,7 +71,7 @@ public class OpenCv_Itay extends LinearOpMode {
 
 //        Mat hsvRegion;
 
-//        static final Point RIGHT = new Point(100,100);
+//        static final Point NEAR = new Point(100,100);
 //        static final Point MID = new Point(150, 150);
 
 		@Override

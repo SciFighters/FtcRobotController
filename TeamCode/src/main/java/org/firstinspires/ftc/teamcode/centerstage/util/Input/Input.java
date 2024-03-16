@@ -151,7 +151,7 @@ public class Input {
     /**
      * Get the list of Toggle instances.
      *
-     * @return RIGHT map of KeyCode to Toggle instances.
+     * @return NEAR map of KeyCode to Toggle instances.
      */
     public static Map<KeyCode, Toggle> getToggles() {
         return toggles;

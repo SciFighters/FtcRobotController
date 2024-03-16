@@ -12,7 +12,7 @@ public class BluePixelStackParkOnlyNear extends Robot {
     @Override
     public void initRobot() {
         auto = addComponent(AutoFlow.class, new AutoFlow(this, AutoFlow.Alliance.BLUE,
-                AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.PARK, AutoFlow.ParkLocation.RIGHT));
+                AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.PARK, AutoFlow.ParkLocation.NEAR));
     }
 
     @Override

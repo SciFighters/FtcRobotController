@@ -21,7 +21,7 @@ public class HandRailTester extends LinearOpMode {
     double targetHeading = 0;
     private HardwareMap HardwareMap;
 
-    private Toggle collector = new Toggle(); //  Collection toggle (RIGHT button)
+    private Toggle collector = new Toggle(); //  Collection toggle (NEAR button)
     boolean release; // releasing object (MID button)
     private Toggle homing = new Toggle();
 
@@ -40,7 +40,7 @@ public class HandRailTester extends LinearOpMode {
             handRail.rail_drive(railPower, true);
             handRail.hand_drive(armPower, true);
 
-            collector.update(gamepad1.a || gamepad2.a); // update toggle (RIGHT button)
+            collector.update(gamepad1.a || gamepad2.a); // update toggle (NEAR button)
             homing.update(gamepad1.x || gamepad2.x);
             release = gamepad1.b || gamepad2.b;
 

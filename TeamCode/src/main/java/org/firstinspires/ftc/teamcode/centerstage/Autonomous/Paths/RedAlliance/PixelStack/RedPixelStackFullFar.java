@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 @Autonomous(group = "RED", name = "Red: Pixel Stack - Full P-Far")
 public class RedPixelStackFullFar extends Robot {
     AutoFlow auto = new AutoFlow(this, AutoFlow.Alliance.RED,
-            AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.LEFT);
+            AutoFlow.StartPos.PIXEL_STACK, AutoFlow.Auto.FULL, AutoFlow.ParkLocation.FAR);
 
     @Override
     public void initRobot() {

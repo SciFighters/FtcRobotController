@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.centerstage.util.Input.Input;
 
-@TeleOp
+@TeleOp(group = "TESTER")
 @Disabled
 public class ServoTester extends LinearOpMode {
     Servo servo1, servo2;
