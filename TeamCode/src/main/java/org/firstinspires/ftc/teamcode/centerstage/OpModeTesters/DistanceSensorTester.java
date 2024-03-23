@@ -9,7 +9,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 @TeleOp(group = "TESTER")
-@Disabled
 public class DistanceSensorTester extends Robot {
     DistanceSensor sensor1, sensor2;
 

@@ -49,6 +49,7 @@ public class AutoFlow extends Component {
     StartPos startPos;
     Location backdropLocation;
     ParkLocation parkLocation;
+    int goToTries = 0;
 
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto, ParkLocation parkLocation) {
         this.robot = robot;
@@ -117,29 +118,17 @@ public class AutoFlow extends Component {
         dashboardTelemetry.update();
         intakeSystem.setServoPos(IntakeSystem.State.Idle);
         backdropLocation = new Location(-tile * 2 + robotLength / 2 + 0.15, -tile - 0.15, 90);
-//        aprilTagDetector = new AprilTagDetector("cam", new Size(800, 448), robot.hardwareMap, telemetry, new AprilTagDetector.PortalConfiguration());
     }
 
     public AutoPath buildPath() {
         AutoPath path = null;
-//        backdropLocation = new Location(-tile * 2 + 0.3, startLocation.y + ((tile + 0.05) * Math.signum(-startLocation.y)), startLocation.angle);
-//        backdropLocation = new Location(-tile * 2 + 0.3, -tile - Math.abs(startLocation.y), startLocation.angle);
-        if (startPos == StartPos.PIXEL_STACK) {
-//            path = new AutoPath.Builder()
-////                    .addStep(new Location(0, tile * 2 + 0.2, drive.getHeading()), lowToleranceSettings)
-//                    .addStep(new Location(-tile * 3 - 0.2, 0, 90), lowToleranceSettings, () -> {
-//
-//                    })
-////                    .addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), lowToleranceSettings)
-////                    .addStep(new Location(0, 0, 90), lowToleranceSettings)
-//                    .build(robot, startLocation);
-        } else {
-            if (propPos == PropPos.LEFT || propPos == PropPos.RIGHT) {
-//                path = new AutoPath.Builder().addStep(new Location(0, 0, 90), normalDriveSettings)
-//                        .addLocation(new Location(backdropLocation.x, backdropLocation.y, 90), normalDriveSettings)
-//                        .build(robot, startLocation);
-            } else
-                path = new AutoPath.Builder().addLocation(new Location(drive.getPosX(), drive.getPosY(), drive.getHeading()), lowToleranceSettings).addStep(new Location(-tile / 2, 0, 90), lowToleranceSettings).build(robot, startLocation);
+        if (startPos == StartPos.BACKSTAGE) {
+            if (propPos == PropPos.MID) {
+//                path = new AutoPath.Builder()
+//                        .addLocation(new Location(drive.getPosX(), drive.getPosY(), drive.getHeading()),
+//                                lowToleranceSettings)
+//                        .addStep(new Location(-tile / 2, 0, 90), lowToleranceSettings).build(robot, startLocation);
+            }
         }
         if (robot.alliance == Alliance.RED) {
             if (path != null) path.flipY();
@@ -192,7 +181,6 @@ public class AutoFlow extends Component {
             drive.setPower(0, 0, powerY);
         }
         drive.setPower(0, 0, 0);
-//        drive.turnTo(targetHeading, 1);
     }
 
     public void lockOnTagByProp(PropPos pos) {
@@ -207,8 +195,8 @@ public class AutoFlow extends Component {
      * @param pos The prop position
      */
     public void placePurplePixelByProp(PropPos pos) {
-        double yOffset = tile * Math.signum(startLocation.y) + 0.4 * Math.signum(startLocation.y);
-        Location mid = new Location(startLocation.x - 0.3, startLocation.y - yOffset, 90);
+        double yOffset = tile * Math.signum(startLocation.y) + 0.43 * Math.signum(startLocation.y);
+        Location mid = new Location(startLocation.x - 0.25, startLocation.y - yOffset, 90);
         Location right = new Location(startLocation.x + 0.12, -tile, 90);
         Location left = new Location(startLocation.x - tile + 0.15, -tile, 90);
         if (startPos == StartPos.PIXEL_STACK) {
@@ -220,6 +208,10 @@ public class AutoFlow extends Component {
         if (robot.alliance == Alliance.RED) {
             left.flipY();
             right.flipY();
+//            if (startPos == StartPos.BACKSTAGE) {
+//                left.angle *= -1;
+//                right.angle *= -1;
+//            }
         }
         if (pos == PropPos.MID || pos == PropPos.NONE) {
             drive.goToLocation(mid, normalDriveSettings);
@@ -255,7 +247,7 @@ public class AutoFlow extends Component {
                 }
             } else {
                 if (propPos == PropPos.LEFT) {
-                    drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
+//                    drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
                 } else if (propPos == PropPos.RIGHT) {
                     drive.goToLocation(new Location(drive.getPosX() + 0.15, drive.getPosY(), drive.getHeading()), normalDriveSettings);
                 }
@@ -274,7 +266,7 @@ public class AutoFlow extends Component {
             drive.goToLocation(location, normalDriveSettings);
             drive.turnTo(90, 1);
 
-            Location pixelStack = new Location(tile * 3 - 0.26, -0.1, 90);
+            Location pixelStack = new Location(tile * 3 - 0.3, -0.13, 90);
             if (robot.alliance == Alliance.RED) {
                 pixelStack = pixelStack.flipY();
             }
@@ -284,9 +276,7 @@ public class AutoFlow extends Component {
             Thread intakeThread = Util.loopAsync(() -> {
                 intakeSystem.update();
             }, robot);
-            robot.sleep(4000);
-            drive.goToLocation(new Location(tile * 3 - 0.4, -0.1, 90), lowToleranceSettings);
-            robot.sleep(2000);
+            robot.sleep(5000);
             drive.goToLocation(new Location(backdropLocation.x, 0, 90), lowToleranceSettings, () -> {
                 if (drive.getPosX() <= tile * 3) {
                     arm.openClaw(true);
@@ -295,6 +285,11 @@ public class AutoFlow extends Component {
                 if (drive.getPosX() < -0.5) {
                     arm.goToPos(2300);
                 }
+                if (drive.getPosX() < backdropLocation.x + 0.48) {
+                    drive.currentTarget = backdropLocation;
+                }
+            }, () -> {
+                drive.currentTarget = backdropLocation;
             });
             intakeThread.interrupt();
         }
@@ -319,6 +314,7 @@ public class AutoFlow extends Component {
             }
         });
         intakeSystem.stopIntake();
+        int goToTries = 0;
         goToBoardByProp(propPos, Arm.Position.Three);
         arm.goToPos(Arm.Position.Three); // makes the arm go yee
         robot.sleep(1300);
@@ -328,18 +324,20 @@ public class AutoFlow extends Component {
     }
 
     public void runPath() {
+        path = buildPath();
         propPos = DuckLine.getPropPos();
         stopPropDetection();
         if (auto != Auto.PARK && startPos == StartPos.BACKSTAGE) {
             arm.goToPos(2300);
         }
+        int sleepTime = 2000;
         startAprilTagDetection();
         placePurplePixelByProp(propPos);
         if (auto != Auto.PARK) {
-            path = buildPath();
             if (path != null) path.run(); // moves to the backboard
 //            lockOnTagByProp(propPos); // aligns on the Y axis
             if (startPos == StartPos.PIXEL_STACK) {
+                sleepTime = 700;
                 PropPos newPos = PropPos.MID;
                 if (propPos == PropPos.MID) {
                     newPos = PropPos.RIGHT;
@@ -348,15 +346,15 @@ public class AutoFlow extends Component {
                 arm.goToPos(Arm.Position.One); // makes the arm go yee
                 robot.sleep(2000);
                 arm.dropBottomPixel();
-                robot.sleep(200);
-                arm.goToPos(Arm.Position.One.liftPos - 200);
+                robot.sleep(500);
+                arm.goToPos(Arm.Position.One.liftPos - 400);
             }
             goToBoardByProp(propPos, Arm.Position.One);
             arm.goToPos(Arm.Position.One); // makes the arm go yee
-            robot.sleep(700);
+            robot.sleep(sleepTime);
             arm.openClaw(false);
             aprilTagDetector.stop();
-            robot.sleep(650);
+            robot.sleep(700);
             arm.goToPos(Arm.Position.Home);
 //            robot.sleep(2000);
             if (auto == Auto.CYCLING) {
@@ -364,6 +362,9 @@ public class AutoFlow extends Component {
             }
         }
         park();
+        if (robot.time < 29) {
+            robot.sleep(2000);
+        }
         robot.requestOpModeStop(); // stops the program
     }
 
@@ -374,7 +375,7 @@ public class AutoFlow extends Component {
     }
 
     public void park() {
-        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.2 * Math.signum(-startLocation.y);
+        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.15 * Math.signum(-startLocation.y);
         double x = -tile * 2.3 - 0.1;
         if (parkLocation == ParkLocation.NEAR) {
             y = startLocation.y + (0.05 * Math.signum(-startLocation.y));
@@ -395,6 +396,12 @@ public class AutoFlow extends Component {
     }
 
     public void goToBoardByProp(PropPos propPos, Arm.Position armPos) {
+        DriveClass.GotoSettings setting = new DriveClass.GotoSettings.Builder()
+                .setPower(1).setTolerance(0.007).setSlowdownMode(false).setTimeout(0).build();
+        if (goToTries > 5) {
+            return;
+        }
+        goToTries++;
         double distanceFromBoardX = Math.min(drive.getDistanceLeftSensorDistance(), drive.getDistanceRightSensorDistance());
         distanceFromBoardX /= 100; // Convert from CM to METERS
         double targetDistanceFromBoardX = armPos.distanceFromBackdrop / 100; // Convert from CM to METERS
@@ -414,6 +421,7 @@ public class AutoFlow extends Component {
         }
         AprilTagDetection tagDetection = aprilTagDetector.getSpecificTag(getTagIDAccordingToTeamPropLocation(propPos, robot.alliance));
         double tagDistanceY = 0;
+
         if (tagDetection != null) {
             tagDistanceY = tagDetection.rawPose.x / 100; // Convert from CM to METERS
         }
@@ -421,8 +429,9 @@ public class AutoFlow extends Component {
         double targetX = drive.getPosX() + (targetDistanceFromBoardX - distanceFromBoardX);
         double targetY = drive.getPosY() + tagDistanceY;
 
-        drive.goToLocation(new Location(targetX, targetY, 90), lowToleranceSettings);
-        drive.goToLocation(new Location(targetX, targetY, 90), normalDriveSettings);
+//        drive.goToLocation(new Location(targetX, targetY, 90), lowToleranceSettings);
+        drive.goToLocation(new Location(targetX, targetY, 90), setting);
+
         if (tagDetection == null) {
             goToBoardByProp(propPos, armPos);
         }

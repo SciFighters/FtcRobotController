@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoPath;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.centerstage.util.Util;
@@ -43,6 +44,7 @@ public class DriveClass extends Component {
     private final Location startingPosition;
     public boolean busy;
     volatile public DcMotorEx fl = null;
+    public Location currentTarget;
     DriveMode mode;
     ElapsedTime timer = new ElapsedTime();
     volatile private DcMotorEx fr = null;
@@ -239,14 +241,44 @@ public class DriveClass extends Component {
         br.setPower(forward - turn + strafe);
     }
 
+//    public void setPowerTrig(double x, double y, double turn) {
+//
+//        double theta = Math.atan2(y, x);
+//        double power = Math.hypot(x, y);
+//
+//        double sin = Math.sin(theta - Math.PI / 4);
+//        double cos = Math.cos(theta - Math.PI / 4);
+//        double max = Math.max(Math.abs(sin), Math.abs(cos));
+//
+//        double frontLeft = (power * cos / max + turn);
+//        double frontRight = (power * sin / max - turn);
+//        double backLeft = (power * sin / max + turn);
+//        double backRight = (power * cos / max - turn);
+//
+//        if ((power + Math.abs(turn)) > 1) {
+//            double minimizer = power + turn;
+//            frontLeft /= power + turn;
+//            frontRight /= power - turn;
+//            backLeft /= power + turn;
+//            backRight /= power - turn;
+//        }
+//
+//        fl.setPower(frontLeft);
+//        fr.setPower(frontRight);
+//        bl.setPower(backLeft);
+//        br.setPower(backRight);
+//    }
+
     public void setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
-        if (!fieldOriented) {
-            setPower(y, turn, x);  // No field oriented  (=> Robot oriented)
+        if (!fieldOriented) {  // No field oriented  (=> Robot oriented)
+            setPower(y, turn, x);
+//            setPowerTrig(x, y, turn);
         } else {
             double phiRad = (-getHeading() + angleOffset) / 180 * Math.PI;
             double forward = y * Math.cos(phiRad) - x * Math.sin(phiRad);
             double strafe = y * Math.sin(phiRad) + x * Math.cos(phiRad);
             setPower(forward, turn, strafe);
+//            setPowerTrig(strafe, forward, turn);
         }
 
 //		robotType.telemetry.addData("Front","left/right: %d, %d", fl.getCurrentPosition(), fr.getCurrentPosition());
@@ -399,9 +431,18 @@ public class DriveClass extends Component {
         return goToAndOperate(location, settings, midwayAction);
     }
 
+    public double goToLocation(Location location, GotoSettings settings, Runnable midwayAction, Runnable onFinish) {
+        return goToAndOperate(location, settings, midwayAction, onFinish);
+    }
+
     private double goToAndOperate(Location location, GotoSettings settings, Runnable midwayAction) {
+        return goToAndOperate(location, settings, midwayAction, null);
+    }
+
+    private double goToAndOperate(Location location, GotoSettings settings, Runnable midwayAction, Runnable onFinish) {
         Thread thread = Util.loopAsync(midwayAction, robot);
-        double goToResult = goToLocation(location, settings);
+        double goToResult = goTo(location.x, location.y, settings.power, location.angle,
+                settings.tolerance, settings.timeout, settings.noSlowdown, onFinish);
         thread.interrupt();
         return goToResult;
     }
@@ -450,17 +491,39 @@ public class DriveClass extends Component {
     }
 
     public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout, boolean superSpeed) {
+        return goTo(x, y, targetPower, targetHeading, tolerance, timeout, superSpeed, null);
+    }
+
+    public double goToLocation(GotoSettings settings, AutoPath.Waypoint... waypoints) {
+        double dist = 0;
+        for (int i = 0; i < waypoints.length; i++) {
+            Location location = waypoints[i].locationDelta;
+            int finalI = i;
+            dist = goToLocation(location, settings, () -> {
+
+            }, () -> {
+                if (finalI != waypoints.length - 1) {
+                    currentTarget = waypoints[finalI + 1].locationDelta;
+                }
+            });
+        }
+        return dist;
+    }
+
+
+    public double goTo(double x, double y, double targetPower, double targetHeading, double tolerance, double timeout, boolean superSpeed, Runnable onFinish) {
         int goToIdle = 0; //if not moving
         int stuckTries = 0;
         boolean isCheckingIdle = false;
-
+        currentTarget = new Location(x, y, targetHeading);
+        Location startTarget = currentTarget;
         double lastX = 0;
         double lastY = 0;
 
         double currentX = getPosX();
         double currentY = getPosY();
-        double deltaX = x - currentX;
-        double deltaY = y - currentY;
+        double deltaX = currentTarget.x - currentX;
+        double deltaY = currentTarget.y - currentY;
         double startX = currentX;
         double startY = currentY;
         double remainDist = 0;
@@ -492,8 +555,8 @@ public class DriveClass extends Component {
             deltaX = currentX - startX;
             deltaY = currentY - startY;
             currentDist = Math.hypot(deltaY, deltaX); // distance moved from start position.
-            deltaX = x - currentX;
-            deltaY = y - currentY;
+            deltaX = currentTarget.x - currentX;
+            deltaY = currentTarget.y - currentY;
             remainDist = Math.hypot(deltaY, deltaX);  // distance left to target.
 
             //double leftDist = totalDist - currentDist;
@@ -517,7 +580,7 @@ public class DriveClass extends Component {
                 power = breakPower;
             }
 
-            double headingErr = getDeltaHeading(targetHeading) / 180;
+            double headingErr = getDeltaHeading(currentTarget.angle) / 180;
             double headingGain = Math.max(0.6, -0.25 * totalDist + 0.95); // y = -0.25x + 0.95
             double correction = headingGain * headingErr;
             double Vy = RVy * power;
@@ -567,6 +630,12 @@ public class DriveClass extends Component {
                 remainDist = -1;
                 break;
             }
+        }
+        if (onFinish != null) {
+            onFinish.run();
+        }
+        if (currentTarget != startTarget) {
+            goTo(currentTarget.x, currentTarget.y, targetPower, currentTarget.angle, tolerance, timeout, superSpeed);
         }
         setPower(0, 0, 0);
         return remainDist;

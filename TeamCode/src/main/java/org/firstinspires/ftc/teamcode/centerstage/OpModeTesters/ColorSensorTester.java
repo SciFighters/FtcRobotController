@@ -5,8 +5,10 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Robot;
 
 
@@ -15,7 +17,7 @@ public class ColorSensorTester extends Robot {
     ColorSensor farPixelColorSensor, nearPixelColorSensor;
     boolean pixelHere;
     MultipleTelemetry multipleTelemetry;
-
+    DistanceSensor nearDistanceSensor;
     @Override
     public void initRobot() {
         FtcDashboard dashboard = FtcDashboard.getInstance();
@@ -23,6 +25,7 @@ public class ColorSensorTester extends Robot {
         multipleTelemetry = new MultipleTelemetry(dashboardTelemetry, telemetry);
         farPixelColorSensor = hardwareMap.get(ColorSensor.class, "farPixelColorSensor");
         nearPixelColorSensor = hardwareMap.get(ColorSensor.class, "nearPixelColorSensor");
+        nearDistanceSensor = hardwareMap.get(DistanceSensor.class, "nearPixelColorSensor");
     }
 
     @Override
@@ -37,6 +40,7 @@ public class ColorSensorTester extends Robot {
         multipleTelemetry.addData("pixelHere: ", pixelHere);
         multipleTelemetry.addData("Color far sensor rgb", String.format("%d, %d, %d", farPixelColorSensor.red(), farPixelColorSensor.green(), farPixelColorSensor.blue()));
         multipleTelemetry.addData("Color near sensor rgb", String.format("%d, %d, %d", nearPixelColorSensor.red(), nearPixelColorSensor.green(), nearPixelColorSensor.blue()));
+        multipleTelemetry.addData("Distance near", nearDistanceSensor.getDistance(DistanceUnit.CM));
         multipleTelemetry.update();
     }
 }

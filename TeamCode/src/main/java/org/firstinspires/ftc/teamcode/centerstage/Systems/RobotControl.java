@@ -58,22 +58,9 @@ public class RobotControl extends Component {
     public void start() {
         lastFrameTimer = new ElapsedTime();
 
-        telemetry.addData(">", "DRIVE START");
-        telemetry.update();
-        drive.start();
         drive.resetOrientation(allianceDefaultHeading);
-        telemetry.addData(">", "DRIVE START DONE");
-
-        telemetry.addData(">", "INTAKE SYSTEM START");
-        telemetry.update();
-        intakeSystem.start();
-        intakeSystem.stopIntake();
-        intakeSystem.spinMotor();
         intakeSystem.setServoPos(IntakeSystem.State.Idle);
-        telemetry.addData(">", "INTAKE SYSTEM START DONE");
-        telemetry.update();
-        arm.start();
-        // Initialize input and start subsystems
+
 //        Input.init(robot, robot.gamepad1, robot.gamepad2);
         targetHeading = drive.getHeading();
         gamepad1.runRumbleEffect(rumbleEffect);

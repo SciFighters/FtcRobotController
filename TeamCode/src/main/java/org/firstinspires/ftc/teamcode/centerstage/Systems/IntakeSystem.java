@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode.centerstage.Systems;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.Arm;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.ThreadedComponent;
@@ -24,7 +27,8 @@ public class IntakeSystem extends Component {
     ColorSensor farPixelColorSensor;
     ColorSensor nearPixelColorSensor;
     DistanceSensor nearPixelDistanceSensor;
-    boolean pixelHere;
+    boolean pixelsInside;
+    RevBlinkinLedDriver blinkinDriver;
     private boolean justStopped;
     private boolean isBusy;
 
@@ -54,6 +58,11 @@ public class IntakeSystem extends Component {
 
     @Override
     public void init() {
+        if (robot.alliance == AutoFlow.Alliance.RED) {
+            LEDPatterns.None.pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+        } else {
+            LEDPatterns.None.pattern = RevBlinkinLedDriver.BlinkinPattern.BLUE;
+        }
         initTime = true;
         this.arm = robot.getComponent(Arm.class);
         motor = hardwareMap.get(DcMotorEx.class, "intakeWheelsMotor");
@@ -65,6 +74,11 @@ public class IntakeSystem extends Component {
         intakeServo1 = hardwareMap.get(Servo.class, "intakeServo1");
         intakeServo2 = hardwareMap.get(Servo.class, "intakeServo2");
         intakeServo2.setDirection(Servo.Direction.REVERSE);
+
+//        blinkinDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+
+//        setLEDPattern(LEDPatterns.None);
+
         timer = new ElapsedTime();
         stopIntake();
         initTime = false;
@@ -82,7 +96,7 @@ public class IntakeSystem extends Component {
             int farRed = farPixelColorSensor.red();
             int farGreen = farPixelColorSensor.green();
             int farBlue = farPixelColorSensor.blue();
-            boolean farPixelDetected = (farRed > 900) && (farGreen > 900) && (farBlue > 900);
+            boolean farPixelDetected = (farRed > 500) && (farGreen > 500) && (farBlue > 500);
 
             int nearRed = nearPixelColorSensor.red();
             int nearGreen = nearPixelColorSensor.green();
@@ -91,16 +105,18 @@ public class IntakeSystem extends Component {
 
             double nearDistanceCM = nearPixelDistanceSensor.getDistance(DistanceUnit.CM);
 
-            if (farPixelDetected && nearPixelDetected && (nearDistanceCM < 6)) {
-                if (!pixelHere && pixelHereTimer == null) {
+            if (farPixelDetected && nearPixelDetected && (nearDistanceCM < 0.7)) {
+                if (!pixelsInside && pixelHereTimer == null) {
                     pixelHereTimer = new ElapsedTime();
-                } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 1) {
+                } else if (pixelHereTimer != null && pixelHereTimer.seconds() > 0.75) {
                     pixelHereTimer = null;
-                    pixelHere = true;
+                    pixelsInside = true;
                     stopIntake();
+//                    LEDPatterns patternFar = getPatternByDistanceSensor(farRed, farGreen, farBlue);
+//                    setLEDPattern(patternFar);
                 }
             } else {
-                pixelHere = false;
+                pixelsInside = false;
             }
         }
         prevState = state;
@@ -110,6 +126,17 @@ public class IntakeSystem extends Component {
     public void setServoPos(double pos) {
         intakeServo1.setPosition(pos);
         intakeServo2.setPosition(pos);
+    }
+
+    public LEDPatterns getPatternByDistanceSensor(double r, double g, double b) {
+        if (!pixelsInside) return LEDPatterns.None;
+        LEDPatterns pattern = LEDPatterns.White;
+        // TODO: color by checks with if's
+        return pattern;
+    }
+
+    public void setLEDPattern(LEDPatterns pattern) {
+        blinkinDriver.setPattern(pattern.pattern);
     }
 
     public void setServoPos(State state) {
@@ -132,16 +159,16 @@ public class IntakeSystem extends Component {
      * Moves the intake wheels
      */
     public void spinMotor() {
-        double normalPower = 0.7;
+        double normalPower = 1;
         double spitPower = 0.75;
         if (isBusy) return; // Don't move if the system is busy
 //        if (arm != null && arm.pos() < 800 && arm.pos() > 50 && state != WheelsState.Collect && !initTime) {
 //            state = WheelsState.AvoidArm;
 //        } else {
 //        state = prevState;
-        if (timer.seconds() >= 0.4 && justStopped && state() == State.Idle) {
+        if (timer.seconds() >= 0.5 && justStopped && state() == State.Idle) {
             spit();
-        } else if (timer.seconds() >= 1 && state() == State.Spit && justStopped) {
+        } else if (timer.seconds() >= 1.5 && state() == State.Spit && justStopped) {
             justStopped = false;
             setState(State.Idle);
         }
@@ -171,6 +198,19 @@ public class IntakeSystem extends Component {
 
         State(double servoPos) {
             this.servoPos = servoPos;
+        }
+    }
+
+    public enum LEDPatterns {
+        Green(RevBlinkinLedDriver.BlinkinPattern.GREEN),
+        Purple(RevBlinkinLedDriver.BlinkinPattern.DARK_BLUE),
+        White(RevBlinkinLedDriver.BlinkinPattern.WHITE),
+        None(RevBlinkinLedDriver.BlinkinPattern.BLUE),
+        Yellow(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+        public RevBlinkinLedDriver.BlinkinPattern pattern;
+
+        LEDPatterns(RevBlinkinLedDriver.BlinkinPattern p) {
+            this.pattern = p;
         }
     }
 }

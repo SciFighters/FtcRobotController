@@ -361,7 +361,7 @@ public class Arm extends Component {
      * @param power The power to set to the motors.
      */
     public void setMotorsPower(double power) {
-        int higherLimit = 70, lowerLimit = 3;
+        double higherLimit = 80, lowerLimit = 4.5;
         if (stateMachine.getCurrentState() == gotoState) {
             higherLimit = 100;
         }
@@ -369,6 +369,7 @@ public class Arm extends Component {
             power = 0;
         } else if ((power < 0) && (touchSensor.isPressed())) {
             power = 0;
+            resetArmPos();
         } else if (power > 0 && pos() > 2000) {
             if ((stateMachine.getCurrentState() == gotoState && targetPos() >= pos()) || (stateMachine.getCurrentState() == manualState)) {
                 double distanceSensorDist = distanceSensorDistance();
@@ -378,7 +379,8 @@ public class Arm extends Component {
 //                        power = 0.5;
 //                    }
                     if (stateMachine.getCurrentState() == manualState) {
-                        power = Math.abs(MathUtil.map(distanceSensorDist, lowerLimit, higherLimit, 0, 1)) * (power * 1.3);
+                        power = Math.abs(MathUtil.map(distanceSensorDist, lowerLimit, higherLimit, 0, 1)) *
+                                (power * 1.6);
                     }
 //                if (stateMachine.getCurrentState() == manualState) {
 //                    power = calculateMotorsPower(power, distanceSensorDist);
@@ -424,8 +426,8 @@ public class Arm extends Component {
      * @param position The position to set the claw servos to.
      */
     public void openClaw(double position) {
-        frontServo.setPosition(position);
         backServo.setPosition(position);
+        frontServo.setPosition(position);
     }
 
     /**
@@ -489,7 +491,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(3900, 41), Two(3530, 40), Hang(500, -1), Three(2780, 39);
+        Home(0, -1), One(5500, 43), Two(3530, 40), Hang(500, -1), Three(2780, 39);
         public final int liftPos;
         public final double distanceFromBackdrop;
 
