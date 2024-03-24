@@ -92,8 +92,8 @@ public class DuckLine extends OpenCvPipeline {
         subRect = new Rect(new Point(width * 2 / 5, height * 5 / 12), new Point(width * 3 / 5, height * 6 / 12));
         subMat = hsv.submat(subRect);
 
-        this.divider_bottom_middle = width / 3.0;
-        this.divider_middle_top = (width / 3.0) * 2;
+        this.divider_bottom_middle = width / 2.0;
+        this.divider_middle_top = (width / 2.0) * 2;
     }
 
     /**

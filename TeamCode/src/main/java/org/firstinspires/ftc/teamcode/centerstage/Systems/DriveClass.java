@@ -440,6 +440,10 @@ public class DriveClass extends Component {
     }
 
     private double goToAndOperate(Location location, GotoSettings settings, Runnable midwayAction, Runnable onFinish) {
+        if (midwayAction == null) {
+            midwayAction = () -> {
+            };
+        }
         Thread thread = Util.loopAsync(midwayAction, robot);
         double goToResult = goTo(location.x, location.y, settings.power, location.angle,
                 settings.tolerance, settings.timeout, settings.noSlowdown, onFinish);

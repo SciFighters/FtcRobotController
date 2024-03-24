@@ -266,7 +266,7 @@ public class AutoFlow extends Component {
             drive.goToLocation(location, normalDriveSettings);
             drive.turnTo(90, 1);
 
-            Location pixelStack = new Location(tile * 3 - 0.3, -0.13, 90);
+            Location pixelStack = new Location(tile * 3 - 0.26, -0.11, 90);
             if (robot.alliance == Alliance.RED) {
                 pixelStack = pixelStack.flipY();
             }
@@ -276,7 +276,11 @@ public class AutoFlow extends Component {
             Thread intakeThread = Util.loopAsync(() -> {
                 intakeSystem.update();
             }, robot);
-            robot.sleep(5000);
+            Location finalPixelStack = pixelStack;
+            drive.goToLocation(pixelStack.subtractX(0.15), normalDriveSettings, null, () -> {
+                drive.currentTarget = finalPixelStack;
+            });
+            robot.sleep(4000);
             drive.goToLocation(new Location(backdropLocation.x, 0, 90), lowToleranceSettings, () -> {
                 if (drive.getPosX() <= tile * 3) {
                     arm.openClaw(true);
@@ -375,10 +379,10 @@ public class AutoFlow extends Component {
     }
 
     public void park() {
-        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.15 * Math.signum(-startLocation.y);
+        double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.12 * Math.signum(-startLocation.y);
         double x = -tile * 2.3 - 0.1;
         if (parkLocation == ParkLocation.NEAR) {
-            y = startLocation.y + (0.05 * Math.signum(-startLocation.y));
+            y = startLocation.y;
         }
         drive.goToLocation(new Location(drive.getPosX(), y, 90), lowToleranceSettings);
         drive.goToLocation(new Location(x, y, 90), lowToleranceSettings);
@@ -396,8 +400,7 @@ public class AutoFlow extends Component {
     }
 
     public void goToBoardByProp(PropPos propPos, Arm.Position armPos) {
-        DriveClass.GotoSettings setting = new DriveClass.GotoSettings.Builder()
-                .setPower(1).setTolerance(0.007).setSlowdownMode(false).setTimeout(0).build();
+        DriveClass.GotoSettings setting = new DriveClass.GotoSettings.Builder().setPower(0.7).setTolerance(0.003).setSlowdownMode(false).setTimeout(0).build();
         if (goToTries > 5) {
             return;
         }
