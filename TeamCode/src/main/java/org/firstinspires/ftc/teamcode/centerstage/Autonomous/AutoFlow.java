@@ -24,8 +24,19 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.lang.annotation.Documented;
+
+/**
+ * Component for autonomous flow control.
+ */
 public class AutoFlow extends Component {
+    /**
+     * Telemetry instance for the dashboard.
+     */
     public static Telemetry dashboardTelemetry;
+    /**
+     * Telemetry instance for multiple telemetry sources.
+     */
     public static MultipleTelemetry telemetry;
     final double robotLength = 0.4404;
     final double tile = 0.6;
@@ -51,6 +62,15 @@ public class AutoFlow extends Component {
     ParkLocation parkLocation;
     int goToTries = 0;
 
+    /**
+     * Constructs an AutoFlow object.
+     *
+     * @param robot        The Robot object.
+     * @param alliance     The Alliance color.
+     * @param startPos     The starting position.
+     * @param auto         The autonomous mode.
+     * @param parkLocation The parking location.
+     */
     public AutoFlow(Robot robot, Alliance alliance, StartPos startPos, Auto auto, ParkLocation parkLocation) {
         this.robot = robot;
         this.startPos = startPos;
@@ -64,6 +84,13 @@ public class AutoFlow extends Component {
         robot.alliance = alliance;
     }
 
+    /**
+     * Gets the tag ID according to the team's prop location.
+     *
+     * @param pos      The prop position.
+     * @param alliance The Alliance color.
+     * @return The tag ID.
+     */
     public static int getTagIDAccordingToTeamPropLocation(PropPos pos, Alliance alliance) {
         if (alliance == Alliance.RED) {
             if (pos == PropPos.LEFT) {
@@ -87,22 +114,31 @@ public class AutoFlow extends Component {
         return id;
     }
 
+    /**
+     * Initializes the webcam for prop detection.
+     */
     void initWebcam() {
         int cameraMonitorViewID = robot.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", robot.hardwareMap.appContext.getPackageName());
 
         WebcamName webcamName = robot.hardwareMap.get(WebcamName.class, "cam");
         webcam = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewID);
 
-        this.duckLine = new DuckLine(this.robot.alliance, telemetry);
+        this.duckLine = new DuckLine(this.robot, telemetry);
         webcam.setPipeline(this.duckLine);
         webcam.openCameraDevice();
         webcam.startStreaming(screenWidth, screenHeight, OpenCvCameraRotation.UPRIGHT);
     }
 
+    /**
+     * Starts AprilTag detection.
+     */
     public void startAprilTagDetection() {
         aprilTagDetector = new AprilTagDetector("cam", new Size(screenWidth, screenHeight), robot.hardwareMap, robot.telemetry, AprilTagDetector.PortalConfiguration.DEFAULT);
     }
 
+    /**
+     * Initializes components and telemetry.
+     */
     @Override
     public void init() {
         timer = new ElapsedTime();
@@ -120,16 +156,13 @@ public class AutoFlow extends Component {
         backdropLocation = new Location(-tile * 2 + robotLength / 2 + 0.15, -tile - 0.15, 90);
     }
 
+    /**
+     * Builds the autonomous path.
+     *
+     * @return The constructed AutoPath.
+     */
     public AutoPath buildPath() {
         AutoPath path = null;
-        if (startPos == StartPos.BACKSTAGE) {
-            if (propPos == PropPos.MID) {
-//                path = new AutoPath.Builder()
-//                        .addLocation(new Location(drive.getPosX(), drive.getPosY(), drive.getHeading()),
-//                                lowToleranceSettings)
-//                        .addStep(new Location(-tile / 2, 0, 90), lowToleranceSettings).build(robot, startLocation);
-            }
-        }
         if (robot.alliance == Alliance.RED) {
             if (path != null) path.flipY();
             backdropLocation.flipY();
@@ -137,6 +170,12 @@ public class AutoFlow extends Component {
         return path;
     }
 
+    /**
+     * Locks onto a specific tag by its ID.
+     *
+     * @param tagID The ID of the tag to lock onto.
+     */
+    @Deprecated
     public void lockOnTag(int tagID) {
         drive.turnTo(90, 1);
         double yOffset = 0.08;
@@ -145,9 +184,6 @@ public class AutoFlow extends Component {
         } else if (tagID == 1 || tagID == 4) {
             yOffset *= -1;
         }
-//        if (robot.alliance == Alliance.RED) {
-//            yOffset *= -1;
-//        }
         drive.goToLocation(new Location(backdropLocation.x, backdropLocation.y + yOffset, 90), normalDriveSettings);
         arm.alignToBoard(Arm.Position.One); // fixes distance to the board on the X axis
         AprilTagDetection tag = aprilTagDetector.getSpecificTag(tagID);
@@ -157,7 +193,6 @@ public class AutoFlow extends Component {
         int distanceSensorIndex = leftDist == distance ? 1 : 2;
         ElapsedTime timeout = new ElapsedTime();
         robot.telemetry.clearAll();
-//        assert tag != null;
         while (timeout.seconds() < 3) {
             tag = aprilTagDetector.getSpecificTag(tagID);
             if (tag == null) {
@@ -183,6 +218,12 @@ public class AutoFlow extends Component {
         drive.setPower(0, 0, 0);
     }
 
+    /**
+     * Locks onto a tag based on the position of the team's prop.
+     *
+     * @param pos The position of the prop.
+     */
+    @Deprecated
     public void lockOnTagByProp(PropPos pos) {
         lockOnTag(getTagIDAccordingToTeamPropLocation(pos, robot.alliance));
     }
@@ -208,10 +249,6 @@ public class AutoFlow extends Component {
         if (robot.alliance == Alliance.RED) {
             left.flipY();
             right.flipY();
-//            if (startPos == StartPos.BACKSTAGE) {
-//                left.angle *= -1;
-//                right.angle *= -1;
-//            }
         }
         if (pos == PropPos.MID || pos == PropPos.NONE) {
             drive.goToLocation(mid, normalDriveSettings);
@@ -226,7 +263,6 @@ public class AutoFlow extends Component {
             drive.goToLocation(right, normalDriveSettings);
             if (startPos == StartPos.BACKSTAGE) drive.turnTo(90, 1);
         }
-//        drive.turnTo(angle, 1);
         intakeSystem.spit();
         timer.reset();
         while (timer.seconds() < 0.75) {
@@ -234,10 +270,6 @@ public class AutoFlow extends Component {
         }
         intakeSystem.stopIntake();
         intakeSystem.update();
-//        if (propPosX == PropPos.MID) {
-//            drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.15 * Math.signum(-startLocation.y), drive.getHeading()), normalDriveSettings);
-//
-//        }
         if (startPos == StartPos.PIXEL_STACK) {
             if (robot.alliance == Alliance.BLUE) {
                 if (propPos == PropPos.RIGHT) {
@@ -246,18 +278,11 @@ public class AutoFlow extends Component {
                     drive.goToLocation(new Location(drive.getPosX() + 0.15, drive.getPosY(), drive.getHeading()), normalDriveSettings);
                 }
             } else {
-                if (propPos == PropPos.LEFT) {
-//                    drive.goToLocation(new Location(drive.getPosX(), drive.getPosY() + 0.3, drive.getHeading()), normalDriveSettings);
-                } else if (propPos == PropPos.RIGHT) {
+                if (propPos == PropPos.RIGHT) {
                     drive.goToLocation(new Location(drive.getPosX() + 0.15, drive.getPosY(), drive.getHeading()), normalDriveSettings);
                 }
             }
         }
-        //        if (pos == PropPos.FAR && robot.alliance == Alliance.BLUE) {
-//            drive.goToLocation(left.add(new Location(0, tile)), lowToleranceSettings);
-//        }
-//        drive.turnTo(90, 0.5);
-
         if (startPos == StartPos.PIXEL_STACK) {
             Location location = new Location(drive.getPosX(), -0.1, drive.getHeading());
             if (robot.alliance == Alliance.RED) {
@@ -284,10 +309,11 @@ public class AutoFlow extends Component {
             drive.goToLocation(new Location(backdropLocation.x, 0, 90), lowToleranceSettings, () -> {
                 if (drive.getPosX() <= tile * 3) {
                     arm.openClaw(true);
-                    intakeSystem.stopIntake();
+                    intakeSystem.spit();
                 }
                 if (drive.getPosX() < -0.5) {
                     arm.goToPos(2300);
+                    intakeSystem.stopIntake();
                 }
                 if (drive.getPosX() < backdropLocation.x + 0.48) {
                     drive.currentTarget = backdropLocation;
@@ -299,6 +325,9 @@ public class AutoFlow extends Component {
         }
     }
 
+    /**
+     * Executes the cycling routine.
+     */
     public void cycle() {
         intakeSystem.collect();
         Thread thread = Util.loopAsync(intakeSystem::update, robot);
@@ -307,7 +336,6 @@ public class AutoFlow extends Component {
         drive.goToLocation(new Location(tile * 3 - 0.23, -0.15, 90), normalDriveSettings);
         arm.openClaw(false);
         robot.sleep(500);
-        //        robot.sleep(4000);
         drive.goToLocation(new Location(-tile * 1.5, 0, 90), lowToleranceSettings, () -> {
             if (drive.getPosX() <= tile * 1.5 && intakeSystem.state() != IntakeSystem.State.Spit) {
                 arm.openClaw(true);
@@ -327,6 +355,9 @@ public class AutoFlow extends Component {
         arm.goToPos(Arm.Position.Home);
     }
 
+    /**
+     * Runs the predefined path.
+     */
     public void runPath() {
         path = buildPath();
         propPos = DuckLine.getPropPos();
@@ -339,14 +370,13 @@ public class AutoFlow extends Component {
         placePurplePixelByProp(propPos);
         if (auto != Auto.PARK) {
             if (path != null) path.run(); // moves to the backboard
-//            lockOnTagByProp(propPos); // aligns on the Y axis
             if (startPos == StartPos.PIXEL_STACK) {
                 sleepTime = 700;
-                PropPos newPos = PropPos.MID;
+                PropPos posForWhitePixel = PropPos.MID;
                 if (propPos == PropPos.MID) {
-                    newPos = PropPos.RIGHT;
+                    posForWhitePixel = PropPos.RIGHT;
                 }
-                goToBoardByProp(newPos, Arm.Position.One);
+                goToBoardByProp(posForWhitePixel, Arm.Position.One);
                 arm.goToPos(Arm.Position.One); // makes the arm go yee
                 robot.sleep(2000);
                 arm.dropBottomPixel();
@@ -372,15 +402,21 @@ public class AutoFlow extends Component {
         robot.requestOpModeStop(); // stops the program
     }
 
+    /**
+     * Stops all operations and components.
+     */
     @Override
     public void stop() {
         stopPropDetection();
         aprilTagDetector.stop();
     }
 
+    /**
+     * Parks the robot in the specified location.
+     */
     public void park() {
         double y = startLocation.y + tile * 2 * Math.signum(-startLocation.y) + 0.12 * Math.signum(-startLocation.y);
-        double x = -tile * 2.3 - 0.1;
+        double x = -tile * 2;
         if (parkLocation == ParkLocation.NEAR) {
             y = startLocation.y;
         }
@@ -389,6 +425,9 @@ public class AutoFlow extends Component {
         drive.turnTo(90, 1);
     }
 
+    /**
+     * Stops prop detection and closes the webcam.
+     */
     public void stopPropDetection() {
         webcam.closeCameraDeviceAsync(new OpenCvCamera.AsyncCameraCloseListener() {
             @Override
@@ -399,6 +438,12 @@ public class AutoFlow extends Component {
         }); // closes the prop detection webcam
     }
 
+    /**
+     * Navigates the robot to the backboard based on the position of the team's prop.
+     *
+     * @param propPos The position of the prop.
+     * @param armPos  The position of the arm.
+     */
     public void goToBoardByProp(PropPos propPos, Arm.Position armPos) {
         DriveClass.GotoSettings setting = new DriveClass.GotoSettings.Builder().setPower(0.7).setTolerance(0.003).setSlowdownMode(false).setTimeout(0).build();
         if (goToTries > 5) {
@@ -438,10 +483,6 @@ public class AutoFlow extends Component {
         if (tagDetection == null) {
             goToBoardByProp(propPos, armPos);
         }
-    }
-
-    public void goToBoard() {
-        drive.goToLocation(backdropLocation, lowToleranceSettings);
     }
 
     public enum StartPos {

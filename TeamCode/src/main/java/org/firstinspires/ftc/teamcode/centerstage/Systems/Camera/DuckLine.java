@@ -25,20 +25,21 @@ public class DuckLine extends OpenCvPipeline {
     Mat mask;
     Mat subMat;
     Rect subRect;
-    AutoFlow.Alliance alliance;
     Telemetry telemetry;
-    Scalar min_red = new Scalar(0, 100, 100);
-    Scalar max_red = new Scalar(10, 255, 255);
+    Scalar min_red = new Scalar(0, 80, 65); // prev = 0 100, 100
+    Scalar max_red = new Scalar(360, 255, 255); // prev = 10, 255, 255
     Scalar min_blue = new Scalar(90, 100, 100);
     Scalar max_blue = new Scalar(130, 255, 255);
+    Robot robot;
     volatile private Point targetPos = null;
     //Rect(x, y, width, height)             x, y - position. width, height - dimensions.
     volatile private Rect targetRect = null;
     private double divider_bottom_middle;
     private double divider_middle_top;
+    private int noneTries = 0;
 
-    public DuckLine(AutoFlow.Alliance alliance, Telemetry telemetry) {
-        this.alliance = alliance;
+    public DuckLine(Robot robot, Telemetry telemetry) {
+        this.robot = robot;
         this.telemetry = telemetry;
     }
 
@@ -106,12 +107,10 @@ public class DuckLine extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat frame) {
         Mat smallFrame = new Mat(frame, new Range(frame.height() / 2, frame.height()));
-        if (alliance == AutoFlow.Alliance.RED)
-            Core.flip(smallFrame, smallFrame, 1);
+        if (robot.alliance == AutoFlow.Alliance.RED) Core.flip(smallFrame, smallFrame, 1);
         //        Mat smallFrame = frame;
         Imgproc.cvtColor(smallFrame, hsv, Imgproc.COLOR_RGB2HSV);  // Convert to HSV color set
-        Scalar min_ = this.alliance == AutoFlow.Alliance.BLUE ?
-                min_blue : min_red, max_ = this.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
+        Scalar min_ = robot.alliance == AutoFlow.Alliance.BLUE ? min_blue : min_red, max_ = robot.alliance == AutoFlow.Alliance.BLUE ? max_blue : max_red;
 
         Core.inRange(hsv, min_, max_, mask);   // Mask all orange
 //        Scalar min_yellow = new Scalar(8, 130, 160);
@@ -146,7 +145,7 @@ public class DuckLine extends OpenCvPipeline {
         // Find the biggest rectangle
         for (int i = 0; i < rects.size(); i++) {
             Rect curr = rects.get(i);
-            if (curr.area() > biggestArea) {
+            if (curr.area() > biggestArea && curr.y + curr.height > 45) {
                 biggestIndex = i;
                 biggestArea = curr.area();
                 highestY = curr.y + curr.height;
@@ -183,7 +182,7 @@ public class DuckLine extends OpenCvPipeline {
             AutoFlow.telemetry.addData("PROP HEIGHT", height);
             AutoFlow.telemetry.addData("PROP WIDTH", width);
             AutoFlow.telemetry.addData("PROP AREA", biggestArea);
-            AutoFlow.telemetry.addData("TAG ID", AutoFlow.getTagIDAccordingToTeamPropLocation(propPos, alliance));
+            AutoFlow.telemetry.addData("TAG ID", AutoFlow.getTagIDAccordingToTeamPropLocation(propPos, robot.alliance));
             AutoFlow.telemetry.update();
             xCoordinateText += "L: " + propPosX;
             Point textPoint = new Point(targetRect.x - 30, targetRect.y - 10); // Adjust the position as needed
@@ -191,8 +190,16 @@ public class DuckLine extends OpenCvPipeline {
         } else {
             targetPos = null;
             targetRect = null;
-        }
 
+            propPos = AutoFlow.PropPos.NONE;
+            // switching to different alliance if no prop is being detected for more than 133 ticks
+            if (noneTries >= 133) {
+                noneTries = 0;
+                robot.alliance = robot.alliance == AutoFlow.Alliance.BLUE ? AutoFlow.Alliance.RED : AutoFlow.Alliance.BLUE;
+            } else {
+                noneTries++;
+            }
+        }
 //        // Draw lines on the frame
         Imgproc.line(smallFrame, new Point(this.divider_bottom_middle, 0), new Point(this.divider_bottom_middle, this.height), new Scalar(86, 123, 47));
         Imgproc.line(smallFrame, new Point(this.divider_middle_top, 0), new Point(this.divider_middle_top, this.height), new Scalar(86, 123, 47));
