@@ -152,7 +152,6 @@ public class AutoFlow extends Component {
         initWebcam();
         drive.resetOrientation(startLocation.angle);
         dashboardTelemetry.update();
-        intakeSystem.setServoPos(IntakeSystem.State.Idle);
         backdropLocation = new Location(-tile * 2 + robotLength / 2 + 0.15, -tile - 0.15, 90);
     }
 
@@ -359,6 +358,7 @@ public class AutoFlow extends Component {
      * Runs the predefined path.
      */
     public void runPath() {
+        intakeSystem.setServoPos(IntakeSystem.State.Idle);
         path = buildPath();
         propPos = DuckLine.getPropPos();
         stopPropDetection();

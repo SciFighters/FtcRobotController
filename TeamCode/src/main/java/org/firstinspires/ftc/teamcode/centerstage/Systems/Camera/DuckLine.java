@@ -26,7 +26,7 @@ public class DuckLine extends OpenCvPipeline {
     Mat subMat;
     Rect subRect;
     Telemetry telemetry;
-    Scalar min_red = new Scalar(0, 80, 65); // prev = 0 100, 100
+    Scalar min_red = new Scalar(0, 100, 100); // prev = 0 100, 100
     Scalar max_red = new Scalar(360, 255, 255); // prev = 10, 255, 255
     Scalar min_blue = new Scalar(90, 100, 100);
     Scalar max_blue = new Scalar(130, 255, 255);
@@ -142,10 +142,11 @@ public class DuckLine extends OpenCvPipeline {
         int biggestIndex = 0;
         double biggestArea = 0;
         double highestY = 0;
+        double filteredArea = 9000;
         // Find the biggest rectangle
         for (int i = 0; i < rects.size(); i++) {
             Rect curr = rects.get(i);
-            if (curr.area() > biggestArea && curr.y + curr.height > 45) {
+            if (curr.area() > biggestArea && curr.y + curr.height > 45 && curr.area() > filteredArea) {
                 biggestIndex = i;
                 biggestArea = curr.area();
                 highestY = curr.y + curr.height;
