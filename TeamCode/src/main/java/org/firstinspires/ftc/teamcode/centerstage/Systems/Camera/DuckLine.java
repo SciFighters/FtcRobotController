@@ -142,7 +142,7 @@ public class DuckLine extends OpenCvPipeline {
         int biggestIndex = 0;
         double biggestArea = 0;
         double highestY = 0;
-        double filteredArea = 9000;
+        double filteredArea = 0;
         // Find the biggest rectangle
         for (int i = 0; i < rects.size(); i++) {
             Rect curr = rects.get(i);
