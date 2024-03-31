@@ -13,7 +13,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.centerstage.Autonomous.AutoFlow;
 import org.firstinspires.ftc.teamcode.centerstage.GLaDOSBlue;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GoToState;
-import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.GraceHoldTimeState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.HoldState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.IdleState;
 import org.firstinspires.ftc.teamcode.centerstage.Systems.Arm.States.ManualState;
@@ -36,7 +35,7 @@ public class Arm extends Component {
     public static double holdPower = 0.1;
     private final double deadZone = 0.05;
     private final double graceTimeLimit = 0.25;
-    public State<Arm> gotoState, graceHoldTimeState, holdState, idleState, manualState;
+    public State<Arm> gotoState, holdState, idleState, manualState;
     public DcMotorEx lift1, lift2;
     public TouchSensor touchSensor;
     public StateMachine<Arm> stateMachine;
@@ -82,7 +81,6 @@ public class Arm extends Component {
 
     private void initStateMachine() {
         gotoState = new GoToState();
-        graceHoldTimeState = new GraceHoldTimeState();
         holdState = new HoldState();
         idleState = new IdleState();
         manualState = new ManualState();
@@ -491,7 +489,7 @@ public class Arm extends Component {
      * Enumeration for different arm positions.
      */
     public enum Position {
-        Home(0, -1), One(5500, 43), Two(3530, 40), Hang(500, -1), Three(2780, 39);
+        Home(0, -1), One(5500, 38), Two(3530, 40), Hang(500, -1), Three(2780, 39);
         public final int liftPos;
         public final double distanceFromBackdrop;
 

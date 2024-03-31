@@ -23,28 +23,23 @@ import org.firstinspires.ftc.teamcode.centerstage.util.ECSSystem.Component;
 import org.firstinspires.ftc.teamcode.centerstage.util.Location;
 import org.firstinspires.ftc.teamcode.centerstage.util.Util;
 import org.firstinspires.ftc.teamcode.power_play.util.IMU_Integrator;
-import org.firstinspires.ftc.teamcode.power_play.util.RodLine;
 import org.opencv.core.Point;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 public class DriveClass extends Component {
     public static final int USE_ENCODERS = 1 << 0;
     public static final int USE_BRAKE = 1 << 1;
     public static final int USE_DASHBOARD_FIELD = 1 << 2;
     public final int MAX_IDLE_BREAK = 20;
-    final double tile = 0.6;
     private final BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
     private final boolean useEncoders;
     private final boolean useBrake;
     private final boolean useDashboardField;
-    private final boolean fieldOriented = true;
-    private final RodLine rodPipline = new RodLine().useYellow();
-    private final RodLine towerPipline = new RodLine();
     private final ROBOT robotType;
     private final Location startingPosition;
     public boolean busy;
     volatile public DcMotorEx fl = null;
     public Location currentTarget;
+    public GotoSettings currentSettings;
     DriveMode mode;
     ElapsedTime timer = new ElapsedTime();
     volatile private DcMotorEx fr = null;
@@ -118,11 +113,6 @@ public class DriveClass extends Component {
 //        }
     }
 
-    public void initRodPipline(OpenCvWebcam rod, OpenCvWebcam tower) {
-        rod.setPipeline(rodPipline);
-        if (tower != null) tower.setPipeline(towerPipline);
-
-    }
 
     @Override
     public void init() {
@@ -194,7 +184,6 @@ public class DriveClass extends Component {
 
         robot.telemetry.addData("Gyro", "calibrating...");
         robot.telemetry.addData("Integrator dashboard", this.useDashboardField);
-        // robotType.telemetry.update();
 
         ElapsedTime timer = new ElapsedTime();
         timer.reset();
@@ -211,8 +200,6 @@ public class DriveClass extends Component {
         }
 
         imu.startAccelerationIntegration(new Position(DistanceUnit.METER, this.startingPosition.x, this.startingPosition.y, 0, 0), new Velocity(), 2);
-
-        // robotType.telemetry.update();
 
         RobotLog.d("IMU status: %s", imu.getSystemStatus().toShortString());
         RobotLog.d("IMU calibration status: %s", imu.getCalibrationStatus().toString());
@@ -241,44 +228,14 @@ public class DriveClass extends Component {
         br.setPower(forward - turn + strafe);
     }
 
-//    public void setPowerTrig(double x, double y, double turn) {
-//
-//        double theta = Math.atan2(y, x);
-//        double power = Math.hypot(x, y);
-//
-//        double sin = Math.sin(theta - Math.PI / 4);
-//        double cos = Math.cos(theta - Math.PI / 4);
-//        double max = Math.max(Math.abs(sin), Math.abs(cos));
-//
-//        double frontLeft = (power * cos / max + turn);
-//        double frontRight = (power * sin / max - turn);
-//        double backLeft = (power * sin / max + turn);
-//        double backRight = (power * cos / max - turn);
-//
-//        if ((power + Math.abs(turn)) > 1) {
-//            double minimizer = power + turn;
-//            frontLeft /= power + turn;
-//            frontRight /= power - turn;
-//            backLeft /= power + turn;
-//            backRight /= power - turn;
-//        }
-//
-//        fl.setPower(frontLeft);
-//        fr.setPower(frontRight);
-//        bl.setPower(backLeft);
-//        br.setPower(backRight);
-//    }
-
     public void setPowerOriented(double y, double x, double turn, boolean fieldOriented) {
         if (!fieldOriented) {  // No field oriented  (=> Robot oriented)
             setPower(y, turn, x);
-//            setPowerTrig(x, y, turn);
         } else {
             double phiRad = (-getHeading() + angleOffset) / 180 * Math.PI;
             double forward = y * Math.cos(phiRad) - x * Math.sin(phiRad);
             double strafe = y * Math.sin(phiRad) + x * Math.cos(phiRad);
             setPower(forward, turn, strafe);
-//            setPowerTrig(strafe, forward, turn);
         }
 
 //		robotType.telemetry.addData("Front","left/right: %d, %d", fl.getCurrentPosition(), fr.getCurrentPosition());
@@ -414,10 +371,10 @@ public class DriveClass extends Component {
 
             setPower(0, power, 0);
 
-//            robot.telemetry.addData("target", targetAngle);
-//            robot.telemetry.addData("current", getHeading());
-//            robot.telemetry.addData("delta", delta);
-//            robot.telemetry.addData("power", power);
+            robot.telemetry.addData("target", targetAngle);
+            robot.telemetry.addData("current", getHeading());
+            robot.telemetry.addData("delta", delta);
+            robot.telemetry.addData("power", power);
             robot.telemetry.update();
         }
         stopPower();
@@ -508,6 +465,7 @@ public class DriveClass extends Component {
             }, () -> {
                 if (finalI != waypoints.length - 1) {
                     currentTarget = waypoints[finalI + 1].locationDelta;
+                    currentSettings = waypoints[finalI + 1].settings;
                 }
             });
         }
@@ -520,6 +478,7 @@ public class DriveClass extends Component {
         int stuckTries = 0;
         boolean isCheckingIdle = false;
         currentTarget = new Location(x, y, targetHeading);
+        currentSettings = new GotoSettings.Builder().setPower(targetPower).setTolerance(tolerance).setTimeout(timeout).setSlowdownMode(superSpeed).build();
         Location startTarget = currentTarget;
         double lastX = 0;
         double lastY = 0;
@@ -544,15 +503,15 @@ public class DriveClass extends Component {
         robot.telemetry.addData("goto y", y);
         robot.telemetry.addData("goto delta x", deltaX);
         robot.telemetry.addData("goto delta y", deltaY);
-        robot.telemetry.addData("goto hypocampus total dist", totalDist);
+        robot.telemetry.addData("goto hyp total dist", totalDist);
         robot.telemetry.update();
         // timer delta variables
         double currentTime = System.nanoTime();
         double lastTime = System.nanoTime();
-        while (robot.opModeIsActive() && (currentDist < (totalDist - tolerance))
+        while (robot.opModeIsActive() && (currentDist < (totalDist - currentSettings.tolerance))
                 && !robot.isStopRequested() && stuckTries < 15) {
 
-            double power = targetPower;
+            double power = currentSettings.power;
 
             currentX = getPosX();
             currentY = getPosY();
@@ -566,7 +525,7 @@ public class DriveClass extends Component {
             //double leftDist = totalDist - currentDist;
             double minPower = 0.2;
 
-            double acclGain = superSpeed ? 3.0 : 1.5;
+            double acclGain = currentSettings.noSlowdown ? 3.0 : 1.5;
             double acclPower = currentDist * acclGain + minPower;
 
             double RVy = deltaY / remainDist;  // y velocity ratio
@@ -577,10 +536,10 @@ public class DriveClass extends Component {
                 power = acclPower;
             }
 
-            double breakGain = superSpeed ? 1.0 : 0.5;
+            double breakGain = currentSettings.noSlowdown ? 1.0 : 0.5;
             double breakPower = remainDist * breakGain + minPower;
 
-            if (breakPower < power) { //
+            if (breakPower < power) {
                 power = breakPower;
             }
 
@@ -607,7 +566,7 @@ public class DriveClass extends Component {
             robot.telemetry.addData("power", power);
             robot.telemetry.update();
 
-            if ((timeout != 0 && timeout <= timer.seconds())) break;
+            if ((currentSettings.timeout != 0 && currentSettings.timeout <= timer.seconds())) break;
 
             // timer delta
             currentTime = System.nanoTime();
@@ -747,66 +706,6 @@ public class DriveClass extends Component {
         }
     }
 
-    public boolean zeroOnTargetOnes() {
-        final double offset = rodPipline.getRodCenterOffset();
-        final double width = rodPipline.getRodWidth();
-        final boolean isCone = !rodPipline.isYellow();
-        final double targetWidth = isCone ? 360 : 170;
-        double f = (targetWidth - width) / targetWidth;
-        double s = -Math.signum(f);
-        f = Math.abs(f) / 2.5;
-        f = Math.min(f, 0.2);
-        double t = offset / 2;
-
-        setPower(f * s, t, 0);
-        Log.d("Sci", String.format("zeroOnTarget w:  %3.1f/%3.1f, f: %1.2f, turn %1.3f", width, targetWidth, f * s, offset));
-        if ((Math.abs(t) < 0.05) && (f < 0.05)) {
-            Log.d("Sci", String.format("zeroOnTarget break on: w: %3.1f, f: %1.2f, turn %1.3f", width, f * s, offset));
-            return true;
-        }
-        return false;
-    }
-
-//    public void update_dashboard_field() {
-////        final double field_width = 5.75 * tile;
-//        double x_ = this.getPosX() * meters_to_inches;
-//        double y_ = this.getPosY() * meters_to_inches;
-//
-//        double lastx = robot_pathx.get(robot_pathx.size() - 1);
-//        double lasty = robot_pathy.get(robot_pathy.size() - 1);
-//        if (Math.abs(lastx - x_) > 1 || Math.abs(lasty - y_) > 1) {
-//            robot_pathx.add(x_);
-//            robot_pathy.add(y_);
-//
-//            TelemetryPacket packet = new TelemetryPacket();
-//            Canvas canvas = packet.fieldOverlay();
-//
-//            canvas.setStroke("tomato");
-//            canvas.strokePolyline(to_d_katan(robot_pathx), to_d_katan(robot_pathy));
-//
-//            FtcDashboard.getInstance().sendTelemetryPacket(packet);
-//        }
-//    }
-//
-//    private double[] to_d_katan(ArrayList<Double> arr) {
-//        double[] a = new double[arr.size()];
-//        for (int i = 0; i < arr.size(); i++) {
-//            a[i] = arr.get(i);
-//        }
-//
-//        return a;
-//    }
-
-    public void zeroOnTarget() {
-        ElapsedTime timer = new ElapsedTime();
-        while (robot.opModeIsActive() && rodPipline.isRodDetected() && (timer.seconds() <= 3)) {
-            if (zeroOnTargetOnes()) break;
-            robot.sleep(10);
-        }
-        Log.d("Sci", "zeroOnTarget ==============================================================");
-        setPower(0, 0, 0);
-    }
-
     public enum ROBOT {
         SCORPION,
         COBALT,
@@ -820,7 +719,6 @@ public class DriveClass extends Component {
         LEFT(1, new Point(0, 0), new Point(-1, -1)),
         RIGHT(2, new Point(0, 0), new Point(1, 1));
 
-        //        public static double tile = 0.6;
         public int index;
         public Point origin, direciton;
 

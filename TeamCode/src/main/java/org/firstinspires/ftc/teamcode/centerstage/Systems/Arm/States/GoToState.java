@@ -12,7 +12,6 @@ public class GoToState extends State<Arm> {
     @Override
     public void enter(Arm owner) {
         this.arm = owner;
-        this.arm.setManualMode(false, 0.8);
     }
 
     /**
@@ -20,6 +19,7 @@ public class GoToState extends State<Arm> {
      */
     @Override
     public void execute() {
+        this.arm.setManualMode(false, 1);
         if (arm.areMotorsBusy()) {
             arm.stateMachine.changeState(arm.holdState);
         }

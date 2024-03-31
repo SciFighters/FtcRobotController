@@ -306,7 +306,12 @@ public class AutoFlow extends Component {
             });
 //            robot.sleep(1000);
             drive.goToLocation(pixelStack.subtractX(0.15), normalDriveSettings);
-            robot.sleep(3000);
+            intakeSystem.stopIntake();
+            drive.goToLocation(finalPixelStack.subtractX(0.1), normalDriveSettings, () -> {
+            }, () -> {
+                drive.currentTarget = finalPixelStack.subtractX(0.15);
+            });
+            robot.sleep(5000);
             drive.goToLocation(new Location(backdropLocation.x, 0, 90), lowToleranceSettings, () -> {
                 if (drive.getPosX() <= tile * 3 && drive.getPosX() > tile * 1.5) {
                     arm.openClaw(true);
@@ -481,7 +486,6 @@ public class AutoFlow extends Component {
         double targetX = drive.getPosX() + (targetDistanceFromBoardX - distanceFromBoardX);
         double targetY = drive.getPosY() + tagDistanceY;
 
-//        drive.goToLocation(new Location(targetX, targetY, 90), lowToleranceSettings);
         drive.goToLocation(new Location(targetX, targetY, 90), setting);
 
         if (tagDetection == null) {

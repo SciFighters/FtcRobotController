@@ -10,7 +10,6 @@ public class ManualState extends State<Arm> {
     public void enter(Arm owner) {
         this.owner = owner;
         owner.setManualMode(true, 0);
-//        owner.setTargetPositions(owner.pos());
     }
 
     @Override

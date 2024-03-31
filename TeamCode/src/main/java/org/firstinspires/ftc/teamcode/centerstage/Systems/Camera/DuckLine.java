@@ -126,36 +126,40 @@ public class DuckLine extends OpenCvPipeline {
         Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         ArrayList<Rect> rects = new ArrayList<>();
+        Rect biggestRect = null;
         Rect rect;
         double minArea = 600;
+        double highestCounturArea = 0;
+        int biggestIndex = 0;
 
         // Find and store rectangles
         for (int i = 0; i < contours.size(); i++) {
             Mat contour = contours.get(i);
             double contourArea = Imgproc.contourArea(contour);
-            if (contourArea > minArea) {
+            if (contourArea > minArea && contourArea > highestCounturArea) {
                 rect = Imgproc.boundingRect(contours.get(i));
                 rects.add(rect);
+                highestCounturArea = contourArea;
+                biggestRect = rect;
             }
         }
-
-        int biggestIndex = 0;
         double biggestArea = 0;
-        double highestY = 0;
-        double filteredArea = 0;
-        // Find the biggest rectangle
-        for (int i = 0; i < rects.size(); i++) {
-            Rect curr = rects.get(i);
-            if (curr.area() > biggestArea && curr.y + curr.height > 45 && curr.area() > filteredArea) {
-                biggestIndex = i;
-                biggestArea = curr.area();
-                highestY = curr.y + curr.height;
+        if (biggestIndex == 0) {
+            double highestY = 0;
+            double filteredArea = 0;
+            // Find the biggest rectangle
+            for (int i = 0; i < rects.size(); i++) {
+                Rect curr = rects.get(i);
+                if (curr.area() > biggestArea && curr.y + curr.height > 45 && curr.area() > filteredArea) {
+                    biggestIndex = i;
+                    biggestArea = curr.area();
+                    highestY = curr.y + curr.height;
+                }
             }
         }
-
         if (rects.size() > 0) {
-            targetRect = rects.get(biggestIndex);
-
+            biggestRect = rects.get(biggestIndex);
+            targetRect = biggestRect;
             int width = targetRect.width;
             int height = targetRect.height;
 

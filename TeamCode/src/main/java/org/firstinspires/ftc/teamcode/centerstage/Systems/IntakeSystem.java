@@ -32,13 +32,6 @@ public class IntakeSystem extends Component {
     private boolean justStopped;
     private boolean isBusy;
 
-    public IntakeSystem() {
-    }
-
-    public boolean IsBusy() {
-        return isBusy;
-    }
-
     public void stopIntake() {
         if (state() == State.Collect) {
             justStopped = true;

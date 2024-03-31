@@ -18,9 +18,4 @@ public class DroneLauncher extends Component {
     public void launch() {
         droneLauncherServo.setPosition(1);
     }
-
-//    @Override
-//    public void stop() {
-//        droneLauncherServo.setPosition(0);
-//    }
 }
